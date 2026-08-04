@@ -7,6 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet">
     <style>
         :root {
             --bg-app: #080B12;
@@ -46,7 +47,7 @@
         .nav-item { display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:var(--radius-md); color:var(--text-secondary); font-size:13px; font-weight:600; cursor:pointer; text-decoration:none; transition:all var(--transition); }
         .nav-item:hover { background:var(--surface-hover); color:var(--text-primary); }
         .nav-item.active { background:rgba(24,215,232,0.1); color:var(--accent-cyan); border-left:3px solid var(--accent-cyan); }
-        .nav-icon { width:20px; height:20px; display:grid; place-items:center; flex-shrink:0; font-size:14px; }
+        .nav-icon { width:20px; height:20px; display:grid; place-items:center; flex-shrink:0; font-size:16px; }
 
         /* Main Content */
         #main-content { margin-left:var(--sidebar-width); flex:1; display:flex; flex-direction:column; min-width:0; }
@@ -129,31 +130,31 @@
 <!-- Sidebar Navigation -->
 <aside id="sidebar">
     <div class="sidebar-brand">
-        <div class="brand-logo">D</div>
+        <div class="brand-logo"><i class="ri-pulse-line"></i></div>
         <div class="brand-name">Dance Live SaaS</div>
     </div>
     <nav class="sidebar-nav">
         <div class="nav-section-title">LIVE</div>
-        <a href="javascript:void(0)" class="nav-item active" onclick="navigate('live-control', this)"><div class="nav-icon">📡</div><span>Live Control Center</span></a>
-        <a href="javascript:void(0)" class="nav-item" onclick="navigate('leaderboard', this)"><div class="nav-icon">🏆</div><span>Top Gifter Leaderboard</span></a>
-        <a href="javascript:void(0)" class="nav-item" onclick="navigate('queue', this)"><div class="nav-icon">📋</div><span>Dancer Queue</span></a>
-        <a href="javascript:void(0)" class="nav-item" onclick="navigate('events-monitor', this)"><div class="nav-icon">⚡</div><span>Event Monitor</span></a>
+        <a href="javascript:void(0)" class="nav-item active" onclick="navigate('live-control', this)"><div class="nav-icon"><i class="ri-broadcast-line"></i></div><span>Live Control Center</span></a>
+        <a href="javascript:void(0)" class="nav-item" onclick="navigate('leaderboard', this)"><div class="nav-icon"><i class="ri-trophy-line"></i></div><span>Top Gifter Leaderboard</span></a>
+        <a href="javascript:void(0)" class="nav-item" onclick="navigate('queue', this)"><div class="nav-icon"><i class="ri-list-ordered"></i></div><span>Dancer Queue</span></a>
+        <a href="javascript:void(0)" class="nav-item" onclick="navigate('events-monitor', this)"><div class="nav-icon"><i class="ri-flashlight-line"></i></div><span>Event Monitor</span></a>
 
         <div class="nav-section-title">AUTOMATION</div>
-        <a href="javascript:void(0)" class="nav-item" onclick="navigate('event-mappings', this)"><div class="nav-icon">🎯</div><span>Events & Actions</span></a>
-        <a href="javascript:void(0)" class="nav-item" onclick="navigate('action-library', this)"><div class="nav-icon">⚡</div><span>Action Library</span></a>
-        <a href="javascript:void(0)" class="nav-item" onclick="navigate('gift-catalogue', this)"><div class="nav-icon">🎁</div><span>Gift Catalogue</span></a>
+        <a href="javascript:void(0)" class="nav-item" onclick="navigate('event-mappings', this)"><div class="nav-icon"><i class="ri-git-merge-line"></i></div><span>Events & Actions</span></a>
+        <a href="javascript:void(0)" class="nav-item" onclick="navigate('action-library', this)"><div class="nav-icon"><i class="ri-magic-line"></i></div><span>Action Library</span></a>
+        <a href="javascript:void(0)" class="nav-item" onclick="navigate('gift-catalogue', this)"><div class="nav-icon"><i class="ri-gift-2-line"></i></div><span>Gift Catalogue</span></a>
 
         <div class="nav-section-title">CONTENT & THEMES</div>
-        <a href="javascript:void(0)" class="nav-item" onclick="navigate('stage-presets', this)"><div class="nav-icon">🪩</div><span>Stage Light Presets</span></a>
-        <a href="javascript:void(0)" class="nav-item" onclick="navigate('music', this)"><div class="nav-icon">🎵</div><span>Music Library</span></a>
-        <a href="javascript:void(0)" class="nav-item" onclick="navigate('dance', this)"><div class="nav-icon">💃</div><span>Dance Emotes</span></a>
-        <a href="javascript:void(0)" class="nav-item" onclick="navigate('overlay', this)"><div class="nav-icon">🎨</div><span>Overlay Studio</span></a>
+        <a href="javascript:void(0)" class="nav-item" onclick="navigate('stage-presets', this)"><div class="nav-icon"><i class="ri-disc-line"></i></div><span>Stage Light Presets</span></a>
+        <a href="javascript:void(0)" class="nav-item" onclick="navigate('music', this)"><div class="nav-icon"><i class="ri-music-2-line"></i></div><span>Music Library</span></a>
+        <a href="javascript:void(0)" class="nav-item" onclick="navigate('dance', this)"><div class="nav-icon"><i class="ri-user-star-line"></i></div><span>Dance Emotes</span></a>
+        <a href="javascript:void(0)" class="nav-item" onclick="navigate('overlay', this)"><div class="nav-icon"><i class="ri-layout-4-line"></i></div><span>Overlay Studio</span></a>
 
         <div class="nav-section-title">SYSTEM</div>
-        <a href="javascript:void(0)" class="nav-item" onclick="navigate('roblox', this)"><div class="nav-icon">⚙️</div><span>Roblox Connection</span></a>
-        <a href="javascript:void(0)" class="nav-item" onclick="navigate('analytics', this)"><div class="nav-icon">📊</div><span>Analytics & Logs</span></a>
-        <a href="javascript:void(0)" class="nav-item" onclick="navigate('settings', this)"><div class="nav-icon">🛠️</div><span>Settings</span></a>
+        <a href="javascript:void(0)" class="nav-item" onclick="navigate('roblox', this)"><div class="nav-icon"><i class="ri-gamepad-line"></i></div><span>Roblox Connection</span></a>
+        <a href="javascript:void(0)" class="nav-item" onclick="navigate('analytics', this)"><div class="nav-icon"><i class="ri-bar-chart-box-line"></i></div><span>Analytics & Logs</span></a>
+        <a href="javascript:void(0)" class="nav-item" onclick="navigate('settings', this)"><div class="nav-icon"><i class="ri-settings-4-line"></i></div><span>Settings</span></a>
     </nav>
 </aside>
 
@@ -175,7 +176,7 @@
                 <span class="status-dot"></span>
                 <span id="tiktok-status-text">TikTok Disconnected</span>
             </div>
-            <button class="btn btn-danger btn-xs" onclick="triggerEmergencyStop()" title="Dừng khẩn cấp mọi hiệu ứng và làm sạch hàng chờ">🚨 Emergency Stop</button>
+            <button class="btn btn-danger btn-xs" onclick="triggerEmergencyStop()" title="Dừng khẩn cấp mọi hiệu ứng và làm sạch hàng chờ"><i class="ri-alarm-warning-line"></i> Emergency Stop</button>
         </div>
     </header>
 
@@ -184,28 +185,28 @@
         <!-- Live Analytics Quick Stats Grid -->
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:20px;">
             <div class="stat-card">
-                <div class="stat-icon-box" style="background:rgba(24,215,232,0.12);color:var(--accent-cyan);">🪙</div>
+                <div class="stat-icon-box" style="background:rgba(24,215,232,0.12);color:var(--accent-cyan);"><i class="ri-coin-line"></i></div>
                 <div>
                     <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;">Tổng Xu Stream</div>
                     <div id="stat-total-coins" style="font-size:22px;font-weight:800;color:#fff;font-family:'Outfit',sans-serif;">0 xu</div>
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon-box" style="background:rgba(244,63,134,0.12);color:var(--accent-pink);">🎁</div>
+                <div class="stat-icon-box" style="background:rgba(244,63,134,0.12);color:var(--accent-pink);"><i class="ri-gift-line"></i></div>
                 <div>
                     <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;">Quà Nhận Được</div>
                     <div id="stat-total-gifts" style="font-size:22px;font-weight:800;color:#fff;font-family:'Outfit',sans-serif;">0 quà</div>
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon-box" style="background:rgba(34,197,94,0.12);color:var(--state-success);">💃</div>
+                <div class="stat-icon-box" style="background:rgba(34,197,94,0.12);color:var(--state-success);"><i class="ri-user-smile-line"></i></div>
                 <div>
                     <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;">Vũ Công Đã Lên Sàn</div>
                     <div id="stat-total-dancers" style="font-size:22px;font-weight:800;color:#fff;font-family:'Outfit',sans-serif;">0 lượt</div>
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon-box" style="background:rgba(255,184,0,0.12);color:var(--accent-gold);">👑</div>
+                <div class="stat-icon-box" style="background:rgba(255,184,0,0.12);color:var(--accent-gold);"><i class="ri-vip-crown-line"></i></div>
                 <div>
                     <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;">Top Gifter Hiển Thị</div>
                     <div id="stat-top-gifter-name" style="font-size:18px;font-weight:800;color:var(--accent-gold);font-family:'Outfit',sans-serif;">Chưa có</div>
@@ -697,14 +698,10 @@ async function loadLeaderboard() {
     try {
         const res = await fetch(`${API_BASE}/api/v1/dashboard/status`);
         const data = await res.json();
-        const topGifters = (data.tenantStatus && data.tenantStatus.stats && data.tenantStatus.stats.leaderboard) || [
-            { username: 'Gnas2606', totalCoins: 44999, topGift: 'TikTok Universe 💫' },
-            { username: 'TikTokViewer99', totalCoins: 29999, topGift: 'Lion 🦁' },
-            { username: 'DanceKing_VN', totalCoins: 1000, topGift: 'Galaxy 🌌' }
-        ];
+        const topGifters = (data.tenantStatus && data.tenantStatus.stats && data.tenantStatus.stats.leaderboard) || [];
 
         if (topGifters.length === 0) {
-            container.innerHTML = '<div style="color:var(--text-muted);padding:30px;text-align:center;">Chưa có dữ liệu Top Gifter trong buổi livestream.</div>';
+            container.innerHTML = '<div style="color:var(--text-muted);padding:40px 20px;text-align:center;font-size:14px;"><i class="ri-gift-line" style="font-size:32px;display:block;margin-bottom:8px;color:var(--text-muted);"></i>Chưa có dữ liệu Top Gifter trong buổi livestream. Hãy kết nối TikTok Live để nhận quà thật!</div>';
             return;
         }
 
