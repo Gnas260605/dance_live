@@ -394,7 +394,35 @@ local function spawnDancer(robloxUsername, tiktokUsername, animationId, isVIP, g
 	if not getUserIdSuccess or not userId then userId = 1 end
 
 	local loadModelSuccess, characterModel = pcall(function() return Players:CreateHumanoidModelFromUserIdAsync(userId) end)
-	if not loadModelSuccess or not characterModel then return end
+	if not loadModelSuccess or not characterModel then
+		-- Fallback to creating a standard Rig/Dummy if Roblox API request fails
+		characterModel = Instance.new("Model")
+		characterModel.Name = robloxUsername
+
+		local hum = Instance.new("Humanoid")
+		hum.Parent = characterModel
+
+		local hrp = Instance.new("Part")
+		hrp.Name = "HumanoidRootPart"
+		hrp.Size = Vector3.new(2, 2, 1)
+		hrp.Transparency = 1
+		hrp.CanCollide = true
+		hrp.Parent = characterModel
+		characterModel.PrimaryPart = hrp
+
+		local head = Instance.new("Part")
+		head.Name = "Head"
+		head.Size = Vector3.new(1.2, 1.2, 1.2)
+		head.Position = hrp.Position + Vector3.new(0, 1.5, 0)
+		head.Parent = characterModel
+
+		local torso = Instance.new("Part")
+		torso.Name = "Torso"
+		torso.Size = Vector3.new(2, 2, 1)
+		torso.Position = hrp.Position
+		torso.Color = isVIP and Color3.fromRGB(255, 215, 0) or Color3.fromRGB(0, 242, 254)
+		torso.Parent = characterModel
+	end
 
 	if #activeDancersList >= MAX_STAGE_DANCERS then
 		local oldestDancer = table.remove(activeDancersList, 1)
