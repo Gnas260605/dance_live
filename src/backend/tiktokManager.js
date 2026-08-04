@@ -4,7 +4,7 @@ const { getTenant, addTenantLog, TIKTOK_GIFTS } = require('./store');
 
 const activeConnections = new Map();
 const userCooldowns = new Map();
-const COOLDOWN_MS = 15000;
+const COOLDOWN_MS = 30000;
 
 function extractRobloxUsername(text) {
     if (!text) return null;
@@ -176,8 +176,9 @@ async function processNewCommentForTenant(apiKey, tiktokUsername, commentText, i
     if (!isVIP && userCooldowns.has(cooldownKey)) {
         const lastTime = userCooldowns.get(cooldownKey);
         if (now - lastTime < COOLDOWN_MS) {
-            addTenantLog(apiKey, `[Bỏ qua] @${tiktokUsername} comment quá nhanh (chờ 15s).`);
-            return { success: false, reason: 'COOLDOWN', error: `@${tiktokUsername} đang trong thời gian chờ 15 giây.` };
+            const remainSec = Math.ceil((COOLDOWN_MS - (now - lastTime)) / 1000);
+            addTenantLog(apiKey, `[Bỏ qua] @${tiktokUsername} comment quá nhanh (cần chờ thêm ${remainSec}s).`);
+            return { success: false, reason: 'COOLDOWN', error: `@${tiktokUsername} đang trong thời gian chờ 30 giây.` };
         }
     }
 
