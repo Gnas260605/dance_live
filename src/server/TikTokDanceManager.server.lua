@@ -13,7 +13,7 @@ local SoundService = game:GetService("SoundService")
 -- CONFIGURATION
 -- ====================================
 local API_KEY = script:GetAttribute("API_KEY") or "demo-api-key-sg-music"
-local DOMAIN_URL = script:GetAttribute("DOMAIN_URL") or "https://loose-dogs-see.loca.lt"
+local DOMAIN_URL = script:GetAttribute("DOMAIN_URL") or "https://tame-maps-prove.loca.lt"
 local BASE_URL = DOMAIN_URL .. "/api/v1/streamer/" .. API_KEY
 
 local POLL_INTERVAL = 1.2
