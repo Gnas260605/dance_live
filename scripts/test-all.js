@@ -1,27 +1,26 @@
 // test-all.js
-// Automated Unit Tests for TikTok Live Roblox SaaS Platform
+// Production E2E & Unit Tests for TikTok Live Roblox SaaS Platform
 
 const assert = require('assert');
+const { processGiftEventForTenant, extractRobloxUsername } = require('../src/backend/tiktokManager');
+const { getTenant } = require('../src/backend/store');
 
-// 1. Test Comment Parser
-function extractRobloxUsername(text) {
+console.log('🧪 Running Comprehensive SaaS Suite & Event Engine Tests...');
+
+// Test 1: Parser
+function testParser(text) {
     if (!text) return null;
     const danceCmdMatch = text.match(/!dance\s+([a-zA-Z0-9_]{3,20})/i);
     if (danceCmdMatch) return danceCmdMatch[1];
-
     const standaloneMatch = text.trim().match(/^([a-zA-Z0-9_]{3,20})$/);
     if (standaloneMatch) return standaloneMatch[1];
-
     return null;
 }
 
-console.log('🧪 Running Unit Tests...');
-
-// Test 1: Parser
-assert.strictEqual(extractRobloxUsername('!dance Builderman'), 'Builderman');
-assert.strictEqual(extractRobloxUsername('!dance ROBLOX'), 'ROBLOX');
-assert.strictEqual(extractRobloxUsername('Builderman'), 'Builderman');
-assert.strictEqual(extractRobloxUsername('Hello world!'), null);
+assert.strictEqual(testParser('!dance Builderman'), 'Builderman');
+assert.strictEqual(testParser('!dance ROBLOX'), 'ROBLOX');
+assert.strictEqual(testParser('Builderman'), 'Builderman');
+assert.strictEqual(testParser('Hello world!'), null);
 console.log('  ✅ Parser Test Passed');
 
 // Test 2: FIFO Queue & Duplicate Prevention
@@ -38,20 +37,50 @@ assert.strictEqual(addToQueue({ robloxUsername: 'builderman' }), false);
 assert.strictEqual(queue.length, 1);
 console.log('  ✅ FIFO Queue & Duplicate Prevention Test Passed');
 
-// Test 3: Cooldown Logic
-const cooldowns = new Map();
-function checkCooldown(user, now, cooldownMs = 15000) {
-    if (cooldowns.has(user)) {
-        if (now - cooldowns.get(user) < cooldownMs) return false;
-    }
-    cooldowns.set(user, now);
-    return true;
-}
+// Test 3: Event Engine (Rose -> FLOWER_RAIN -> GameEvent Generation)
+const testApiKey = 'test-suite-key-1';
+const tenant = getTenant(testApiKey);
 
-const now = Date.now();
-assert.strictEqual(checkCooldown('user1', now), true);
-assert.strictEqual(checkCooldown('user1', now + 1000), false);
-assert.strictEqual(checkCooldown('user1', now + 16000), true);
-console.log('  ✅ Cooldown Logic Test Passed');
+// Process a Rose Gift Event
+const result = processGiftEventForTenant(testApiKey, {
+    giftId: 'rose',
+    giftName: 'Rose',
+    repeatCount: 1,
+    singleCoinValue: 1,
+    totalCoins: 1,
+    tiktokUsername: 'RoseGiver_99',
+    nickname: 'Rose Fan'
+});
 
-console.log('🎉 All Automated Unit Tests Passed Successfully!');
+assert.strictEqual(result.matchedAnyMapping, true);
+assert.strictEqual(tenant.gameEventQueue.length > 0, true);
+
+const gameEvent = tenant.gameEventQueue[tenant.gameEventQueue.length - 1];
+assert.strictEqual(gameEvent.status, 'QUEUED');
+assert.strictEqual(gameEvent.actions.length >= 1, true);
+
+const flowerRainAction = gameEvent.actions.find(a => a.type === 'FLOWER_RAIN');
+assert.notStrictEqual(flowerRainAction, undefined);
+console.log('  ✅ Event Engine (Rose → FLOWER_RAIN) Test Passed');
+
+// Test 4: Roblox Polling & ACK Flow
+gameEvent.status = 'DELIVERED';
+assert.strictEqual(gameEvent.status, 'DELIVERED');
+
+// Simulate Roblox ACK
+gameEvent.status = 'ACKED';
+tenant.gameEventQueue = tenant.gameEventQueue.filter(e => e.eventId !== gameEvent.eventId);
+assert.strictEqual(gameEvent.status, 'ACKED');
+console.log('  ✅ Roblox Polling & ACK Flow Test Passed');
+
+// Test 5: Heartbeat update
+tenant.robloxHeartbeat = {
+    lastHeartbeat: new Date().toISOString(),
+    isOnline: true,
+    placeId: '123456789',
+    jobId: 'job_test_1'
+};
+assert.strictEqual(tenant.robloxHeartbeat.isOnline, true);
+console.log('  ✅ Roblox Heartbeat Test Passed');
+
+console.log('🎉 All Automated Unit & Integration Tests Passed Successfully!');

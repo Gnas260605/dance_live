@@ -33,10 +33,13 @@ model User {
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
 
-  streamConfig StreamConfig?
-  musicTracks  MusicTrack[]
-  danceEmotes  DanceAnimation[]
-  sessions     StreamSession[]
+  streamConfig  StreamConfig?
+  musicTracks   MusicTrack[]
+  danceEmotes   DanceAnimation[]
+  sessions      StreamSession[]
+  eventMappings EventMapping[]
+  actionDefs    ActionDefinition[]
+  robloxSession RobloxSession?
 }
 
 model StreamConfig {
@@ -77,16 +80,16 @@ model DanceAnimation {
 }
 
 model StreamSession {
-  id                 String      @id @default(uuid())
-  userId             String
-  user               User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  tiktokUsername     String
-  startedAt          DateTime    @default(now())
-  endedAt            DateTime?
-  totalComments      Int         @default(0)
-  totalGifts         Int         @default(0)
-  totalDancersSpawned Int        @default(0)
-  logs               StreamLog[]
+  id                  String      @id @default(uuid())
+  userId              String
+  user                User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tiktokUsername      String
+  startedAt           DateTime    @default(now())
+  endedAt             DateTime?
+  totalComments       Int         @default(0)
+  totalGifts          Int         @default(0)
+  totalDancersSpawned Int         @default(0)
+  logs                StreamLog[]
 }
 
 model StreamLog {
@@ -96,4 +99,67 @@ model StreamLog {
   level     String        @default("INFO")
   message   String
   timestamp DateTime      @default(now())
+}
+
+model EventMapping {
+  id                      String   @id @default(uuid())
+  userId                  String
+  user                    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name                    String
+  description             String?
+  enabled                 Boolean  @default(true)
+  priority                Int      @default(10)
+  triggerType             String   @default("TIKTOK_GIFT")
+  giftId                  String?
+  giftName                String?
+  minRepeatCount          Int      @default(1)
+  minTotalCoins           Int      @default(0)
+  actionsJson             String   @default("[]")
+  cooldownMs              Int      @default(500)
+  userCooldownMs          Int      @default(0)
+  queueMode               String   @default("QUEUE")
+  stopProcessingAfterMatch Boolean  @default(true)
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+}
+
+model ActionDefinition {
+  id                String   @id @default(uuid())
+  userId            String
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name              String
+  type              String
+  enabled           Boolean  @default(true)
+  defaultDelayMs    Int      @default(0)
+  defaultDurationMs Int      @default(5000)
+  parametersJson    String   @default("{}")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model GameEvent {
+  id               String    @id @default(uuid())
+  eventId          String    @unique @default(uuid())
+  userId           String
+  mappingId        String?
+  eventType        String    @default("gift_effect")
+  actionsJson      String
+  contextJson      String
+  status           String    @default("QUEUED")
+  deliveryAttempts Int       @default(0)
+  createdAt        DateTime  @default(now())
+  expiresAt        DateTime
+  ackedAt          DateTime?
+}
+
+model RobloxSession {
+  id            String   @id @default(uuid())
+  userId        String   @unique
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  placeId       String?
+  jobId         String?
+  scriptVer     String   @default("1.0.0")
+  lastHeartbeat DateTime @default(now())
+  isOnline      Boolean  @default(false)
+  updatedAt     DateTime @updatedAt
 }

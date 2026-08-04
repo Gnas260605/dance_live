@@ -3,208 +3,189 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>S&G Music - Enterprise Commercial SaaS Platform</title>
+    <title>Dance Live — Creator Control Center (TikTok LIVE → Roblox)</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-app: #070A12;
-            --surface-sidebar: #0D111C;
-            --surface-card: #121827;
-            --surface-hover: #1A2234;
-            --border-color: #253047;
-            --accent-primary: #00f2fe;
-            --accent-primary-glow: rgba(0, 242, 254, 0.2);
-            --accent-secondary: #ff007f;
-            --accent-secondary-glow: rgba(255, 0, 127, 0.2);
-            --state-success: #10b981;
-            --state-warning: #f59e0b;
-            --state-danger: #ef4444;
-            --text-primary: #f3f4f6;
-            --text-secondary: #9ca3af;
-            --text-muted: #6b7280;
-            --radius-sm: 6px; --radius-md: 10px; --radius-lg: 16px; --radius-full: 9999px;
+            --bg-app: #080B12;
+            --surface-sidebar: #0B0F18;
+            --surface-card: #101624;
+            --surface-hover: #161F33;
+            --surface-active: #1D2942;
+            --border-color: rgba(255,255,255,0.08);
+            --border-strong: rgba(255,255,255,0.16);
+            --accent-cyan: #18D7E8;
+            --accent-glow-cyan: rgba(24, 215, 232, 0.2);
+            --accent-pink: #F43F86;
+            --accent-glow-pink: rgba(244, 63, 134, 0.2);
+            --state-success: #22C55E;
+            --state-warning: #F59E0B;
+            --state-danger: #EF4444;
+            --text-primary: #F7F9FC;
+            --text-secondary: #AAB4C5;
+            --text-muted: #738097;
+            --radius-sm: 6px; --radius-md: 10px; --radius-lg: 14px; --radius-full: 9999px;
             --shadow-card: 0 4px 20px rgba(0,0,0,0.4);
-            --shadow-glow: 0 0 20px var(--accent-primary-glow);
-            --sidebar-width: 260px; --header-height: 64px;
+            --sidebar-width: 250px; --header-height: 64px;
             --transition: 0.2s cubic-bezier(0.4,0,0.2,1);
         }
         * { box-sizing:border-box; margin:0; padding:0; font-family:'Plus Jakarta Sans',sans-serif; -webkit-font-smoothing:antialiased; }
         body { background:var(--bg-app); color:var(--text-primary); min-height:100vh; display:flex; overflow-x:hidden; }
 
         /* Sidebar */
-        #sidebar { width:var(--sidebar-width); background:var(--surface-sidebar); border-right:1px solid var(--border-color); display:flex; flex-direction:column; position:fixed; top:0; bottom:0; left:0; z-index:50; }
-        .sidebar-brand { height:var(--header-height); display:flex; align-items:center; padding:0 20px; gap:12px; border-bottom:1px solid var(--border-color); }
-        .brand-logo { width:36px; height:36px; background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary)); border-radius:var(--radius-md); display:grid; place-items:center; font-weight:800; font-size:16px; color:#fff; box-shadow:var(--shadow-glow); }
+        #sidebar { width:var(--sidebar-width); background:var(--surface-sidebar); border-right:1px solid var(--border-color); display:flex; flex-direction:column; position:fixed; top:0; bottom:0; left:0; z-index:50; transition:width var(--transition); }
+        .sidebar-brand { height:var(--header-height); display:flex; align-items:center; padding:0 18px; gap:12px; border-bottom:1px solid var(--border-color); }
+        .brand-logo { width:36px; height:36px; background:linear-gradient(135deg,var(--accent-cyan),var(--accent-pink)); border-radius:var(--radius-md); display:grid; place-items:center; font-weight:800; font-size:16px; color:#fff; box-shadow:0 0 15px var(--accent-glow-cyan); }
         .brand-name { font-family:'Outfit',sans-serif; font-size:15px; font-weight:700; color:#fff; white-space:nowrap; }
-        .sidebar-nav { flex:1; padding:16px 12px; display:flex; flex-direction:column; gap:4px; overflow-y:auto; }
-        .nav-section-title { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); padding:12px 12px 6px; }
-        .nav-item { display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:var(--radius-md); color:var(--text-secondary); font-size:13px; font-weight:600; cursor:pointer; transition:all var(--transition); }
+        .sidebar-nav { flex:1; padding:12px 10px; display:flex; flex-direction:column; gap:3px; overflow-y:auto; }
+        .nav-section-title { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); padding:10px 10px 4px; margin-top:6px; }
+        .nav-item { display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:var(--radius-md); color:var(--text-secondary); font-size:13px; font-weight:600; cursor:pointer; text-decoration:none; transition:all var(--transition); }
         .nav-item:hover { background:var(--surface-hover); color:var(--text-primary); }
-        .nav-item.active { background:rgba(0,242,254,0.1); color:var(--accent-primary); border-left:3px solid var(--accent-primary); }
+        .nav-item.active { background:rgba(24,215,232,0.1); color:var(--accent-cyan); border-left:3px solid var(--accent-cyan); }
         .nav-icon { width:20px; height:20px; display:grid; place-items:center; flex-shrink:0; font-size:14px; }
 
-        /* Main */
+        /* Main Content */
         #main-content { margin-left:var(--sidebar-width); flex:1; display:flex; flex-direction:column; min-width:0; }
-        header { height:var(--header-height); background:rgba(13,17,28,0.85); backdrop-filter:blur(12px); border-bottom:1px solid var(--border-color); padding:0 24px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:40; }
-        .status-pill { display:inline-flex; align-items:center; gap:8px; padding:6px 14px; border-radius:var(--radius-full); font-size:12px; font-weight:600; border:1px solid var(--border-color); background:var(--surface-card); }
-        .status-pill.live { border-color:rgba(16,185,129,0.4); background:rgba(16,185,129,0.1); color:var(--state-success); }
+        header { height:var(--header-height); background:rgba(11,15,24,0.85); backdrop-filter:blur(12px); border-bottom:1px solid var(--border-color); padding:0 24px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:40; }
+        
+        .topbar-left { display:flex; align-items:center; gap:12px; }
+        .cmd-btn { display:inline-flex; align-items:center; gap:8px; padding:6px 14px; background:var(--surface-card); border:1px solid var(--border-color); border-radius:var(--radius-md); font-size:12px; color:var(--text-muted); cursor:pointer; }
+        .cmd-btn:hover { border-color:var(--accent-cyan); color:var(--text-primary); }
+        .kbd { background:var(--bg-app); border:1px solid var(--border-strong); padding:2px 6px; border-radius:4px; font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--text-secondary); }
+
+        .topbar-right { display:flex; align-items:center; gap:14px; }
+        .status-pill { display:inline-flex; align-items:center; gap:8px; padding:5px 12px; border-radius:var(--radius-full); font-size:12px; font-weight:600; border:1px solid var(--border-color); background:var(--surface-card); }
+        .status-pill.live { border-color:rgba(34,197,94,0.4); background:rgba(34,197,94,0.1); color:var(--state-success); }
         .status-pill.disconnected { border-color:rgba(239,68,68,0.4); background:rgba(239,68,68,0.1); color:var(--state-danger); }
         .status-dot { width:8px; height:8px; border-radius:50%; background:currentColor; box-shadow:0 0 8px currentColor; }
-        .user-menu { display:flex; align-items:center; gap:12px; cursor:pointer; }
-        .user-avatar { width:34px; height:34px; border-radius:50%; background:var(--surface-hover); border:1px solid var(--border-color); display:grid; place-items:center; font-weight:700; font-size:13px; color:var(--accent-primary); }
 
-        /* Views */
+        /* Panels */
         .view-panel { padding:24px; display:none; flex:1; }
         .view-panel.active { display:block; }
-        .grid-3col { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:20px; }
+        .grid-3col { display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:20px; }
+        .grid-2col { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
 
         /* Cards */
         .card { background:var(--surface-card); border:1px solid var(--border-color); border-radius:var(--radius-lg); padding:20px; box-shadow:var(--shadow-card); }
         .card-title-bar { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid var(--border-color); }
         .card-title-text { font-family:'Outfit',sans-serif; font-size:15px; font-weight:700; color:#fff; display:flex; align-items:center; gap:8px; }
 
-        /* Forms */
+        /* Buttons & Controls */
+        .btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:9px 16px; border-radius:var(--radius-md); font-size:13px; font-weight:600; border:none; cursor:pointer; transition:all var(--transition); text-decoration:none; }
+        .btn-primary { background:var(--accent-cyan); color:#080B12; }
+        .btn-primary:hover { box-shadow:0 0 15px var(--accent-glow-cyan); transform:translateY(-1px); }
+        .btn-secondary { background:var(--surface-hover); color:#fff; border:1px solid var(--border-color); }
+        .btn-secondary:hover { background:var(--surface-active); border-color:var(--border-strong); }
+        .btn-danger { background:var(--state-danger); color:#fff; }
+        .btn-warning { background:var(--state-warning); color:#080B12; }
+        .btn-xs { padding:4px 10px; font-size:11px; border-radius:var(--radius-sm); }
+
+        /* Form elements */
         .form-group { margin-bottom:14px; }
         .form-label { display:block; font-size:12px; font-weight:600; color:var(--text-secondary); margin-bottom:6px; }
         .form-input { width:100%; background:var(--bg-app); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:10px 14px; color:#fff; font-size:13px; outline:none; transition:border-color var(--transition); }
-        .form-input:focus { border-color:var(--accent-primary); box-shadow:0 0 0 2px var(--accent-primary-glow); }
+        .form-input:focus { border-color:var(--accent-cyan); box-shadow:0 0 0 2px var(--accent-glow-cyan); }
 
-        /* Buttons */
-        .btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:10px 16px; border-radius:var(--radius-md); font-size:13px; font-weight:600; border:none; cursor:pointer; transition:all var(--transition); }
-        .btn-primary { background:var(--accent-primary); color:#070A12; }
-        .btn-primary:hover { box-shadow:var(--shadow-glow); transform:translateY(-1px); }
-        .btn-secondary { background:var(--surface-hover); color:#fff; border:1px solid var(--border-color); }
-        .btn-secondary:hover { background:var(--border-color); }
-        .btn-danger { background:var(--state-danger); color:#fff; }
-        .btn-warning { background:var(--state-warning); color:#070A12; }
-        .btn-xs { padding:3px 8px; font-size:11px; border-radius:var(--radius-sm); }
-
-        /* Dancer active box */
-        .active-dancer-box { background:linear-gradient(180deg,rgba(0,242,254,0.05) 0%,rgba(18,24,39,0.8) 100%); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:20px; text-align:center; }
-        .progress-bar-container { width:100%; height:6px; background:var(--border-color); border-radius:var(--radius-full); overflow:hidden; margin-top:14px; }
-        .progress-bar-fill { height:100%; background:linear-gradient(90deg,var(--accent-primary),var(--accent-secondary)); width:100%; transition:width 0.2s linear; }
-
-        /* Music quick chips */
-        .music-chip-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:10px; }
-        .music-chip { background:var(--surface-hover); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:10px 12px; cursor:pointer; font-size:12px; font-weight:600; color:#fff; display:flex; align-items:center; justify-content:space-between; transition:all 0.2s; }
-        .music-chip:hover { border-color:var(--accent-primary); background:rgba(0,242,254,0.1); }
-        .music-chip.active-track { border-color:var(--accent-primary); background:rgba(0,242,254,0.15); color:var(--accent-primary); }
-
-        /* Gift mapper styles */
-        .gift-tier-header { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px; padding:10px 0 6px; color:var(--text-muted); border-bottom:1px solid var(--border-color); margin-bottom:8px; }
-        .gift-tier-header.tier1 { color:#6b7280; }
-        .gift-tier-header.tier2 { color:#60a5fa; }
-        .gift-tier-header.tier3 { color:#a78bfa; }
-        .gift-tier-header.tier4 { color:#f59e0b; }
-        .gift-tier-header.tier5 { color:#ff007f; }
-        .gift-row { display:grid; grid-template-columns:36px 1fr 80px 1fr 90px; gap:8px; align-items:center; padding:8px 6px; border-radius:var(--radius-sm); transition:background 0.15s; }
-        .gift-row:hover { background:var(--surface-hover); }
-        .gift-emoji { font-size:20px; text-align:center; }
-        .gift-name { font-size:13px; font-weight:600; color:#fff; }
-        .gift-coins { font-size:11px; color:var(--state-warning); font-family:'JetBrains Mono',monospace; }
-        .gift-music-input { background:var(--bg-app); border:1px solid var(--border-color); border-radius:var(--radius-sm); padding:6px 10px; color:#fff; font-size:11px; font-family:'JetBrains Mono',monospace; outline:none; transition:border-color var(--transition); }
-        .gift-music-input:focus { border-color:var(--accent-primary); }
-        .gift-music-input.has-value { border-color:rgba(16,185,129,0.5); }
-        .gift-save-btn { background:transparent; border:1px solid var(--border-color); border-radius:var(--radius-sm); padding:5px 10px; color:var(--text-secondary); font-size:11px; font-weight:600; cursor:pointer; transition:all 0.15s; }
-        .gift-save-btn:hover { border-color:var(--accent-primary); color:var(--accent-primary); }
-        .gift-save-btn.saved { border-color:var(--state-success); color:var(--state-success); }
-
-        /* Table */
+        /* Tables */
         .data-table { width:100%; border-collapse:collapse; font-size:13px; }
-        .data-table th { text-align:left; padding:10px 12px; color:var(--text-muted); font-size:11px; text-transform:uppercase; border-bottom:1px solid var(--border-color); }
-        .data-table td { padding:12px; border-bottom:1px solid var(--border-color); color:var(--text-primary); }
+        .data-table th { text-align:left; padding:10px 14px; color:var(--text-muted); font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; border-bottom:1px solid var(--border-color); }
+        .data-table td { padding:12px 14px; border-bottom:1px solid var(--border-color); vertical-align:middle; }
+        .data-table tr:hover td { background:rgba(255,255,255,0.02); }
 
-        .test-mode-badge { background:rgba(245,158,11,0.15); border:1px solid var(--state-warning); color:var(--state-warning); padding:4px 10px; border-radius:var(--radius-sm); font-size:11px; font-weight:700; text-transform:uppercase; }
+        /* Toggle switch */
+        .switch { position:relative; display:inline-block; width:38px; height:22px; }
+        .switch input { opacity:0; width:0; height:0; }
+        .slider { position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background-color:var(--border-color); transition:.2s; border-radius:34px; }
+        .slider:before { position:absolute; content:""; height:16px; width:16px; left:3px; bottom:3px; background-color:white; transition:.2s; border-radius:50%; }
+        input:checked + .slider { background-color:var(--state-success); }
+        input:checked + .slider:before { transform:translateX(16px); }
+
+        /* Badges */
+        .badge { display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border-radius:var(--radius-sm); font-size:11px; font-weight:700; text-transform:uppercase; }
+        .badge-cyan { background:rgba(24,215,232,0.12); color:var(--accent-cyan); border:1px solid rgba(24,215,232,0.3); }
+        .badge-green { background:rgba(34,197,94,0.12); color:var(--state-success); border:1px solid rgba(34,197,94,0.3); }
+        .badge-warning { background:rgba(245,158,11,0.12); color:var(--state-warning); border:1px solid rgba(245,158,11,0.3); }
+        .badge-danger { background:rgba(239,68,68,0.12); color:var(--state-danger); border:1px solid rgba(239,68,68,0.3); }
 
         /* Toast */
         #toast-wrapper { position:fixed; bottom:24px; right:24px; display:flex; flex-direction:column; gap:8px; z-index:1000; }
-        .toast-msg { background:var(--surface-card); border:1px solid var(--border-color); border-left:4px solid var(--accent-primary); padding:12px 18px; border-radius:var(--radius-md); font-size:13px; color:#fff; box-shadow:var(--shadow-card); max-width:360px; }
+        .toast-msg { background:var(--surface-card); border:1px solid var(--border-strong); border-left:4px solid var(--accent-cyan); padding:12px 18px; border-radius:var(--radius-md); font-size:13px; color:#fff; box-shadow:var(--shadow-card); max-width:380px; }
 
-        /* Music library table */
-        .lib-table { width:100%; border-collapse:collapse; font-size:13px; }
-        .lib-table th { text-align:left; padding:10px 14px; color:var(--text-muted); font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; border-bottom:1px solid var(--border-color); }
-        .lib-table td { padding:12px 14px; border-bottom:1px solid var(--border-color); vertical-align:middle; }
-        .lib-table tr:last-child td { border-bottom:none; }
-        .lib-table tr:hover td { background:rgba(255,255,255,0.02); }
-        .track-name { font-weight:700; color:#fff; }
-        .track-id { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-muted); }
-        .badge-playing { display:inline-flex; align-items:center; gap:5px; background:rgba(0,242,254,0.12); color:var(--accent-primary); border:1px solid rgba(0,242,254,0.3); border-radius:var(--radius-full); padding:3px 10px; font-size:10px; font-weight:700; text-transform:uppercase; }
-        .lib-empty { padding:60px 24px; text-align:center; color:var(--text-muted); }
-        .lib-empty-icon { font-size:40px; margin-bottom:10px; }
-        .chip-dynamic { background:var(--surface-hover); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:10px 12px; cursor:pointer; font-size:12px; font-weight:600; color:#fff; display:flex; align-items:center; justify-content:space-between; gap:6px; transition:all 0.2s; overflow:hidden; }
-        .chip-dynamic:hover { border-color:var(--accent-primary); background:rgba(0,242,254,0.1); }
-        .chip-dynamic.active-track { border-color:var(--accent-primary); background:rgba(0,242,254,0.15); color:var(--accent-primary); }
-        .chip-name { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        /* Modal & Overlay */
+        .modal-overlay { position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.75); backdrop-filter:blur(6px); display:none; place-items:center; z-index:200; }
+        .modal-overlay.active { display:grid; }
+        .modal-box { background:var(--surface-card); border:1px solid var(--border-strong); border-radius:var(--radius-lg); width:90%; max-width:600px; padding:24px; box-shadow:0 10px 40px rgba(0,0,0,0.6); max-height:90vh; overflow-y:auto; }
 
-        @media(max-width:768px){ #sidebar{display:none;} #main-content{margin-left:0;} }
+        /* Active dancer display */
+        .active-dancer-box { background:linear-gradient(180deg,rgba(24,215,232,0.06) 0%,rgba(16,22,36,0.9) 100%); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:20px; text-align:center; }
+        .progress-bar-fill { height:6px; background:linear-gradient(90deg,var(--accent-cyan),var(--accent-pink)); width:100%; border-radius:var(--radius-full); transition:width 0.2s linear; }
+
+        .chip-dynamic { background:var(--surface-hover); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:9px 12px; cursor:pointer; font-size:12px; font-weight:600; color:#fff; display:flex; align-items:center; justify-content:space-between; gap:6px; transition:all 0.2s; }
+        .chip-dynamic:hover { border-color:var(--accent-cyan); background:rgba(24,215,232,0.1); }
+        .chip-dynamic.active-track { border-color:var(--accent-cyan); background:rgba(24,215,232,0.15); color:var(--accent-cyan); }
     </style>
-
 </head>
 <body>
 
+<!-- Sidebar Navigation -->
 <aside id="sidebar">
     <div class="sidebar-brand">
-        <div class="brand-logo">S&G</div>
-        <div class="brand-name">Commercial SaaS</div>
+        <div class="brand-logo">D</div>
+        <div class="brand-name">Dance Live SaaS</div>
     </div>
     <nav class="sidebar-nav">
-        <div class="nav-section-title">Core Controls</div>
-        <a href="javascript:void(0)" class="nav-item active" onclick="navigate('live-control', this)">
-            <div class="nav-icon">📡</div><span>Live Control Center</span>
-        </a>
-        <a href="javascript:void(0)" class="nav-item" onclick="navigate('queue', this)">
-            <div class="nav-icon">📋</div><span>Dancer Queue</span>
-        </a>
-        <a href="javascript:void(0)" class="nav-item" onclick="navigate('music', this)">
-            <div class="nav-icon">🎵</div><span>Music Library</span>
-        </a>
-        <a href="javascript:void(0)" class="nav-item" onclick="navigate('gift-mapper', this)">
-            <div class="nav-icon">🎁</div><span>Gift → Music Map</span>
-        </a>
-        <a href="javascript:void(0)" class="nav-item" onclick="navigate('dance', this)">
-            <div class="nav-icon">💃</div><span>Dance Emotes</span>
-        </a>
-        <div class="nav-section-title">Customization</div>
-        <a href="javascript:void(0)" class="nav-item" onclick="navigate('overlay', this)">
-            <div class="nav-icon">🎨</div><span>Stream Overlay</span>
-        </a>
-        <a href="javascript:void(0)" class="nav-item" onclick="navigate('roblox', this)">
-            <div class="nav-icon">⚙️</div><span>Roblox Studio</span>
-        </a>
-        <a href="javascript:void(0)" class="nav-item" onclick="navigate('analytics', this)">
-            <div class="nav-icon">📊</div><span>Analytics & Logs</span>
-        </a>
+        <div class="nav-section-title">LIVE</div>
+        <a href="javascript:void(0)" class="nav-item active" onclick="navigate('live-control', this)"><div class="nav-icon">📡</div><span>Live Control Center</span></a>
+        <a href="javascript:void(0)" class="nav-item" onclick="navigate('queue', this)"><div class="nav-icon">📋</div><span>Dancer Queue</span></a>
+        <a href="javascript:void(0)" class="nav-item" onclick="navigate('events-monitor', this)"><div class="nav-icon">⚡</div><span>Event Monitor</span></a>
+
+        <div class="nav-section-title">AUTOMATION</div>
+        <a href="javascript:void(0)" class="nav-item" onclick="navigate('event-mappings', this)"><div class="nav-icon">🎯</div><span>Events & Actions</span></a>
+        <a href="javascript:void(0)" class="nav-item" onclick="navigate('action-library', this)"><div class="nav-icon">⚡</div><span>Action Library</span></a>
+        <a href="javascript:void(0)" class="nav-item" onclick="navigate('gift-catalogue', this)"><div class="nav-icon">🎁</div><span>Gift Catalogue</span></a>
+
+        <div class="nav-section-title">CONTENT</div>
+        <a href="javascript:void(0)" class="nav-item" onclick="navigate('music', this)"><div class="nav-icon">🎵</div><span>Music Library</span></a>
+        <a href="javascript:void(0)" class="nav-item" onclick="navigate('dance', this)"><div class="nav-icon">💃</div><span>Dance Emotes</span></a>
+        <a href="javascript:void(0)" class="nav-item" onclick="navigate('overlay', this)"><div class="nav-icon">🎨</div><span>Overlay Studio</span></a>
+
+        <div class="nav-section-title">SYSTEM</div>
+        <a href="javascript:void(0)" class="nav-item" onclick="navigate('roblox', this)"><div class="nav-icon">⚙️</div><span>Roblox Connection</span></a>
+        <a href="javascript:void(0)" class="nav-item" onclick="navigate('analytics', this)"><div class="nav-icon">📊</div><span>Analytics & Logs</span></a>
+        <a href="javascript:void(0)" class="nav-item" onclick="navigate('settings', this)"><div class="nav-icon">🛠️</div><span>Settings</span></a>
     </nav>
 </aside>
 
+<!-- Main App Content -->
 <div id="main-content">
     <header>
-        <div style="display:flex;align-items:center;gap:16px;">
-            <div id="live-status-pill" class="status-pill disconnected">
-                <span class="status-dot"></span>
-                <span id="live-status-text">Disconnected</span>
-            </div>
-            <span style="font-size:12px;color:var(--text-muted);" id="header-timer">Duration: 00:00:00</span>
+        <div class="topbar-left">
+            <button class="cmd-btn" onclick="openCommandPalette()">
+                🔍 Tìm kiếm hoặc phím tắt... <span class="kbd">Ctrl+K</span>
+            </button>
         </div>
-        <div class="user-menu">
-            <div class="user-avatar">SG</div>
-            <div style="font-size:13px;">
-                <div style="font-weight:700;">Demo Workspace</div>
-                <div style="font-size:11px;color:var(--text-muted);">PRO Tier</div>
+
+        <div class="topbar-right">
+            <div id="roblox-status-pill" class="status-pill disconnected">
+                <span class="status-dot"></span>
+                <span id="roblox-status-text">Roblox Offline</span>
             </div>
+            <div id="tiktok-status-pill" class="status-pill disconnected">
+                <span class="status-dot"></span>
+                <span id="tiktok-status-text">TikTok Disconnected</span>
+            </div>
+            <button class="btn btn-danger btn-xs" onclick="triggerEmergencyStop()" title="Dừng khẩn cấp mọi hiệu ứng và làm sạch hàng chờ">🚨 Emergency Stop</button>
         </div>
     </header>
 
     <!-- ====== VIEW: Live Control Center ====== -->
     <div id="view-live-control" class="view-panel active">
         <div class="grid-3col">
-
+            <!-- TikTok Connector -->
             <div class="card">
-                <div class="card-title-bar">
-                    <div class="card-title-text">📡 TikTok LIVE Connector</div>
-                </div>
+                <div class="card-title-bar"><div class="card-title-text">📡 TikTok LIVE Connector</div></div>
                 <div class="form-group">
                     <label class="form-label">TikTok Username ID</label>
                     <input type="text" id="input-tiktok-user" class="form-input" value="sandg.music" placeholder="@username">
@@ -213,55 +194,79 @@
                     <button class="btn btn-primary" style="flex:1;" onclick="handleConnectTikTok()">Connect</button>
                     <button class="btn btn-danger" style="flex:1;" onclick="confirmDisconnectTikTok()">Disconnect</button>
                 </div>
-                <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text-muted);">
-                    <span>Processed: <strong id="val-comments-count" style="color:#fff;">0</strong></span>
-                    <span>Last: <strong id="val-last-event" style="color:#fff;">None</strong></span>
-                </div>
+                <button class="btn btn-secondary btn-xs" style="width:100%;margin-bottom:10px;" onclick="runPreflightCheck()">📋 Run Pre-live Checklist</button>
             </div>
 
+            <!-- Currently Dancing -->
             <div class="card">
                 <div class="card-title-bar">
-                    <div class="card-title-text">🕺 Currently Dancing</div>
-                    <button class="btn btn-secondary" style="padding:4px 8px;font-size:11px;" onclick="handleSkipDancer()">Skip ⏭️</button>
+                    <div class="card-title-text">🕺 Active Dancer</div>
+                    <button class="btn btn-secondary btn-xs" onclick="handleSkipDancer()">Skip ⏭️</button>
                 </div>
                 <div class="active-dancer-box">
                     <div style="font-size:32px;margin-bottom:4px;">🕺</div>
                     <div id="active-roblox-name" style="font-size:18px;font-weight:800;color:#fff;">Waiting...</div>
-                    <div id="active-tiktok-user" style="font-size:12px;color:var(--accent-primary);margin-top:2px;">Comment !dance Username on TikTok</div>
-                    <div class="progress-bar-container"><div id="dancer-progress-fill" class="progress-bar-fill"></div></div>
-                </div>
-                <div style="display:flex;gap:8px;margin-top:14px;">
-                    <button class="btn btn-secondary" style="flex:1;">Replay</button>
-                    <button class="btn btn-secondary" style="flex:1;">Focus Camera</button>
+                    <div id="active-tiktok-user" style="font-size:12px;color:var(--accent-cyan);margin-top:2px;">Comment !dance Username on TikTok</div>
+                    <div style="background:var(--border-color);height:6px;border-radius:var(--radius-full);overflow:hidden;margin-top:14px;">
+                        <div id="dancer-progress-fill" class="progress-bar-fill"></div>
+                    </div>
                 </div>
             </div>
 
+            <!-- Quick Simulator -->
             <div class="card">
-                <div class="card-title-bar">
-                    <div class="card-title-text">🎵 Live Music Switcher</div>
-                    <span style="font-size:11px;color:var(--accent-primary);">Real-Time</span>
+                <div class="card-title-bar"><div class="card-title-text">🧪 Quick Simulator</div></div>
+                <div class="form-group">
+                    <label class="form-label">Test Roblox Username</label>
+                    <input type="text" id="input-test-roblox" class="form-input" value="Builderman">
                 </div>
-                <span style="font-size:11px;color:var(--text-muted);">Bấm chọn đổi bài nhạc ngay tức thì:</span>
-                <div class="music-chip-grid" id="music-chip-grid" style="margin-top:10px;">
-                    <!-- Populated dynamically from Music Library -->
-                    <div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--text-muted);font-size:12px;">Đang tải...</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+                    <button class="btn btn-secondary" style="font-size:12px;" onclick="triggerTestComment(false)">💬 Comment Test</button>
+                    <button class="btn btn-warning" style="font-size:12px;" onclick="triggerTestComment(true)">🎁 VIP Gift Test</button>
                 </div>
-
-                <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border-color);">
-                    <div class="card-title-bar" style="margin-bottom:10px;padding-bottom:8px;">
-                        <div class="card-title-text" style="font-size:13px;">🛠️ Quick Simulator</div>
-                        <span class="test-mode-badge">Test Mode</span>
-                    </div>
-                    <div class="form-group" style="margin-bottom:10px;">
-                        <input type="text" id="input-test-roblox" class="form-input" value="Builderman" placeholder="Roblox Username">
-                    </div>
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-                        <button class="btn btn-secondary" style="font-size:12px;" onclick="triggerTestComment(false)">Normal Test</button>
-                        <button class="btn btn-warning" style="font-size:12px;" onclick="triggerTestComment(true)">🎁 VIP Gift Test</button>
-                    </div>
-                </div>
+                <button class="btn btn-primary btn-xs" style="width:100%;" onclick="testRoseEvent()">🌹 Test Rose → Flower Rain</button>
             </div>
+        </div>
+    </div>
 
+    <!-- ====== VIEW: Events & Actions (Rules Manager) ====== -->
+    <div id="view-event-mappings" class="view-panel">
+        <div class="card">
+            <div class="card-title-bar">
+                <div class="card-title-text">🎯 Event Mappings (Gift → Action Rules)</div>
+                <button class="btn btn-primary btn-xs" onclick="openCreateMappingModal()">+ Create Event Rule</button>
+            </div>
+            <table class="data-table">
+                <thead>
+                    <tr><th>Active</th><th>Event Name</th><th>Trigger</th><th>Actions</th><th>Priority</th><th>Actions</th></tr>
+                </thead>
+                <tbody id="table-mappings-body">
+                    <tr><td colspan="6" style="text-align:center;color:var(--text-muted);">Loading Event Mappings...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ====== VIEW: Action Library ====== -->
+    <div id="view-action-library" class="view-panel">
+        <div class="card">
+            <div class="card-title-bar">
+                <div class="card-title-text">⚡ Action Library (Reusable Game Effects)</div>
+                <button class="btn btn-primary btn-xs" onclick="openCreateActionModal()">+ Create Action</button>
+            </div>
+            <div id="action-cards-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;">
+                <div style="color:var(--text-muted);grid-column:1/-1;text-align:center;padding:30px;">Loading Action Library...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====== VIEW: Gift Catalogue ====== -->
+    <div id="view-gift-catalogue" class="view-panel">
+        <div class="card">
+            <div class="card-title-bar"><div class="card-title-text">🎁 TikTok LIVE Gift Catalogue</div></div>
+            <div id="gift-catalogue-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;">
+                <!-- Populated dynamically -->
+            </div>
         </div>
     </div>
 
@@ -281,98 +286,60 @@
         </div>
     </div>
 
-       <!-- ====== VIEW: Music Library ====== -->
-    <div id="view-music" class="view-panel">
-
-        <!-- Add Track Form -->
-        <div class="card" style="max-width:600px;margin-bottom:24px;">
-            <div class="card-title-bar">
-                <div class="card-title-text">🎵 Thêm Bài Nhạc Vào Library</div>
-            </div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-                <div class="form-group" style="margin-bottom:0;">
-                    <label class="form-label">Tên Bài Nhạc <span style="color:var(--state-danger);">*</span></label>
-                    <input type="text" id="input-music-title" class="form-input" placeholder="Vd: K-Pop Viral Mix 2025">
-                </div>
-                <div class="form-group" style="margin-bottom:0;">
-                    <label class="form-label">Roblox Sound Asset ID <span style="color:var(--state-danger);">*</span></label>
-                    <input type="text" id="input-music-id" class="form-input" style="font-family:'JetBrains Mono',monospace;" placeholder="Vd: 1837879082">
-                </div>
-            </div>
-            <div style="display:flex;gap:8px;margin-top:14px;">
-                <button class="btn btn-primary" style="flex:1;" onclick="handleAddToLibrary()">📚 Thêm vào Library</button>
-                <button class="btn btn-secondary" onclick="handleAddAndPlayTrack()" title="Thêm vào Library và phát ngay">▶ Thêm &amp; Phát Ngay</button>
-            </div>
-            <div id="lib-add-error" style="color:var(--state-danger);font-size:12px;margin-top:8px;display:none;"></div>
-        </div>
-
-        <!-- Track List -->
+    <!-- ====== VIEW: Event Monitor ====== -->
+    <div id="view-events-monitor" class="view-panel">
         <div class="card">
-            <div class="card-title-bar">
-                <div class="card-title-text">📋 Danh Sách Nhạc
-                    <span id="lib-count" style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-muted);font-weight:400;"></span>
-                </div>
-                <span style="font-size:11px;color:var(--text-muted);">Bấm ▶ để phát ngay trong Roblox</span>
-            </div>
-            <div id="music-library-container">
-                <div class="lib-empty">
-                    <div class="lib-empty-icon">🎵</div>
-                    <div style="font-weight:600;color:#fff;margin-bottom:6px;">Library trống</div>
-                    <div style="font-size:12px;">Thêm bài nhạc đầu tiên ở phía trên để bắt đầu</div>
-                </div>
-            </div>
+            <div class="card-title-bar"><div class="card-title-text">⚡ Realtime Game Event Stream</div></div>
+            <table class="data-table">
+                <thead><tr><th>Event ID</th><th>Rule Name</th><th>Sender / Gift</th><th>Status</th><th>Time</th><th>Actions</th></tr></thead>
+                <tbody id="table-events-monitor-body">
+                    <tr><td colspan="6" style="text-align:center;color:var(--text-muted);">No game events processed yet</td></tr>
+                </tbody>
+            </table>
         </div>
     </div>
 
-    <!-- ====== VIEW: Gift → Music Mapper (Tikfanny Coin Milestone Style) ====== -->
-    <div id="view-gift-mapper" class="view-panel">
-
-        <!-- Explanation banner -->
-        <div style="background:linear-gradient(135deg,rgba(0,242,254,0.08),rgba(255,0,127,0.08));border:1px solid rgba(0,242,254,0.2);border-radius:var(--radius-lg);padding:18px 20px;margin-bottom:20px;display:flex;align-items:center;gap:16px;">
-            <div style="font-size:32px;flex-shrink:0;">🎁</div>
-            <div>
-                <div style="font-family:'Outfit',sans-serif;font-weight:700;font-size:15px;color:#fff;margin-bottom:4px;">
-                    Coin Milestone → Music (Tikfanny-style)
-                </div>
-                <div style="font-size:12px;color:var(--text-muted);line-height:1.6;">
-                    Mỗi <strong style="color:var(--accent-primary)">ngưỡng xu</strong> tương ứng 1 bài nhạc riêng.
-                    Khi khán giả tặng quà, hệ thống tự động tính coin value → khớp ngưỡng → đổi nhạc Roblox ngay.
-                    Nhập <strong style="color:var(--state-warning)">Roblox Sound Asset ID</strong> vào từng ô bên dưới.
-                </div>
+    <!-- ====== VIEW: Music Library ====== -->
+    <div id="view-music" class="view-panel">
+        <div class="card" style="max-width:600px;margin-bottom:20px;">
+            <div class="card-title-bar"><div class="card-title-text">🎵 Thêm Bài Nhạc</div></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <input type="text" id="input-music-title" class="form-input" placeholder="Tên bài nhạc">
+                <input type="text" id="input-music-id" class="form-input" placeholder="Sound Asset ID (vd: 1837879082)">
+            </div>
+            <div style="display:flex;gap:8px;margin-top:12px;">
+                <button class="btn btn-primary" style="flex:1;" onclick="handleAddToLibrary()">📚 Thêm Library</button>
+                <button class="btn btn-secondary" onclick="handleAddAndPlayTrack()">▶ Thêm & Phát Ngay</button>
             </div>
         </div>
-
-        <!-- Milestone cards grid -->
-        <div id="milestone-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:16px;">
-            <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-muted);">
-                Đang tải Coin Milestones...
-            </div>
+        <div class="card">
+            <div class="card-title-bar"><div class="card-title-text">📋 Danh Sách Nhạc</div></div>
+            <div id="music-library-container"></div>
         </div>
     </div>
-
 
     <!-- ====== VIEW: Dance Emotes ====== -->
     <div id="view-dance" class="view-panel">
-        <div class="card" style="max-width:680px;">
-            <div class="card-title-bar"><div class="card-title-text">💃 Add Custom Dance Emote</div></div>
+        <div class="card" style="max-width:600px;">
+            <div class="card-title-bar"><div class="card-title-text">💃 Roblox Dance Emote ID</div></div>
             <div class="form-group">
-                <label class="form-label">Emote Name</label>
-                <input type="text" id="input-dance-title" class="form-input" placeholder="K-Pop Viral Emote">
+                <label class="form-label">Animation Name</label>
+                <input type="text" id="input-dance-title" class="form-input" value="Viral Phonk Emote">
             </div>
             <div class="form-group">
                 <label class="form-label">Roblox Animation Asset ID</label>
-                <input type="text" id="input-dance-id" class="form-input" placeholder="507771019">
+                <input type="text" id="input-dance-id" class="form-input" value="507771019">
             </div>
-            <button class="btn btn-primary" onclick="handleAddDanceEmote()">💃 Add & Set Active Emote</button>
+            <button class="btn btn-primary" onclick="handleAddDanceEmote()">💃 Save Emote</button>
         </div>
     </div>
 
-    <!-- ====== VIEW: Stream Overlay ====== -->
+    <!-- ====== VIEW: Overlay Studio ====== -->
     <div id="view-overlay" class="view-panel">
-        <div class="card" style="max-width:680px;">
-            <div class="card-title-bar"><div class="card-title-text">🎨 Stream Branding & Timing</div></div>
+        <div class="card" style="max-width:650px;">
+            <div class="card-title-bar"><div class="card-title-text">🎨 Stream Overlay Branding</div></div>
             <div class="form-group">
-                <label class="form-label">Banner Overlay Title</label>
+                <label class="form-label">Overlay Title Banner</label>
                 <input type="text" id="input-overlay-title" class="form-input" value="🎵 S&G MUSIC - ROBLOX TIKTOK DANCE LIVE 🎵">
             </div>
             <div class="form-group">
@@ -380,64 +347,71 @@
                 <input type="text" id="input-overlay-color" class="form-input" value="#ff007f">
             </div>
             <div class="form-group">
-                <label class="form-label">⏱️ Thời gian nhảy tối đa / Dancer (Giây)</label>
+                <label class="form-label">⏱️ Thời gian nhảy tối đa / Dancer (giây)</label>
                 <input type="number" id="input-dance-duration" class="form-input" value="12" min="5" max="120">
             </div>
-            <button class="btn btn-warning" onclick="handleSaveOverlayAndTiming()">💾 Lưu & Đồng Bộ Sang Roblox</button>
-            <div id="overlayPreviewBox" style="margin-top:16px;background:#0d0f18;border:2px solid var(--accent-secondary);border-radius:12px;padding:14px;text-align:center;">
-                <div id="previewTitle" style="font-weight:bold;color:#ffd700;font-size:15px;">🎵 S&G MUSIC - ROBLOX TIKTOK DANCE LIVE 🎵</div>
-                <div style="font-size:12px;color:#fff;margin-top:4px;">💃 Đang nhảy: @tiktok (RobloxName)</div>
-            </div>
+            <button class="btn btn-warning" onclick="handleSaveOverlayAndTiming()">💾 Lưu & Đồng Bộ</button>
         </div>
     </div>
 
-    <!-- ====== VIEW: Roblox Studio ====== -->
+    <!-- ====== VIEW: Roblox Connection ====== -->
     <div id="view-roblox" class="view-panel">
-        <div class="card" style="max-width:680px;">
-            <div class="card-title-bar"><div class="card-title-text">⚙️ Roblox Studio API Key</div></div>
+        <div class="card" style="max-width:650px;">
+            <div class="card-title-bar"><div class="card-title-text">⚙️ Roblox Studio Connection Settings</div></div>
             <div class="form-group">
                 <label class="form-label">Your Workspace API Key</label>
-                <div style="display:flex;gap:8px;">
-                    <input type="text" id="display-api-key" class="form-input" value="demo-api-key-sg-music" readonly>
-                    <button class="btn btn-secondary" onclick="copyApiKeyToClipboard()">Copy</button>
-                </div>
+                <input type="text" id="display-api-key" class="form-input" value="demo-api-key-sg-music" readonly>
             </div>
+            <div class="form-group">
+                <label class="form-label">Roblox Heartbeat Status</label>
+                <div id="roblox-hb-detail" style="font-size:13px;color:var(--text-muted);">Chưa nhận heartbeat từ Roblox Lua script.</div>
+            </div>
+            <button class="btn btn-primary" onclick="runPreflightCheck()">📋 Chạy Pre-live Checklist</button>
         </div>
     </div>
 
-    <!-- ====== VIEW: Analytics ====== -->
+    <!-- ====== VIEW: Analytics & Logs ====== -->
     <div id="view-analytics" class="view-panel">
         <div class="card">
-            <div class="card-title-bar"><div class="card-title-text">📊 System Activity Log</div></div>
-            <div id="log-console-box" style="background:#050608;border:1px solid var(--border-color);border-radius:10px;padding:12px;font-family:'JetBrains Mono',monospace;font-size:11px;height:420px;overflow-y:auto;color:#d1d5db;display:flex;flex-direction:column;gap:3px;">
-                <div><span style="color:var(--text-muted)">[System]</span> Commercial SaaS Control Center Ready.</div>
+            <div class="card-title-bar"><div class="card-title-text">📊 Activity Log Console</div></div>
+            <div id="log-console-box" style="background:#050608;border:1px solid var(--border-color);border-radius:10px;padding:12px;font-family:'JetBrains Mono',monospace;font-size:11px;height:400px;overflow-y:auto;color:#d1d5db;display:flex;flex-direction:column;gap:4px;">
+                <div><span style="color:var(--text-muted)">[System]</span> Control Center ready.</div>
             </div>
         </div>
     </div>
 
+    <!-- ====== VIEW: Settings ====== -->
+    <div id="view-settings" class="view-panel">
+        <div class="card" style="max-width:650px;">
+            <div class="card-title-bar"><div class="card-title-text">🛠️ System & Emergency Controls</div></div>
+            <button class="btn btn-danger" style="width:100%;margin-bottom:12px;" onclick="triggerEmergencyStop()">🚨 Emergency Stop All Automations</button>
+        </div>
+    </div>
 </div>
 
 <div id="toast-wrapper"></div>
 
+<!-- Modal Dialogs -->
+<div id="preflight-modal" class="modal-overlay">
+    <div class="modal-box">
+        <div class="card-title-bar"><div class="card-title-text">📋 Pre-live Diagnostics Checklist</div></div>
+        <div id="preflight-checks-list" style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;"></div>
+        <button class="btn btn-secondary" style="width:100%;" onclick="closePreflightModal()">Đóng</button>
+    </div>
+</div>
+
 <script>
 const API_BASE = '';
-let timerSeconds = 0;
-let audioCtx = null;
-let currentActiveChipId = null;
-let allGifts = [];
-let giftMusicMap = {};
-let musicLibrary = []; // { id, name, musicId, addedAt }
-let currentMusicId = null; // currently playing in Roblox
+let musicLibrary = [];
+let currentMusicId = null;
+let eventMappings = [];
+let actionDefs = [];
 
-
-// ===========================
-// UI Core
-// ===========================
 function notify(msg, type = 'primary') {
     const wrapper = document.getElementById('toast-wrapper');
     const toast = document.createElement('div');
     toast.className = 'toast-msg';
-    const colors = { primary: 'var(--accent-primary)', success: 'var(--state-success)', danger: 'var(--state-danger)', warning: 'var(--state-warning)' };
+    const colors = { primary: 'var(--accent-cyan)', success: 'var(--state-success)', danger: 'var(--state-danger)', warning: 'var(--state-warning)' };
     toast.style.borderLeftColor = colors[type] || colors.primary;
     toast.innerText = msg;
     wrapper.appendChild(toast);
@@ -452,241 +426,43 @@ function navigate(viewId, el) {
     if (targetNav) targetNav.classList.add('active');
     const targetView = document.getElementById(`view-${viewId}`);
     if (targetView) targetView.classList.add('active');
-    if (viewId === 'gift-mapper') loadGiftMapper();
+    if (viewId === 'event-mappings') loadEventMappings();
+    if (viewId === 'action-library') loadActionLibrary();
+    if (viewId === 'gift-catalogue') loadGiftCatalogue();
+    if (viewId === 'events-monitor') loadEventsMonitor();
     if (viewId === 'music') loadMusicLibrary();
 }
 
-
-function playWebSoundFX(freq = 587, duration = 0.18) {
-    try {
-        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = 'sine'; osc.frequency.value = freq;
-        gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
-        osc.connect(gain); gain.connect(audioCtx.destination);
-        osc.start(); osc.stop(audioCtx.currentTime + duration);
-    } catch (e) {}
-}
-
-function copyApiKeyToClipboard() {
-    navigator.clipboard.writeText(document.getElementById('display-api-key').value);
-    notify('✅ Copied API Key!', 'success');
-}
-
-// ===========================
-// Coin Milestone Mapper (Tikfanny-style)
-// ===========================
-let milestones = [];
-
-// Gift examples per tier for display
-const TIER_EXAMPLES = {
-    milestone_1: ['🌹 Rose','🤞 Finger Heart','🔔 Bell','😎 Sunglasses','🍫 Chocolate'],
-    milestone_2: ['🍩 Donut','🎂 Cake','🎤 Mic','🧢 TikTok Cap','🍭 Lollipop'],
-    milestone_3: ['👑 Crown','💍 Diamond','⚡ Thunder','🤝 Friendship','🌠 Shooting Star'],
-    milestone_4: ['🐯 Tiger','🦅 Eagle','🏎️ Sports Car','✈️ Jet','🌌 Galaxy'],
-    milestone_5: ['🚢 Cruise','🐉 Dragon','🦁 Lion','💐 Rose Bouquet','🚀 Rocket'],
-    milestone_6: ['🌌 Universe','💫 TikTok Universe','🦁 Lion King','🛸 Spaceship'],
-};
-
-async function loadGiftMapper() {
-    const container = document.getElementById('milestone-grid');
-    try {
-        const res = await fetch(`${API_BASE}/api/v1/dashboard/coin-milestones`);
-        const data = await res.json();
-        milestones = data.milestones || [];
-    } catch (e) {
-        container.innerHTML = `<div style="color:var(--state-danger);padding:20px;grid-column:1/-1;">Lỗi tải milestones: ${e.message}</div>`;
-        return;
-    }
-    renderMilestoneCards();
-}
-
-function renderMilestoneCards() {
-    const container = document.getElementById('milestone-grid');
-    if (!milestones.length) {
-        container.innerHTML = '<div style="color:var(--text-muted);grid-column:1/-1;text-align:center;padding:40px;">Không có milestone nào.</div>';
-        return;
-    }
-    container.innerHTML = milestones.map(m => {
-        const examples = (TIER_EXAMPLES[m.id] || []).join(' · ');
-        const displayId = (m.musicId || '').replace('rbxassetid://', '');
-        const maxLabel = m.maxCoins === null || m.maxCoins >= 999999 ? '∞' : m.maxCoins;
-        return `
-        <div class="card" style="border-top:3px solid ${m.color};position:relative;overflow:hidden;">
-            <!-- Glow accent -->
-            <div style="position:absolute;top:0;right:0;width:80px;height:80px;background:radial-gradient(circle,${m.color}22,transparent 70%);pointer-events:none;"></div>
-
-            <!-- Header -->
-            <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
-                <div style="width:48px;height:48px;border-radius:var(--radius-md);background:${m.color}22;border:1px solid ${m.color}44;display:grid;place-items:center;font-size:22px;flex-shrink:0;">${m.emoji}</div>
-                <div style="flex:1;min-width:0;">
-                    <div style="font-family:'Outfit',sans-serif;font-weight:800;font-size:15px;color:#fff;">${m.label}</div>
-                    <div style="font-size:12px;font-family:'JetBrains Mono',monospace;color:${m.color};margin-top:2px;">${m.minCoins} – ${maxLabel} 🪙</div>
-                </div>
-                <div id="ms-status-${m.id}" style="width:8px;height:8px;border-radius:50%;background:${displayId ? 'var(--state-success)' : 'var(--border-color)'};box-shadow:0 0 6px ${displayId ? 'var(--state-success)' : 'transparent'};flex-shrink:0;"></div>
-            </div>
-
-            <!-- Example gifts -->
-            <div style="font-size:11px;color:var(--text-muted);margin-bottom:12px;line-height:1.7;">${m.description}<br><span style="color:${m.color}99;">${examples}</span></div>
-
-            <!-- Music name -->
-            <div class="form-group" style="margin-bottom:10px;">
-                <label class="form-label">Tên bài nhạc (hiển thị)</label>
-                <input type="text" id="ms-name-${m.id}" class="form-input" style="font-size:12px;" value="${m.musicName || ''}" placeholder="Vd: K-Pop Viral Mix">
-            </div>
-
-            <!-- Sound ID input -->
-            <div class="form-group" style="margin-bottom:14px;">
-                <label class="form-label">Roblox Sound Asset ID</label>
-                <input type="text" id="ms-id-${m.id}" class="form-input" style="font-family:'JetBrains Mono',monospace;font-size:12px;${displayId?'border-color:rgba(16,185,129,0.5);':''}" 
-                    placeholder="Nhập ID nhạc (vd: 1847648398)"
-                    value="${displayId}"
-                    oninput="onMilestoneInput('${m.id}', this)">
-            </div>
-
-            <!-- Save button -->
-            <button id="ms-btn-${m.id}" class="btn ${displayId ? 'btn-secondary' : 'btn-primary'}" style="width:100%;font-size:13px;" onclick="saveMilestone('${m.id}')">
-                ${displayId ? '✓ Đã cấu hình — Lưu lại' : '💾 Lưu & Kích hoạt'}
-            </button>
-        </div>`;
-    }).join('');
-}
-
-function onMilestoneInput(id, input) {
-    const btn = document.getElementById(`ms-btn-${id}`);
-    const dot = document.getElementById(`ms-status-${id}`);
-    const hasVal = input.value.trim().length > 0;
-    btn.className = 'btn btn-warning';
-    btn.style.width = '100%';
-    btn.style.fontSize = '13px';
-    btn.innerText = '⚠️ Chưa lưu — Bấm để lưu';
-    input.style.borderColor = hasVal ? 'rgba(245,158,11,0.6)' : '';
-    dot.style.background = 'var(--state-warning)';
-    dot.style.boxShadow = '0 0 6px var(--state-warning)';
-}
-
-async function saveMilestone(milestoneId) {
-    const musicId = document.getElementById(`ms-id-${milestoneId}`).value.trim();
-    const musicName = document.getElementById(`ms-name-${milestoneId}`).value.trim();
-    const btn = document.getElementById(`ms-btn-${milestoneId}`);
-    const dot = document.getElementById(`ms-status-${milestoneId}`);
-    const input = document.getElementById(`ms-id-${milestoneId}`);
-
-    btn.innerText = '⏳ Đang lưu...';
-    btn.disabled = true;
-
-    try {
-        const res = await fetch(`${API_BASE}/api/v1/dashboard/coin-milestones`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ milestoneId, musicId, musicName })
-        });
-        const data = await res.json();
-        milestones = data.milestones;
-
-        btn.disabled = false;
-        btn.className = 'btn btn-secondary';
-        btn.style.width = '100%';
-        btn.style.fontSize = '13px';
-        btn.innerText = '✓ Đã cấu hình — Lưu lại';
-        input.style.borderColor = musicId ? 'rgba(16,185,129,0.5)' : '';
-        dot.style.background = musicId ? 'var(--state-success)' : 'var(--border-color)';
-        dot.style.boxShadow = musicId ? '0 0 6px var(--state-success)' : 'none';
-
-        const milestone = milestones.find(m => m.id === milestoneId);
-        const label = milestone ? milestone.label : milestoneId;
-        notify(`🎁 ${label} → Nhạc ${musicId || 'đã xóa'} đã được lưu!`, 'success');
-        playWebSoundFX(880, 0.25);
-    } catch (e) {
-        btn.disabled = false;
-        btn.innerText = '❌ Lỗi — Thử lại';
-        notify('Lỗi khi lưu: ' + e.message, 'danger');
-    }
-}
-
-
-
-
-
-// ===========================
-// Music Switcher (dynamic chips from library)
-// ===========================
 function escapeHtml(str) {
     return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
-async function quickSelectMusic(trackId) {
-    const track = musicLibrary.find(t => t.id === trackId || t.musicId === trackId);
-    if (!track) return;
-    const musicId = track.musicId;
-    const trackName = track.name;
-    const chipId = 'chip_' + track.id;
-
-    playWebSoundFX(880, 0.2);
-    document.querySelectorAll('.chip-dynamic, .music-chip').forEach(c => c.classList.remove('active-track'));
-    const chip = document.getElementById(chipId);
-    if (chip) chip.classList.add('active-track');
-    currentActiveChipId = chipId;
-
-    try {
-        await fetch(`${API_BASE}/api/v1/dashboard/music`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name: trackName, musicId })
-        });
-        currentMusicId = musicId.startsWith('rbxassetid://') ? musicId : 'rbxassetid://' + musicId;
-        notify(`🎵 Phát: ${trackName}`, 'success');
-        renderMusicLibrary();
-    } catch (e) { notify('Error: ' + e.message, 'danger'); }
-}
-
-function renderChipGrid() {
-    const grid = document.getElementById('music-chip-grid');
-    if (!grid) return;
-    if (musicLibrary.length === 0) {
-        grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--text-muted);font-size:12px;">
-            Chưa có nhạc — <a href="javascript:void(0)" onclick="navigate('music')" style="color:var(--accent-primary);">Thêm bài nhạc</a>
-        </div>`;
-        return;
-    }
-    const chips = musicLibrary.slice(0, 6);
-    grid.innerHTML = chips.map(t => {
-        const isPlaying = t.musicId === currentMusicId;
-        const chipId = 'chip_' + t.id;
-        return `<div class="chip-dynamic ${isPlaying ? 'active-track' : ''}" id="${chipId}" onclick="quickSelectMusic('${t.id}')">
-            <span class="chip-name">${escapeHtml(t.name)}</span><span>▶</span>
-        </div>`;
-    }).join('');
-}
-
-
-// ===========================
-// Status Polling
-// ===========================
 async function fetchStatus() {
     try {
         const res = await fetch(`${API_BASE}/api/v1/dashboard/status`);
         const data = await res.json();
         if (!data.success || !data.tenantStatus) return;
         const st = data.tenantStatus;
-        const pill = document.getElementById('live-status-pill');
-        const text = document.getElementById('live-status-text');
-        pill.className = st.isConnected ? 'status-pill live' : 'status-pill disconnected';
-        text.innerText = st.isConnected ? `Live: @${st.tiktokUsername}` : 'Disconnected';
+
+        // TikTok Status Pill
+        const tkPill = document.getElementById('tiktok-status-pill');
+        const tkText = document.getElementById('tiktok-status-text');
+        tkPill.className = st.isConnected ? 'status-pill live' : 'status-pill disconnected';
+        tkText.innerText = st.isConnected ? `Live: @${st.tiktokUsername}` : 'TikTok Disconnected';
+
+        // Roblox Status Pill
+        const rbxPill = document.getElementById('roblox-status-pill');
+        const rbxText = document.getElementById('roblox-status-text');
+        rbxPill.className = st.isRobloxOnline ? 'status-pill live' : 'status-pill disconnected';
+        rbxText.innerText = st.isRobloxOnline ? 'Roblox Online' : 'Roblox Offline';
 
         if (st.activePlayer) {
             document.getElementById('active-roblox-name').innerText = st.activePlayer.robloxUsername;
             document.getElementById('active-tiktok-user').innerText = '@' + st.activePlayer.tiktokUsername;
         }
-        if (st.danceDuration) document.getElementById('input-dance-duration').value = st.danceDuration;
 
-        // Sync currentMusicId from server
-        if (st.currentMusicId && st.currentMusicId !== currentMusicId) {
-            currentMusicId = st.currentMusicId;
-            renderChipGrid();
-            renderMusicLibrary();
+        if (st.robloxHeartbeat && st.robloxHeartbeat.lastHeartbeat) {
+            document.getElementById('roblox-hb-detail').innerText = `Heartbeat gần nhất: ${new Date(st.robloxHeartbeat.lastHeartbeat).toLocaleTimeString()} (PlaceID: ${st.robloxHeartbeat.placeId || 'Studio'})`;
         }
 
         if (st.queue) {
@@ -695,26 +471,191 @@ async function fetchStatus() {
                 ? '<tr><td colspan="5" style="text-align:center;color:var(--text-muted);">Queue is empty</td></tr>'
                 : st.queue.map((q,i) => `<tr>
                     <td>#${i+1}</td>
-                    <td><strong>${q.robloxUsername}</strong></td>
-                    <td>@${q.tiktokUsername}</td>
-                    <td><span class="test-mode-badge">${q.isVIP ? 'VIP Gift' : 'Normal'}</span></td>
+                    <td><strong>${escapeHtml(q.robloxUsername)}</strong></td>
+                    <td>@${escapeHtml(q.tiktokUsername)}</td>
+                    <td><span class="badge ${q.isVIP ? 'badge-warning' : 'badge-cyan'}">${q.isVIP ? 'VIP Gift' : 'Normal'}</span></td>
                     <td><button class="btn btn-danger btn-xs" onclick="handleSkipDancer()">Remove</button></td>
                 </tr>`).join('');
         }
     } catch (_) {}
 }
 
+// =========================================================
+// Event Mappings & Actions Engine UI
+// =========================================================
+async function loadEventMappings() {
+    try {
+        const res = await fetch(`${API_BASE}/api/v1/dashboard/event-mappings`);
+        const data = await res.json();
+        eventMappings = data.eventMappings || [];
+        renderEventMappings();
+    } catch (e) { notify('Lỗi tải Event Mappings: ' + e.message, 'danger'); }
+}
 
-// ===========================
-// API Action Handlers
-// ===========================
+function renderEventMappings() {
+    const tbody = document.getElementById('table-mappings-body');
+    if (!tbody) return;
+    if (eventMappings.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);">Chưa có Event Rule nào.</td></tr>';
+        return;
+    }
+    tbody.innerHTML = eventMappings.map(m => `<tr>
+        <td>
+            <label class="switch">
+                <input type="checkbox" ${m.enabled ? 'checked' : ''} onchange="toggleMappingEnabled('${m.id}', this.checked)">
+                <span class="slider"></span>
+            </label>
+        </td>
+        <td><strong>${escapeHtml(m.name)}</strong></td>
+        <td><span class="badge badge-cyan">${m.trigger?.giftName || m.trigger?.giftId || 'Gift'}</span></td>
+        <td>${(m.actions || []).length} actions</td>
+        <td>${m.priority || 10}</td>
+        <td>
+            <div style="display:flex;gap:6px;">
+                <button class="btn btn-primary btn-xs" onclick="testMappingRule('${m.id}')">🧪 Test</button>
+                <button class="btn btn-danger btn-xs" onclick="deleteMappingRule('${m.id}')">🗑️</button>
+            </div>
+        </td>
+    </tr>`).join('');
+}
+
+async function toggleMappingEnabled(id, enabled) {
+    await fetch(`${API_BASE}/api/v1/dashboard/event-mappings/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ enabled })
+    });
+    notify(`🎯 Rule ${enabled ? 'Đã bật' : 'Đã tắt'}`, enabled ? 'success' : 'warning');
+}
+
+async function testMappingRule(id) {
+    const res = await fetch(`${API_BASE}/api/v1/dashboard/event-mappings/${id}/test`, { method: 'POST' });
+    const data = await res.json();
+    notify(data.message, 'success');
+}
+
+async function deleteMappingRule(id) {
+    if (!confirm('Xóa Rule này?')) return;
+    await fetch(`${API_BASE}/api/v1/dashboard/event-mappings/${id}`, { method: 'DELETE' });
+    loadEventMappings();
+    notify('🗑️ Đã xóa Rule');
+}
+
+async function loadActionLibrary() {
+    try {
+        const res = await fetch(`${API_BASE}/api/v1/dashboard/actions`);
+        const data = await res.json();
+        actionDefs = data.actionDefs || [];
+        renderActionLibrary();
+    } catch (e) { notify('Lỗi tải Action Library: ' + e.message, 'danger'); }
+}
+
+function renderActionLibrary() {
+    const grid = document.getElementById('action-cards-grid');
+    if (!grid) return;
+    if (actionDefs.length === 0) {
+        grid.innerHTML = '<div style="color:var(--text-muted);grid-column:1/-1;text-align:center;padding:30px;">Chưa có Action nào trong thư viện.</div>';
+        return;
+    }
+    grid.innerHTML = actionDefs.map(a => `
+    <div class="card" style="border-top:3px solid var(--accent-cyan);">
+        <div class="card-title-bar"><div class="card-title-text">${escapeHtml(a.name)}</div></div>
+        <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">Type: <strong style="color:#fff;">${a.type}</strong></div>
+        <div style="font-size:11px;color:var(--text-secondary);margin-bottom:14px;">Duration: ${a.defaultDurationMs}ms</div>
+        <button class="btn btn-secondary btn-xs" style="width:100%;" onclick="deleteActionDef('${a.id}')">🗑️ Xóa Action</button>
+    </div>`).join('');
+}
+
+async function deleteActionDef(id) {
+    if (!confirm('Xóa Action này?')) return;
+    const res = await fetch(`${API_BASE}/api/v1/dashboard/actions/${id}`, { method: 'DELETE' });
+    const data = await res.json();
+    if (res.ok) { loadActionLibrary(); notify('🗑️ Đã xóa Action'); }
+    else { notify(data.error || 'Không thể xóa Action', 'danger'); }
+}
+
+async function loadGiftCatalogue() {
+    const grid = document.getElementById('gift-catalogue-grid');
+    try {
+        const res = await fetch(`${API_BASE}/api/v1/gifts`);
+        const data = await res.json();
+        const gifts = data.gifts || [];
+        grid.innerHTML = gifts.map(g => `
+        <div class="card" style="padding:14px;text-align:center;">
+            <div style="font-size:28px;">${g.emoji}</div>
+            <div style="font-weight:700;font-size:13px;color:#fff;margin-top:4px;">${g.name}</div>
+            <div style="font-size:11px;color:var(--state-warning);margin-top:2px;">${g.coins} 🪙</div>
+        </div>`).join('');
+    } catch (e) { grid.innerHTML = `<div style="color:var(--state-danger);padding:20px;">Lỗi tải catalogue: ${e.message}</div>`; }
+}
+
+async function loadEventsMonitor() {
+    const tbody = document.getElementById('table-events-monitor-body');
+    try {
+        const res = await fetch(`${API_BASE}/api/v1/dashboard/events`);
+        const data = await res.json();
+        const all = [...(data.queued || []), ...(data.history || [])];
+        if (all.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);">No game events processed yet</td></tr>';
+            return;
+        }
+        tbody.innerHTML = all.map(e => `<tr>
+            <td><code style="font-size:11px;">${e.eventId}</code></td>
+            <td><strong>${escapeHtml(e.mappingName || 'Direct Effect')}</strong></td>
+            <td>${escapeHtml(e.context?.tiktokUsername || 'User')} (${e.context?.giftName || 'Gift'})</td>
+            <td><span class="badge ${e.status === 'ACKED' ? 'badge-green' : (e.status === 'QUEUED' ? 'badge-warning' : 'badge-cyan')}">${e.status}</span></td>
+            <td>${new Date(e.createdAt).toLocaleTimeString()}</td>
+            <td><button class="btn btn-secondary btn-xs" onclick="replayEvent('${e.eventId}')">🔄 Replay</button></td>
+        </tr>`).join('');
+    } catch (e) {}
+}
+
+async function replayEvent(eventId) {
+    const res = await fetch(`${API_BASE}/api/v1/dashboard/events/${eventId}/retry`, { method: 'POST' });
+    const data = await res.json();
+    notify(data.message, 'success');
+    loadEventsMonitor();
+}
+
+async function testRoseEvent() {
+    const res = await fetch(`${API_BASE}/api/v1/dashboard/event-mappings/map_rose/test`, { method: 'POST' });
+    const data = await res.json();
+    notify('🌹 ' + (data.message || 'Đã phát event Rose → Mưa hoa hồng!'), 'success');
+}
+
+async function runPreflightCheck() {
+    const res = await fetch(`${API_BASE}/api/v1/dashboard/preflight`, { method: 'POST' });
+    const data = await res.json();
+    const list = document.getElementById('preflight-checks-list');
+    list.innerHTML = (data.checks || []).map(c => `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bg-app);border:1px solid var(--border-color);border-radius:var(--radius-md);">
+        <div>
+            <div style="font-weight:700;font-size:13px;color:#fff;">${c.name}</div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">${c.detail}</div>
+        </div>
+        <span class="badge ${c.pass ? 'badge-green' : 'badge-danger'}">${c.pass ? 'PASS' : 'FAIL'}</span>
+    </div>`).join('');
+    document.getElementById('preflight-modal').classList.add('active');
+}
+
+function closePreflightModal() { document.getElementById('preflight-modal').classList.remove('active'); }
+
+async function triggerEmergencyStop() {
+    if (!confirm('DỪNG KHẨN CẤP: Xóa toàn bộ hàng chờ nhảy và hiệu ứng game?')) return;
+    const res = await fetch(`${API_BASE}/api/v1/dashboard/emergency-stop`, { method: 'POST' });
+    const data = await res.json();
+    notify(data.message, 'danger');
+    fetchStatus();
+}
+
+// Action Handlers
 async function handleConnectTikTok() {
     const user = document.getElementById('input-tiktok-user').value;
     if (!user) return;
     const res = await fetch(`${API_BASE}/api/v1/dashboard/connect`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({tiktokUsername:user}) });
     const data = await res.json();
     notify(data.message, 'success');
-    setTimeout(fetchStatus, 1500);
+    setTimeout(fetchStatus, 1000);
 }
 
 async function confirmDisconnectTikTok() {
@@ -726,7 +667,6 @@ async function confirmDisconnectTikTok() {
 }
 
 async function triggerTestComment(isVIP) {
-    playWebSoundFX(isVIP ? 1046 : 523, 0.2);
     const rUser = document.getElementById('input-test-roblox').value || 'Builderman';
     const res = await fetch(`${API_BASE}/api/v1/dashboard/mock-comment`, {
         method:'POST', headers:{'Content-Type':'application/json'},
@@ -734,10 +674,8 @@ async function triggerTestComment(isVIP) {
     });
     const data = await res.json();
     if (data.success) {
-        document.getElementById('val-comments-count').innerText = parseInt(document.getElementById('val-comments-count').innerText||0)+1;
-        document.getElementById('val-last-event').innerText = new Date().toLocaleTimeString();
-        notify(`${isVIP ? '🎁 VIP Gift sent + Music switched!' : `💬 Comment sent for "${rUser}"`}`, isVIP ? 'warning' : 'primary');
-        setTimeout(fetchStatus, 800);
+        notify(`${isVIP ? '🎁 VIP Gift Test Success' : `💬 Comment Test Success`}`);
+        setTimeout(fetchStatus, 500);
     } else { notify(data.error || 'Skipped', 'danger'); }
 }
 
@@ -748,193 +686,78 @@ async function handleSkipDancer() {
 }
 
 async function confirmClearQueue() {
-    if (!confirm('Clear entire queue?')) return;
-    const res = await fetch(`${API_BASE}/api/v1/dashboard/clear-queue`, { method:'POST' });
-    const data = await res.json();
-    notify(data.message);
+    if (!confirm('Clear queue?')) return;
+    await fetch(`${API_BASE}/api/v1/dashboard/clear-queue`, { method:'POST' });
+    notify('Đã làm sạch hàng chờ');
     setTimeout(fetchStatus, 500);
 }
 
-// ===========================
-// Music Library
-// ===========================
 async function loadMusicLibrary() {
+    const container = document.getElementById('music-library-container');
     try {
         const res = await fetch(`${API_BASE}/api/v1/dashboard/music-library`);
         const data = await res.json();
-        if (data.success) {
-            musicLibrary = data.tracks || [];
-            if (data.currentMusicId) currentMusicId = data.currentMusicId;
-            renderMusicLibrary();
-            renderChipGrid();
-        }
-    } catch (e) {
-        const c = document.getElementById('music-library-container');
-        if (c) c.innerHTML = `<div style="color:var(--state-danger);padding:24px;">Lỗi tải library: ${e.message}</div>`;
-    }
+        musicLibrary = data.tracks || [];
+        if (data.currentMusicId) currentMusicId = data.currentMusicId;
+        renderMusicLibrary();
+    } catch (e) { container.innerHTML = `<div style="color:var(--state-danger);">Lỗi tải library: ${e.message}</div>`; }
 }
 
 function renderMusicLibrary() {
     const container = document.getElementById('music-library-container');
     if (!container) return;
-    const countEl = document.getElementById('lib-count');
-    if (countEl) countEl.innerText = ` (${musicLibrary.length} bài)`;
-
     if (musicLibrary.length === 0) {
-        container.innerHTML = `<div class="lib-empty">
-            <div class="lib-empty-icon">🎵</div>
-            <div style="font-weight:600;color:#fff;margin-bottom:6px;">Library trống</div>
-            <div style="font-size:12px;">Thêm bài nhạc đầu tiên ở phía trên để bắt đầu</div>
-        </div>`;
+        container.innerHTML = '<div style="color:var(--text-muted);padding:20px;text-align:center;">Library trống</div>';
         return;
     }
-
-    const rows = musicLibrary.map((t, i) => {
-        const isPlaying = t.musicId === currentMusicId;
-        const shortId = t.musicId.replace('rbxassetid://', '');
-        const addedDate = t.addedAt ? new Date(t.addedAt).toLocaleDateString('vi-VN') : '';
-        return `<tr>
-            <td style="color:var(--text-muted);">${i + 1}</td>
-            <td>
-                <div class="track-name">${escapeHtml(t.name)}</div>
-                ${isPlaying ? '<div style="margin-top:4px;"><span class="badge-playing">🔴 Đang Phát</span></div>' : ''}
-            </td>
-            <td class="track-id">${shortId}</td>
-            <td style="color:var(--text-muted);font-size:11px;">${addedDate}</td>
-            <td>
-                <div style="display:flex;gap:6px;">
-                    <button class="btn btn-primary btn-xs" onclick="handlePlayTrack('${t.id}')">▶ Phát</button>
-                    <button class="btn btn-danger btn-xs" onclick="handleDeleteTrack('${t.id}')">🗑️</button>
-                </div>
-            </td>
-        </tr>`;
-    }).join('');
-
-    container.innerHTML = `<table class="lib-table">
-        <thead><tr>
-            <th>#</th><th>Tên bài nhạc</th><th>Sound ID</th><th>Ngày thêm</th><th>Actions</th>
-        </tr></thead>
-        <tbody>${rows}</tbody>
-    </table>`;
-}
-
-async function handleAddToLibrary() {
-    const name = document.getElementById('input-music-title').value.trim();
-    const musicId = document.getElementById('input-music-id').value.trim();
-    const errEl = document.getElementById('lib-add-error');
-    errEl.style.display = 'none';
-
-    if (!name) { errEl.innerText = 'Vui lòng nhập tên bài nhạc.'; errEl.style.display = 'block'; return; }
-    if (!musicId) { errEl.innerText = 'Vui lòng nhập Sound Asset ID.'; errEl.style.display = 'block'; return; }
-
-    try {
-        const res = await fetch(`${API_BASE}/api/v1/dashboard/music-library`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, musicId })
-        });
-        const data = await res.json();
-        if (!res.ok) { errEl.innerText = data.error || 'Lỗi không xác định'; errEl.style.display = 'block'; return; }
-
-        musicLibrary = data.tracks;
-        document.getElementById('input-music-title').value = '';
-        document.getElementById('input-music-id').value = '';
-        renderMusicLibrary();
-        renderChipGrid();
-        playWebSoundFX(880, 0.2);
-        notify(`📚 Đã thêm: "${name}" vào Library!`, 'success');
-    } catch (e) { errEl.innerText = 'Lỗi kết nối: ' + e.message; errEl.style.display = 'block'; }
-}
-
-async function handleAddAndPlayTrack() {
-    const name = document.getElementById('input-music-title').value.trim();
-    const musicId = document.getElementById('input-music-id').value.trim();
-    const errEl = document.getElementById('lib-add-error');
-    errEl.style.display = 'none';
-
-    if (!name) { errEl.innerText = 'Vui lòng nhập tên bài nhạc.'; errEl.style.display = 'block'; return; }
-    if (!musicId) { errEl.innerText = 'Vui lòng nhập Sound Asset ID.'; errEl.style.display = 'block'; return; }
-
-    // Add to library first (ignore duplicate error silently — still play)
-    try {
-        const res = await fetch(`${API_BASE}/api/v1/dashboard/music-library`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, musicId })
-        });
-        const data = await res.json();
-        if (res.ok) musicLibrary = data.tracks;
-    } catch (_) {}
-
-    // Then set as playing
-    try {
-        const playRes = await fetch(`${API_BASE}/api/v1/dashboard/music`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, musicId })
-        });
-        const playData = await playRes.json();
-        if (playData.success) {
-            currentMusicId = playData.currentMusicId;
-            document.getElementById('input-music-title').value = '';
-            document.getElementById('input-music-id').value = '';
-            renderMusicLibrary();
-            renderChipGrid();
-            playWebSoundFX(1046, 0.25);
-            notify(`▶ Phát ngay trong Roblox: "${name}"`, 'success');
-        }
-    } catch (e) { errEl.innerText = 'Lỗi phát nhạc: ' + e.message; errEl.style.display = 'block'; }
+    const rows = musicLibrary.map((t, i) => `<tr>
+        <td>${i+1}</td>
+        <td><strong>${escapeHtml(t.name)}</strong></td>
+        <td><code style="font-size:11px;">${t.musicId}</code></td>
+        <td><button class="btn btn-primary btn-xs" onclick="handlePlayTrack('${t.id}')">▶ Phát</button></td>
+    </tr>`).join('');
+    container.innerHTML = `<table class="data-table"><thead><tr><th>#</th><th>Tên bài</th><th>Sound ID</th><th>Action</th></tr></thead><tbody>${rows}</tbody></table>`;
 }
 
 async function handlePlayTrack(trackId) {
     const track = musicLibrary.find(t => t.id === trackId);
     if (!track) return;
-    try {
-        const res = await fetch(`${API_BASE}/api/v1/dashboard/music`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name: track.name, musicId: track.musicId })
+    await fetch(`${API_BASE}/api/v1/dashboard/music`, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({ name: track.name, musicId: track.musicId })
+    });
+    notify(`🎵 Đã phát: ${track.name}`, 'success');
+}
+
+async function handleAddToLibrary() {
+    const name = document.getElementById('input-music-title').value.trim();
+    const musicId = document.getElementById('input-music-id').value.trim();
+    if (!name || !musicId) return notify('Vui lòng nhập tên và Sound ID', 'danger');
+    await fetch(`${API_BASE}/api/v1/dashboard/music-library`, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({ name, musicId })
+    });
+    loadMusicLibrary();
+    notify('📚 Đã thêm bài nhạc!', 'success');
+}
+
+async function handleAddAndPlayTrack() {
+    await handleAddToLibrary();
+    const musicId = document.getElementById('input-music-id').value.trim();
+    const name = document.getElementById('input-music-title').value.trim();
+    if (musicId) {
+        await fetch(`${API_BASE}/api/v1/dashboard/music`, {
+            method:'POST', headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({ name, musicId })
         });
-        const data = await res.json();
-        if (data.success) {
-            currentMusicId = data.currentMusicId;
-            renderMusicLibrary();
-            renderChipGrid();
-            playWebSoundFX(880, 0.2);
-            notify(`🎵 Phát: "${track.name}" trong Roblox`, 'success');
-        }
-    } catch (e) { notify('Lỗi: ' + e.message, 'danger'); }
+    }
 }
-
-async function handleDeleteTrack(trackId) {
-    const track = musicLibrary.find(t => t.id === trackId);
-    if (!track) return;
-    if (!confirm(`Xóa "${track.name}" khỏi Music Library?`)) return;
-    try {
-        const res = await fetch(`${API_BASE}/api/v1/dashboard/music-library/${trackId}`, { method: 'DELETE' });
-        const data = await res.json();
-        if (data.success) {
-            musicLibrary = data.tracks;
-            renderMusicLibrary();
-            renderChipGrid();
-            notify(`🗑️ Đã xóa "${track.name}" khỏi library.`);
-        }
-    } catch (e) { notify('Lỗi xóa: ' + e.message, 'danger'); }
-}
-
-async function handleAddMusicTrack() {
-    // Legacy compat — redirect to handleAddAndPlayTrack
-    await handleAddAndPlayTrack();
-}
-
 
 async function handleAddDanceEmote() {
-    const title = document.getElementById('input-dance-title').value;
+    const name = document.getElementById('input-dance-title').value;
     const danceId = document.getElementById('input-dance-id').value;
-    if (!danceId) return alert('Enter Roblox Animation ID');
-    const res = await fetch(`${API_BASE}/api/v1/dashboard/dance`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({name:title, danceId}) });
-    const data = await res.json();
-    notify('💃 Dance emote set: ' + data.selectedDanceId, 'success');
+    await fetch(`${API_BASE}/api/v1/dashboard/dance`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({name, danceId}) });
+    notify('💃 Emote saved!', 'success');
 }
 
 async function handleSaveOverlayAndTiming() {
@@ -943,25 +766,28 @@ async function handleSaveOverlayAndTiming() {
     const danceDuration = document.getElementById('input-dance-duration').value;
     await fetch(`${API_BASE}/api/v1/dashboard/overlay`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({overlayTitle, overlayColor}) });
     await fetch(`${API_BASE}/api/v1/dashboard/settings`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({danceDuration: parseInt(danceDuration)}) });
-    notify('🎨 Stream Overlay & Timer saved!', 'success');
-    document.getElementById('previewTitle').innerText = overlayTitle;
+    notify('🎨 Overlay & Timer saved!', 'success');
 }
 
-// ===========================
-// Init
-// ===========================
-setInterval(() => {
-    timerSeconds++;
-    const h = String(Math.floor(timerSeconds/3600)).padStart(2,'0');
-    const m = String(Math.floor((timerSeconds%3600)/60)).padStart(2,'0');
-    const s = String(timerSeconds%60).padStart(2,'0');
-    document.getElementById('header-timer').innerText = `Duration: ${h}:${m}:${s}`;
-}, 1000);
+function openCommandPalette() {
+    const cmd = prompt("Command Palette:\n1. type 'live' to switch to Live Control\n2. type 'events' for Event Mappings\n3. type 'rose' to test Rose Event\n4. type 'stop' for Emergency Stop");
+    if (!cmd) return;
+    if (cmd === 'live') navigate('live-control');
+    if (cmd === 'events') navigate('event-mappings');
+    if (cmd === 'rose') testRoseEvent();
+    if (cmd === 'stop') triggerEmergencyStop();
+}
 
+document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        openCommandPalette();
+    }
+});
+
+// Init
 setInterval(fetchStatus, 3000);
 fetchStatus();
-loadMusicLibrary(); // Load library on startup to populate chip grid
-
 </script>
 </body>
 </html>

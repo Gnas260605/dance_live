@@ -97,80 +97,124 @@ const TIKTOK_GIFTS = [
     { id: 'spaceship',      name: 'Spaceship',       emoji: '🛸', coins: 20000,  category: 'tier5' },
 ];
 
-// =========================================================
-// COIN MILESTONE → MUSIC MAP (Tikfanny-style)
-// Each milestone fires when gift.coins >= minCoins.
-// The highest matching milestone wins.
-// =========================================================
 const DEFAULT_COIN_MILESTONES = [
-    {
-        id: 'milestone_1',
-        label: '🌸 Nhỏ xinh',
-        description: 'Quà 1–9 xu (Rose, Heart, Bell…)',
-        minCoins: 1,
-        maxCoins: 9,
-        emoji: '🌸',
-        color: '#9ca3af',
-        musicId: 'rbxassetid://1837879082',
-        musicName: 'K-Pop Chill',
-    },
-    {
-        id: 'milestone_2',
-        label: '💙 Dễ thương',
-        description: 'Quà 10–99 xu (Donut, Mic, Cake…)',
-        minCoins: 10,
-        maxCoins: 99,
-        emoji: '💙',
-        color: '#60a5fa',
-        musicId: 'rbxassetid://9043887091',
-        musicName: 'EDM Festival',
-    },
-    {
-        id: 'milestone_3',
-        label: '💜 Sang chảnh',
-        description: 'Quà 100–499 xu (Crown, Diamond, Thunder…)',
-        minCoins: 100,
-        maxCoins: 499,
-        emoji: '💜',
-        color: '#a78bfa',
-        musicId: 'rbxassetid://1847648398',
-        musicName: 'Phonk Bass',
-    },
-    {
-        id: 'milestone_4',
-        label: '⭐ Khủng',
-        description: 'Quà 500–1999 xu (Tiger, Dragon, Jet…)',
-        minCoins: 500,
-        maxCoins: 1999,
-        emoji: '⭐',
-        color: '#f59e0b',
-        musicId: 'rbxassetid://1847648398',
-        musicName: 'Boss Phonk Drop',
-    },
-    {
-        id: 'milestone_5',
-        label: '🔥 VIP Boss',
-        description: 'Quà 2000–9999 xu (Cruise, Dragon, Lion…)',
-        minCoins: 2000,
-        maxCoins: 9999,
-        emoji: '🔥',
-        color: '#ff007f',
-        musicId: 'rbxassetid://1837879082',
-        musicName: 'VIP Hype Track',
-    },
-    {
-        id: 'milestone_6',
-        label: '💎 Legendary',
-        description: 'Quà 10000+ xu (Universe, Lion King, Spaceship…)',
-        minCoins: 10000,
-        maxCoins: Infinity,
-        emoji: '💎',
-        color: '#00f2fe',
-        musicId: 'rbxassetid://1847648398',
-        musicName: 'Legendary Anthem',
-    },
+    { id: 'milestone_1', label: '🌸 Nhỏ xinh', description: 'Quà 1–9 xu', minCoins: 1, maxCoins: 9, emoji: '🌸', color: '#9ca3af', musicId: 'rbxassetid://1837879082', musicName: 'K-Pop Chill' },
+    { id: 'milestone_2', label: '💙 Dễ thương', description: 'Quà 10–99 xu', minCoins: 10, maxCoins: 99, emoji: '💙', color: '#60a5fa', musicId: 'rbxassetid://9043887091', musicName: 'EDM Festival' },
+    { id: 'milestone_3', label: '💜 Sang chảnh', description: 'Quà 100–499 xu', minCoins: 100, maxCoins: 499, emoji: '💜', color: '#a78bfa', musicId: 'rbxassetid://1847648398', musicName: 'Phonk Bass' },
+    { id: 'milestone_4', label: '⭐ Khủng', description: 'Quà 500–1999 xu', minCoins: 500, maxCoins: 1999, emoji: '⭐', color: '#f59e0b', musicId: 'rbxassetid://1847648398', musicName: 'Boss Phonk Drop' },
+    { id: 'milestone_5', label: '🔥 VIP Boss', description: 'Quà 2000–9999 xu', minCoins: 2000, maxCoins: 9999, emoji: '🔥', color: '#ff007f', musicId: 'rbxassetid://1837879082', musicName: 'VIP Hype Track' },
+    { id: 'milestone_6', label: '💎 Legendary', description: 'Quà 10000+ xu', minCoins: 10000, maxCoins: Infinity, emoji: '💎', color: '#00f2fe', musicId: 'rbxassetid://1847648398', musicName: 'Legendary Anthem' },
 ];
 
+// Pre-seeded Action Definitions
+const DEFAULT_ACTION_DEFS = [
+    {
+        id: 'act_flower_rain',
+        name: '🌸 Mưa Hoa Hồng (Flower Rain)',
+        type: 'FLOWER_RAIN',
+        enabled: true,
+        defaultDelayMs: 0,
+        defaultDurationMs: 5000,
+        parameters: { target: 'DANCE_STAGE', count: 30, radius: 15 }
+    },
+    {
+        id: 'act_heart_burst',
+        name: '🫶 Trái Tim Bùng Nổ (Heart Burst)',
+        type: 'HEART_BURST',
+        enabled: true,
+        defaultDelayMs: 0,
+        defaultDurationMs: 4000,
+        parameters: { target: 'ACTIVE_DANCER', count: 20, size: 1.5 }
+    },
+    {
+        id: 'act_boss_lights',
+        name: '🌌 Đổi Đèn Vũ Trụ (Stage Light Shift)',
+        type: 'CHANGE_STAGE_LIGHT',
+        enabled: true,
+        defaultDelayMs: 0,
+        defaultDurationMs: 8000,
+        parameters: { palette: 'NEON', pattern: 'FLASH' }
+    },
+    {
+        id: 'act_show_msg',
+        name: '💬 Banner Thông Báo Quà',
+        type: 'SHOW_MESSAGE',
+        enabled: true,
+        defaultDelayMs: 0,
+        defaultDurationMs: 4000,
+        parameters: { template: '🎁 {tiktokUsername} vừa tặng {giftName} x{repeatCount}!' }
+    }
+];
+
+// Pre-seeded Event Mappings
+const DEFAULT_EVENT_MAPPINGS = [
+    {
+        id: 'map_rose',
+        name: '🌹 Rose → Mưa hoa hồng',
+        description: 'Tặng Rose sẽ kích hoạt mưa hoa rơi trên sân khấu Roblox',
+        enabled: true,
+        priority: 10,
+        trigger: {
+            type: 'TIKTOK_GIFT',
+            giftId: 'rose',
+            giftName: 'Rose',
+            minRepeatCount: 1,
+            minTotalCoins: 1,
+            userFilter: 'ANY'
+        },
+        actions: [
+            { actionId: 'act_flower_rain', delayMs: 0, durationMs: 5000 },
+            { actionId: 'act_show_msg', delayMs: 0, durationMs: 4000 }
+        ],
+        cooldownMs: 500,
+        queueMode: 'QUEUE',
+        stopProcessingAfterMatch: true
+    },
+    {
+        id: 'map_hand_heart',
+        name: '🫶 Hand Heart → Trái tim quanh Dancer',
+        description: 'Tặng Hand Heart sẽ bắn trái tim xoay quanh avatar đang nhảy',
+        enabled: true,
+        priority: 10,
+        trigger: {
+            type: 'TIKTOK_GIFT',
+            giftId: 'hand_heart',
+            giftName: 'Hand Heart',
+            minRepeatCount: 1,
+            minTotalCoins: 55,
+            userFilter: 'ANY'
+        },
+        actions: [
+            { actionId: 'act_heart_burst', delayMs: 0, durationMs: 4000 },
+            { actionId: 'act_show_msg', delayMs: 0, durationMs: 4000 }
+        ],
+        cooldownMs: 1000,
+        queueMode: 'QUEUE',
+        stopProcessingAfterMatch: true
+    },
+    {
+        id: 'map_galaxy',
+        name: '🌌 Galaxy → Show ánh sáng hoành tráng',
+        description: 'Tặng Galaxy đổi đèn sân khấu và thông báo toàn máy chủ',
+        enabled: true,
+        priority: 20,
+        trigger: {
+            type: 'TIKTOK_GIFT',
+            giftId: 'galaxy',
+            giftName: 'Galaxy',
+            minRepeatCount: 1,
+            minTotalCoins: 500,
+            userFilter: 'ANY'
+        },
+        actions: [
+            { actionId: 'act_boss_lights', delayMs: 0, durationMs: 8000 },
+            { actionId: 'act_show_msg', delayMs: 0, durationMs: 5000 }
+        ],
+        cooldownMs: 2000,
+        queueMode: 'QUEUE',
+        stopProcessingAfterMatch: true
+    }
+];
 
 function loadStore() {
     try {
@@ -230,11 +274,15 @@ function initTenantConfig(apiKey) {
             overlayTitle: '🎵 S&G MUSIC - ROBLOX TIKTOK DANCE LIVE 🎵',
             overlayColor: '#ff007f',
             danceDuration: 12,
-            // Tikfanny-style: coin milestones (customizable per tenant)
             coinMilestones: DEFAULT_COIN_MILESTONES.map(m => ({ ...m })),
+            actionDefs: JSON.parse(JSON.stringify(DEFAULT_ACTION_DEFS)),
+            eventMappings: JSON.parse(JSON.stringify(DEFAULT_EVENT_MAPPINGS)),
+            gameEventQueue: [],       // Queued Game Events for Roblox polling
+            gameEventsHistory: [],    // Audit history of processed events
+            robloxHeartbeat: { lastHeartbeat: null, isOnline: false, placeId: null, jobId: null },
             customMusic: [],
             customDances: [],
-            logs: [{ timestamp: new Date().toLocaleTimeString(), message: 'Tenant workspace initialized.', isImportant: true }]
+            logs: [{ timestamp: new Date().toLocaleTimeString(), message: 'Tenant workspace & Event Engine initialized.', isImportant: true }]
         };
     }
     return tenantConfigs[apiKey];
@@ -272,6 +320,7 @@ loadStore();
 
 module.exports = {
     DEFAULT_THEMES, TIKTOK_GIFTS, DEFAULT_COIN_MILESTONES,
+    DEFAULT_ACTION_DEFS, DEFAULT_EVENT_MAPPINGS,
     users, findUserByEmail, findUserByApiKey, findUserById,
     createUser, getTenant, addTenantLog, saveStore
 };

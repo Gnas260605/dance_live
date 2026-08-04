@@ -5,6 +5,8 @@ const bcrypt = require('bcryptjs');
 const { 
     TIKTOK_GIFTS,
     DEFAULT_COIN_MILESTONES,
+    DEFAULT_ACTION_DEFS,
+    DEFAULT_EVENT_MAPPINGS,
     createUser, 
     findUserByEmail, 
     getTenant, 
@@ -21,7 +23,8 @@ const {
 const { 
     connectTikTokForTenant, 
     disconnectTikTokForTenant, 
-    processNewCommentForTenant 
+    processNewCommentForTenant,
+    processGiftEventForTenant
 } = require('./tiktokManager');
 const { 
     authLimiter, 
@@ -126,7 +129,9 @@ router.get('/auth/me', optionalAuth, (req, res) => {
     });
 });
 
-// Roblox Studio Polling Endpoint
+// =========================================================
+// Roblox Bridge API Endpoints (Polling, ACK, Heartbeat)
+// =========================================================
 router.get('/v1/streamer/:apiKey/current-player', (req, res) => {
     const apiKey = req.params.apiKey || 'demo-api-key-sg-music';
     const tenant = getTenant(apiKey);
@@ -159,10 +164,78 @@ router.get('/current-player', (req, res) => {
     });
 });
 
-// Streamer Dashboard Endpoints
+// GET: Roblox Game Events Polling Endpoint (Returns pending QUEUED events for Roblox execution)
+router.get('/v1/streamer/:apiKey/game-events', (req, res) => {
+    const apiKey = req.params.apiKey || 'demo-api-key-sg-music';
+    const tenant = getTenant(apiKey);
+    const now = Date.now();
+
+    // Filter unexpired queued events
+    const pendingEvents = (tenant.gameEventQueue || []).filter(e => e.status === 'QUEUED' && new Date(e.expiresAt).getTime() > now);
+
+    // Mark delivered
+    pendingEvents.forEach(e => {
+        e.status = 'DELIVERED';
+        e.deliveryAttempts = (e.deliveryAttempts || 0) + 1;
+    });
+
+    res.json({
+        success: true,
+        events: pendingEvents,
+        count: pendingEvents.length,
+        timestamp: now
+    });
+});
+
+// POST: Roblox ACK Endpoint (Receives ACK execution status from Lua script)
+router.post('/v1/streamer/:apiKey/game-events/:eventId/ack', (req, res) => {
+    const apiKey = req.params.apiKey || 'demo-api-key-sg-music';
+    const { eventId } = req.params;
+    const { success = true, error = null } = req.body;
+    const tenant = getTenant(apiKey);
+
+    const event = (tenant.gameEventsHistory || []).find(e => e.eventId === eventId);
+    if (event) {
+        event.status = success ? 'ACKED' : 'FAILED';
+        event.ackedAt = new Date().toISOString();
+        if (error) event.lastError = error;
+    }
+
+    // Remove from active queue
+    tenant.gameEventQueue = (tenant.gameEventQueue || []).filter(e => e.eventId !== eventId);
+
+    addTenantLog(apiKey, `✅ Roblox ACK [${eventId}]: ${success ? 'Thành công' : 'Lỗi: ' + error}`);
+    res.json({ success: true, eventId, status: event ? event.status : 'ACKED' });
+});
+
+// POST: Roblox Heartbeat Endpoint
+router.post('/v1/streamer/:apiKey/heartbeat', (req, res) => {
+    const apiKey = req.params.apiKey || 'demo-api-key-sg-music';
+    const { placeId, jobId, scriptVer } = req.body;
+    const tenant = getTenant(apiKey);
+
+    tenant.robloxHeartbeat = {
+        lastHeartbeat: new Date().toISOString(),
+        isOnline: true,
+        placeId: placeId || null,
+        jobId: jobId || null,
+        scriptVer: scriptVer || '1.0.0'
+    };
+
+    res.json({ success: true, isOnline: true, timestamp: Date.now() });
+});
+
+// =========================================================
+// Streamer Dashboard API Endpoints
+// =========================================================
 router.get('/v1/dashboard/status', optionalAuth, (req, res) => {
     const apiKey = getApiKeyFromReq(req);
     const tenant = getTenant(apiKey);
+
+    // Check heartbeat freshness (online if heartbeat received in last 25s)
+    const hb = tenant.robloxHeartbeat || {};
+    const isRobloxOnline = hb.lastHeartbeat && (Date.now() - new Date(hb.lastHeartbeat).getTime() < 25000);
+
     res.json({
         success: true,
         user: req.user ? {
@@ -187,8 +260,13 @@ router.get('/v1/dashboard/status', optionalAuth, (req, res) => {
             overlayTitle: tenant.overlayTitle || "🎵 S&G MUSIC - ROBLOX TIKTOK DANCE LIVE 🎵",
             overlayColor: tenant.overlayColor || "#ff007f",
             danceDuration: tenant.danceDuration || 12,
+            isRobloxOnline,
+            robloxHeartbeat: { ...hb, isOnline: isRobloxOnline },
             customMusic: tenant.customMusic,
             customDances: tenant.customDances,
+            eventMappingsCount: (tenant.eventMappings || []).length,
+            actionDefsCount: (tenant.actionDefs || []).length,
+            pendingGameEventsCount: (tenant.gameEventQueue || []).length,
             logs: tenant.logs
         }
     });
@@ -209,16 +287,218 @@ router.post('/v1/dashboard/disconnect', optionalAuth, (req, res) => {
     res.json({ success: true, message: 'Đã ngắt kết nối' });
 });
 
-// POST /v1/dashboard/music — set currently playing track (immediate playback in Roblox)
+// Event Mappings Endpoints (CRUD & Test)
+router.get('/v1/dashboard/event-mappings', optionalAuth, (req, res) => {
+    const apiKey = getApiKeyFromReq(req);
+    const tenant = getTenant(apiKey);
+    res.json({ success: true, eventMappings: tenant.eventMappings || DEFAULT_EVENT_MAPPINGS });
+});
+
+router.post('/v1/dashboard/event-mappings', optionalAuth, (req, res) => {
+    const apiKey = getApiKeyFromReq(req);
+    const tenant = getTenant(apiKey);
+    const mapping = req.body;
+
+    if (!mapping.name) return res.status(400).json({ error: 'Mapping name is required' });
+
+    mapping.id = mapping.id || 'map_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 5);
+    mapping.enabled = mapping.enabled !== undefined ? mapping.enabled : true;
+    mapping.createdAt = new Date().toISOString();
+    mapping.updatedAt = new Date().toISOString();
+
+    if (!tenant.eventMappings) tenant.eventMappings = [];
+    tenant.eventMappings.unshift(mapping);
+    addTenantLog(apiKey, `🎯 Đã tạo Event Mapping mới: "${mapping.name}"`, true);
+
+    res.json({ success: true, mapping, eventMappings: tenant.eventMappings });
+});
+
+router.put('/v1/dashboard/event-mappings/:id', optionalAuth, (req, res) => {
+    const apiKey = getApiKeyFromReq(req);
+    const tenant = getTenant(apiKey);
+    const { id } = req.params;
+    const updates = req.body;
+
+    const idx = (tenant.eventMappings || []).findIndex(m => m.id === id);
+    if (idx === -1) return res.status(404).json({ error: 'Event mapping not found' });
+
+    tenant.eventMappings[idx] = { ...tenant.eventMappings[idx], ...updates, updatedAt: new Date().toISOString() };
+    addTenantLog(apiKey, `🎯 Đã cập nhật Event Mapping: "${tenant.eventMappings[idx].name}"`);
+
+    res.json({ success: true, mapping: tenant.eventMappings[idx], eventMappings: tenant.eventMappings });
+});
+
+router.delete('/v1/dashboard/event-mappings/:id', optionalAuth, (req, res) => {
+    const apiKey = getApiKeyFromReq(req);
+    const tenant = getTenant(apiKey);
+    const { id } = req.params;
+
+    const idx = (tenant.eventMappings || []).findIndex(m => m.id === id);
+    if (idx === -1) return res.status(404).json({ error: 'Event mapping not found' });
+
+    const deleted = tenant.eventMappings.splice(idx, 1)[0];
+    addTenantLog(apiKey, `🗑️ Đã xóa Event Mapping: "${deleted.name}"`);
+
+    res.json({ success: true, eventMappings: tenant.eventMappings });
+});
+
+router.post('/v1/dashboard/event-mappings/:id/test', optionalAuth, (req, res) => {
+    const apiKey = getApiKeyFromReq(req);
+    const tenant = getTenant(apiKey);
+    const { id } = req.params;
+
+    const mapping = (tenant.eventMappings || []).find(m => m.id === id);
+    if (!mapping) return res.status(404).json({ error: 'Event mapping not found' });
+
+    const result = processGiftEventForTenant(apiKey, {
+        giftId: mapping.trigger?.giftId || 'test_gift',
+        giftName: mapping.trigger?.giftName || 'Rose (Test)',
+        repeatCount: mapping.trigger?.minRepeatCount || 1,
+        singleCoinValue: mapping.trigger?.minTotalCoins || 1,
+        totalCoins: mapping.trigger?.minTotalCoins || 1,
+        tiktokUsername: 'Tester_VIP',
+        nickname: 'VIP Tester'
+    });
+
+    res.json({ success: true, message: `Thử nghiệm Event Mapping "${mapping.name}" thành công!`, result });
+});
+
+// Actions Endpoints (CRUD & Test)
+router.get('/v1/dashboard/actions', optionalAuth, (req, res) => {
+    const apiKey = getApiKeyFromReq(req);
+    const tenant = getTenant(apiKey);
+    res.json({ success: true, actionDefs: tenant.actionDefs || DEFAULT_ACTION_DEFS });
+});
+
+router.post('/v1/dashboard/actions', optionalAuth, (req, res) => {
+    const apiKey = getApiKeyFromReq(req);
+    const tenant = getTenant(apiKey);
+    const action = req.body;
+
+    if (!action.name || !action.type) return res.status(400).json({ error: 'Action name and type are required' });
+
+    action.id = action.id || 'act_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 5);
+    action.enabled = action.enabled !== undefined ? action.enabled : true;
+    action.createdAt = new Date().toISOString();
+    action.updatedAt = new Date().toISOString();
+
+    if (!tenant.actionDefs) tenant.actionDefs = [];
+    tenant.actionDefs.unshift(action);
+    addTenantLog(apiKey, `⚡ Đã thêm Action mới vào thư viện: "${action.name}" (${action.type})`, true);
+
+    res.json({ success: true, action, actionDefs: tenant.actionDefs });
+});
+
+router.put('/v1/dashboard/actions/:id', optionalAuth, (req, res) => {
+    const apiKey = getApiKeyFromReq(req);
+    const tenant = getTenant(apiKey);
+    const { id } = req.params;
+    const updates = req.body;
+
+    const idx = (tenant.actionDefs || []).findIndex(a => a.id === id);
+    if (idx === -1) return res.status(404).json({ error: 'Action definition not found' });
+
+    tenant.actionDefs[idx] = { ...tenant.actionDefs[idx], ...updates, updatedAt: new Date().toISOString() };
+    addTenantLog(apiKey, `⚡ Đã cập nhật Action: "${tenant.actionDefs[idx].name}"`);
+
+    res.json({ success: true, action: tenant.actionDefs[idx], actionDefs: tenant.actionDefs });
+});
+
+router.delete('/v1/dashboard/actions/:id', optionalAuth, (req, res) => {
+    const apiKey = getApiKeyFromReq(req);
+    const tenant = getTenant(apiKey);
+    const { id } = req.params;
+
+    // Check dependency in Event Mappings
+    const isUsed = (tenant.eventMappings || []).some(m => (m.actions || []).some(a => a.actionId === id));
+    if (isUsed) return res.status(400).json({ error: 'Không thể xóa Action đang được dùng trong Event Mapping!' });
+
+    const idx = (tenant.actionDefs || []).findIndex(a => a.id === id);
+    if (idx === -1) return res.status(404).json({ error: 'Action definition not found' });
+
+    const deleted = tenant.actionDefs.splice(idx, 1)[0];
+    addTenantLog(apiKey, `🗑️ Đã xóa Action: "${deleted.name}"`);
+
+    res.json({ success: true, actionDefs: tenant.actionDefs });
+});
+
+// Event Monitor & History Endpoints
+router.get('/v1/dashboard/events', optionalAuth, (req, res) => {
+    const apiKey = getApiKeyFromReq(req);
+    const tenant = getTenant(apiKey);
+    res.json({
+        success: true,
+        queued: tenant.gameEventQueue || [],
+        history: tenant.gameEventsHistory || []
+    });
+});
+
+router.post('/v1/dashboard/events/:eventId/retry', optionalAuth, (req, res) => {
+    const apiKey = getApiKeyFromReq(req);
+    const tenant = getTenant(apiKey);
+    const { eventId } = req.params;
+
+    const event = (tenant.gameEventsHistory || []).find(e => e.eventId === eventId);
+    if (!event) return res.status(404).json({ error: 'Event not found in history' });
+
+    // Create new retried GameEvent with unique ID
+    const newEvent = {
+        ...JSON.parse(JSON.stringify(event)),
+        eventId: 'evt_retry_' + Date.now().toString(36),
+        status: 'QUEUED',
+        createdAt: new Date().toISOString(),
+        expiresAt: new Date(Date.now() + 60000).toISOString(),
+        deliveryAttempts: 0
+    };
+
+    tenant.gameEventQueue.push(newEvent);
+    tenant.gameEventsHistory.unshift(newEvent);
+    addTenantLog(apiKey, `🔄 Replay Event [${eventId}] thành [${newEvent.eventId}]`, true);
+
+    res.json({ success: true, message: `Đã phát lại sự kiện [${newEvent.eventId}]`, event: newEvent });
+});
+
+// Pre-live Checklist Diagnostics Endpoint
+router.post('/v1/dashboard/preflight', optionalAuth, (req, res) => {
+    const apiKey = getApiKeyFromReq(req);
+    const tenant = getTenant(apiKey);
+
+    const hb = tenant.robloxHeartbeat || {};
+    const isRobloxOnline = hb.lastHeartbeat && (Date.now() - new Date(hb.lastHeartbeat).getTime() < 25000);
+
+    const checks = [
+        { name: 'Backend API Service', pass: true, detail: 'Server Express đang lắng nghe và phản hồi mượt mà.' },
+        { name: 'TikTok Live Connector', pass: tenant.isConnected, detail: tenant.isConnected ? `Đã kết nối kênh @${tenant.tiktokUsername}` : 'Chưa kết nối TikTok Live (Bấm Connect)' },
+        { name: 'Roblox Heartbeat', pass: isRobloxOnline, detail: isRobloxOnline ? `Roblox Online (PlaceId: ${hb.placeId || 'N/A'})` : 'Roblox chưa gửi heartbeat (Hãy chạy Lua script trong Roblox Studio)' },
+        { name: 'Event Mappings Engine', pass: (tenant.eventMappings || []).length > 0, detail: `Đã thiết lập ${(tenant.eventMappings || []).length} quy tắc sự kiện` },
+        { name: 'Music & Sound Engine', pass: !!tenant.currentMusicId, detail: `Current Music SoundID: ${tenant.currentMusicId}` }
+    ];
+
+    const allPassed = checks.every(c => c.pass);
+    res.json({ success: true, allPassed, checks });
+});
+
+// Emergency Stop
+router.post('/v1/dashboard/emergency-stop', optionalAuth, (req, res) => {
+    const apiKey = getApiKeyFromReq(req);
+    const tenant = getTenant(apiKey);
+
+    tenant.gameEventQueue = [];
+    tenant.playerQueue = [];
+    tenant.activePlayer = null;
+
+    addTenantLog(apiKey, `🚨 DỪNG KHẨN CẤP (EMERGENCY STOP): Đã xóa sạch hàng chờ nhảy và hiệu ứng game!`, true);
+    res.json({ success: true, message: 'Đã kích hoạt dừng khẩn cấp. Toàn bộ hàng chờ đã được làm sạch!' });
+});
+
+// Music & Dance Dashboard Endpoints
 router.post('/v1/dashboard/music', optionalAuth, (req, res) => {
     const apiKey = getApiKeyFromReq(req);
     const { name, musicId } = req.body;
     if (!musicId) return res.status(400).json({ error: 'musicId is required' });
 
     let formattedId = musicId.trim();
-    if (!formattedId.startsWith('rbxassetid://')) {
-        formattedId = 'rbxassetid://' + formattedId;
-    }
+    if (!formattedId.startsWith('rbxassetid://')) formattedId = 'rbxassetid://' + formattedId;
 
     const tenant = getTenant(apiKey);
     tenant.currentMusicId = formattedId;
@@ -227,14 +507,12 @@ router.post('/v1/dashboard/music', optionalAuth, (req, res) => {
     res.json({ success: true, currentMusicId: formattedId });
 });
 
-// GET /v1/dashboard/music-library — list all saved tracks
 router.get('/v1/dashboard/music-library', optionalAuth, (req, res) => {
     const apiKey = getApiKeyFromReq(req);
     const tenant = getTenant(apiKey);
     res.json({ success: true, tracks: tenant.customMusic || [], currentMusicId: tenant.currentMusicId });
 });
 
-// POST /v1/dashboard/music-library — add a track to the library (does NOT auto-play)
 router.post('/v1/dashboard/music-library', optionalAuth, (req, res) => {
     const apiKey = getApiKeyFromReq(req);
     const { name, musicId } = req.body;
@@ -242,14 +520,11 @@ router.post('/v1/dashboard/music-library', optionalAuth, (req, res) => {
     if (!name || !name.trim()) return res.status(400).json({ error: 'name is required' });
 
     let formattedId = musicId.trim();
-    if (!formattedId.startsWith('rbxassetid://')) {
-        formattedId = 'rbxassetid://' + formattedId;
-    }
+    if (!formattedId.startsWith('rbxassetid://')) formattedId = 'rbxassetid://' + formattedId;
 
     const tenant = getTenant(apiKey);
     if (!tenant.customMusic) tenant.customMusic = [];
 
-    // Prevent duplicate Sound IDs
     const exists = tenant.customMusic.find(t => t.musicId === formattedId);
     if (exists) return res.status(409).json({ error: `Sound ID "${formattedId}" đã có trong library.` });
 
@@ -265,7 +540,6 @@ router.post('/v1/dashboard/music-library', optionalAuth, (req, res) => {
     res.json({ success: true, track, tracks: tenant.customMusic });
 });
 
-// DELETE /v1/dashboard/music-library/:trackId — remove a track
 router.delete('/v1/dashboard/music-library/:trackId', optionalAuth, (req, res) => {
     const apiKey = getApiKeyFromReq(req);
     const { trackId } = req.params;
@@ -286,9 +560,7 @@ router.post('/v1/dashboard/dance', optionalAuth, (req, res) => {
     if (!danceId) return res.status(400).json({ error: 'danceId is required' });
 
     let formattedId = danceId.trim();
-    if (!formattedId.startsWith('rbxassetid://')) {
-        formattedId = 'rbxassetid://' + formattedId;
-    }
+    if (!formattedId.startsWith('rbxassetid://')) formattedId = 'rbxassetid://' + formattedId;
 
     const tenant = getTenant(apiKey);
     tenant.selectedDanceId = formattedId;
@@ -298,7 +570,6 @@ router.post('/v1/dashboard/dance', optionalAuth, (req, res) => {
     res.json({ success: true, selectedDanceId: formattedId, dances: tenant.customDances });
 });
 
-// Update Stream Overlay Branding
 router.post('/v1/dashboard/overlay', optionalAuth, (req, res) => {
     const apiKey = getApiKeyFromReq(req);
     const { overlayTitle, overlayColor } = req.body;
@@ -311,7 +582,6 @@ router.post('/v1/dashboard/overlay', optionalAuth, (req, res) => {
     res.json({ success: true, overlayTitle: tenant.overlayTitle, overlayColor: tenant.overlayColor });
 });
 
-// Update Stream Settings (Dance Duration)
 router.post('/v1/dashboard/settings', optionalAuth, (req, res) => {
     const apiKey = getApiKeyFromReq(req);
     const { danceDuration } = req.body;
@@ -366,42 +636,16 @@ router.post('/v1/dashboard/skip-player', optionalAuth, (req, res) => {
     res.json({ success: true, activePlayer: tenant.activePlayer });
 });
 
-// POST: Save overlay settings
-router.post('/v1/dashboard/overlay', optionalAuth, (req, res) => {
-    const apiKey = getApiKeyFromReq(req);
-    const { overlayTitle, overlayColor } = req.body;
-    const tenant = getTenant(apiKey);
-    if (overlayTitle) tenant.overlayTitle = overlayTitle;
-    if (overlayColor) tenant.overlayColor = overlayColor;
-    addTenantLog(apiKey, `🎨 Overlay updated: "${overlayTitle}" / ${overlayColor}`);
-    res.json({ success: true, overlayTitle: tenant.overlayTitle, overlayColor: tenant.overlayColor });
-});
-
-// POST: Save dance duration and other settings
-router.post('/v1/dashboard/settings', optionalAuth, (req, res) => {
-    const apiKey = getApiKeyFromReq(req);
-    const { danceDuration } = req.body;
-    const tenant = getTenant(apiKey);
-    if (danceDuration && !isNaN(danceDuration)) {
-        tenant.danceDuration = Math.max(5, Math.min(120, parseInt(danceDuration)));
-        addTenantLog(apiKey, `⏱️ Dance duration set to ${tenant.danceDuration}s`, true);
-    }
-    res.json({ success: true, danceDuration: tenant.danceDuration });
-});
-
-// GET: TikTok Gift Catalogue (full list for reference)
 router.get('/v1/gifts', (req, res) => {
     res.json({ success: true, gifts: TIKTOK_GIFTS });
 });
 
-// GET: Coin Milestones (Tikfanny-style: tier → music)
 router.get('/v1/dashboard/coin-milestones', optionalAuth, (req, res) => {
     const apiKey = getApiKeyFromReq(req);
     const tenant = getTenant(apiKey);
     res.json({ success: true, milestones: tenant.coinMilestones || DEFAULT_COIN_MILESTONES });
 });
 
-// POST: Save a single milestone's music (by milestone id)
 router.post('/v1/dashboard/coin-milestones', optionalAuth, (req, res) => {
     const apiKey = getApiKeyFromReq(req);
     const { milestoneId, musicId, musicName } = req.body;

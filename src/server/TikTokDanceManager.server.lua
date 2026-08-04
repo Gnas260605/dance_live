@@ -1,5 +1,5 @@
 -- TikTokDanceManager.server.lua
--- Main Server Script for TikTok Live Comment Auto Dance & Gift FX (Production SaaS)
+-- Production Roblox Action Executor & Multi-Tenant TikTok Live Sync Engine
 
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
@@ -10,17 +10,16 @@ local TweenService = game:GetService("TweenService")
 local SoundService = game:GetService("SoundService")
 
 -- ====================================
--- PRODUCTION CONFIGURATION
+-- CONFIGURATION
 -- ====================================
 local API_KEY = script:GetAttribute("API_KEY") or "demo-api-key-sg-music"
 local DOMAIN_URL = script:GetAttribute("DOMAIN_URL") or "http://localhost:3000"
-local SERVER_URL = DOMAIN_URL .. "/api/v1/streamer/" .. API_KEY .. "/current-player"
+local BASE_URL = DOMAIN_URL .. "/api/v1/streamer/" .. API_KEY
 
 local POLL_INTERVAL = 1.2
 local MAX_STAGE_DANCERS = 10
 local danceDurationSeconds = 12
 
--- Verified Working Public Roblox Audio Track IDs
 local DEFAULT_MUSIC_ID = "rbxassetid://1837879082"
 local GIFT_FANFARE_SOUND_ID = "rbxassetid://9043887091"
 
@@ -43,24 +42,18 @@ if not focusEvent then
 	focusEvent.Parent = ReplicatedStorage
 end
 
--- Stage Helper Functions
+-- Stage Helpers
 local function getStageCFrame(stg)
 	if not stg then return CFrame.new(0, 1.5, 0) end
-	if stg:IsA("Model") then
-		return stg:GetPivot()
-	elseif stg:IsA("BasePart") then
-		return stg.CFrame
-	end
+	if stg:IsA("Model") then return stg:GetPivot()
+	elseif stg:IsA("BasePart") then return stg.CFrame end
 	return CFrame.new(0, 1.5, 0)
 end
 
 local function getStageSize(stg)
 	if not stg then return Vector3.new(44, 3, 28) end
-	if stg:IsA("Model") then
-		return stg:GetExtentsSize()
-	elseif stg:IsA("BasePart") then
-		return stg.Size
-	end
+	if stg:IsA("Model") then return stg:GetExtentsSize()
+	elseif stg:IsA("BasePart") then return stg.Size end
 	return Vector3.new(44, 3, 28)
 end
 
@@ -76,7 +69,6 @@ if not stage then
 	stage.Color = Color3.fromRGB(30, 35, 55)
 	stage.Parent = Workspace
 
-	-- Glass floor overlay
 	local stageFloor = Instance.new("Part")
 	stageFloor.Name = "StageFloor"
 	stageFloor.Size = Vector3.new(43.8, 0.1, 27.8)
@@ -88,7 +80,6 @@ if not stage then
 	stageFloor.CanCollide = false
 	stageFloor.Parent = Workspace
 
-	-- Neon Rim
 	local neonRim = Instance.new("SelectionBox")
 	neonRim.Name = "NeonRim"
 	neonRim.Color3 = Color3.fromRGB(255, 0, 127)
@@ -96,7 +87,6 @@ if not stage then
 	neonRim.Adornee = stage
 	neonRim.Parent = stage
 
-	-- LED Wall Backdrop
 	local ledWall = Instance.new("Part")
 	ledWall.Name = "LEDWall"
 	ledWall.Size = Vector3.new(36, 18, 1)
@@ -107,7 +97,7 @@ if not stage then
 	ledWall.Parent = Workspace
 end
 
--- Bright Stage Overhead Spotlight
+-- Spotlight
 local lightPart = Workspace:FindFirstChild("OverheadLight")
 local spotLight
 if not lightPart then
@@ -132,7 +122,7 @@ else
 	spotLight = lightPart:FindFirstChildOfClass("SpotLight")
 end
 
--- Global 2D Stage Music - SINGLE TRACK ONLY: stop all before playing
+-- Stage Music
 local stageMusic = SoundService:FindFirstChild("StageMusic")
 if not stageMusic then
 	stageMusic = Instance.new("Sound")
@@ -143,9 +133,8 @@ if not stageMusic then
 	stageMusic.Parent = SoundService
 end
 
--- Stop ALL existing sounds in SoundService to prevent multi-play
 for _, snd in ipairs(SoundService:GetChildren()) do
-	if snd:IsA("Sound") then
+	if snd:IsA("Sound") and snd.Name ~= "StageMusic" then
 		pcall(function() snd:Stop() end)
 	end
 end
@@ -154,13 +143,13 @@ stageMusic.Volume = 1.0
 stageMusic.Looped = true
 stageMusic:Play()
 
--- State Management
+-- State Tracking
 local lastProcessedPlayerId = ""
 local currentMusicId = DEFAULT_MUSIC_ID
 local activeDancersList = {}
 local nextSlotIndex = 1
+local processedEventIds = {}
 
--- Calculate Grid Slot Offsets facing FRONT (math.rad(180))
 local function getSlotOffset(index)
 	local row = math.floor((index - 1) / 5)
 	local col = (index - 1) % 5
@@ -172,73 +161,159 @@ local function getSlotOffset(index)
 	return Vector3.new(xOffset, stgSize.Y / 2 + 3.2, zOffset)
 end
 
--- ====================================
--- TIKTOK GIFT VISUAL & SOUND FX SYSTEM
--- ====================================
-local function triggerGiftSpecialEffects(position, isVIP, giftDetails)
+-- Change Stage Music
+local function changeStageMusic(musicAssetId)
 	pcall(function()
-		-- 1. Fireworks & Particle Burst
+		if not musicAssetId or musicAssetId == "" then return end
+		if not string.find(musicAssetId, "rbxassetid://") then
+			musicAssetId = "rbxassetid://" .. musicAssetId
+		end
+		stageMusic.SoundId = musicAssetId
+		stageMusic.Volume = 1.0
+		stageMusic.Looped = true
+		stageMusic:Play()
+	end)
+end
+
+-- =========================================================
+-- SPEC SECTION 22: ACTION HANDLERS REGISTRY
+-- =========================================================
+local ActionHandlers = {}
+
+-- 1. FLOWER_RAIN Action Handler
+ActionHandlers.FLOWER_RAIN = function(action, context)
+	pcall(function()
+		local params = action.parameters or {}
+		local count = math.clamp(tonumber(params.count) or 25, 5, 100)
+		local duration = (action.durationMs or 5000) / 1000
+
 		local attachment = Instance.new("Attachment")
-		attachment.Position = position or Vector3.new(0, 4, 0)
+		attachment.Position = getStageCFrame(stage).Position + Vector3.new(0, 15, 0)
 		attachment.Parent = Workspace.Terrain
 
 		local emitter = Instance.new("ParticleEmitter")
-		emitter.Texture = "rbxassetid://243664672"
-		emitter.Color = ColorSequence.new({
-			ColorSequenceKeypoint.new(0, isVIP and Color3.fromRGB(255, 215, 0) or Color3.fromRGB(255, 0, 127)),
-			ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 255, 255)),
-			ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 242, 254))
-		})
-		emitter.Size = NumberSequence.new({NumberSequenceKeypoint.new(0, 3.0), NumberSequenceKeypoint.new(1, 0)})
-		emitter.Speed = NumberRange.new(20, 35)
-		emitter.Lifetime = NumberRange.new(1.0, 2.5)
-		emitter.Rate = isVIP and 350 or 150
+		emitter.Texture = "rbxassetid://243664672" -- Flower / Petal texture
+		emitter.Color = ColorSequence.new(Color3.fromRGB(255, 0, 127), Color3.fromRGB(255, 182, 193))
+		emitter.Size = NumberSequence.new({NumberSequenceKeypoint.new(0, 1.8), NumberSequenceKeypoint.new(1, 0.4)})
+		emitter.Speed = NumberRange.new(8, 18)
+		emitter.Lifetime = NumberRange.new(2.5, 4.0)
+		emitter.Rate = count
 		emitter.Parent = attachment
 
-		-- 2. Play Gift Fanfare Sound Effect (using stageMusic to avoid multi-audio)
-		if isVIP then
-			local prevId = stageMusic.SoundId
-			stageMusic:Stop()
-			stageMusic.SoundId = GIFT_FANFARE_SOUND_ID
-			stageMusic.Looped = false
-			stageMusic.Volume = 1.2
-			stageMusic:Play()
-			-- Restore background music after fanfare finishes (~3s)
-			task.delay(3.2, function()
-				pcall(function()
-					stageMusic:Stop()
-					stageMusic.SoundId = prevId
-					stageMusic.Volume = 1.0
-					stageMusic.Looped = true
-					stageMusic:Play()
-				end)
-			end)
-		end
-
-		-- 3. Flash Stage Lights Gold if Gift VIP
-		local ledWall = Workspace:FindFirstChild("LEDWall")
-		if isVIP and ledWall then
-			local origColor = ledWall.Color
-			ledWall.Color = Color3.fromRGB(255, 215, 0)
-			if spotLight then spotLight.Brightness = 14 end
-
-			task.delay(1.5, function()
-				pcall(function()
-					ledWall.Color = origColor
-					if spotLight then spotLight.Brightness = 6 end
-				end)
-			end)
-		end
-
-		task.delay(1.2, function()
+		task.delay(duration, function()
 			pcall(function() emitter.Enabled = false end)
-			task.wait(2)
+			task.wait(4)
 			pcall(function() attachment:Destroy() end)
 		end)
 	end)
 end
 
--- Create Stylized Nametag above Avatar Head
+-- 2. HEART_BURST Action Handler
+ActionHandlers.HEART_BURST = function(action, context)
+	pcall(function()
+		local params = action.parameters or {}
+		local count = math.clamp(tonumber(params.count) or 20, 5, 60)
+		local duration = (action.durationMs or 4000) / 1000
+
+		local targetPos = getStageCFrame(stage).Position + Vector3.new(0, 5, 0)
+		if #activeDancersList > 0 and activeDancersList[#activeDancersList].model then
+			local hrp = activeDancersList[#activeDancersList].model:FindFirstChild("HumanoidRootPart")
+			if hrp then targetPos = hrp.Position end
+		end
+
+		local attachment = Instance.new("Attachment")
+		attachment.Position = targetPos
+		attachment.Parent = Workspace.Terrain
+
+		local emitter = Instance.new("ParticleEmitter")
+		emitter.Texture = "rbxassetid://258128463" -- Heart texture
+		emitter.Color = ColorSequence.new(Color3.fromRGB(255, 20, 147), Color3.fromRGB(255, 105, 180))
+		emitter.Size = NumberSequence.new({NumberSequenceKeypoint.new(0, 2.5), NumberSequenceKeypoint.new(1, 0.2)})
+		emitter.Speed = NumberRange.new(12, 25)
+		emitter.Lifetime = NumberRange.new(1.5, 3.0)
+		emitter.Rate = count
+		emitter.Parent = attachment
+
+		task.delay(duration, function()
+			pcall(function() emitter.Enabled = false end)
+			task.wait(3)
+			pcall(function() attachment:Destroy() end)
+		end)
+	end)
+end
+
+-- 3. CHANGE_STAGE_LIGHT Action Handler
+ActionHandlers.CHANGE_STAGE_LIGHT = function(action, context)
+	pcall(function()
+		local ledWall = Workspace:FindFirstChild("LEDWall")
+		local duration = (action.durationMs or 6000) / 1000
+		if not ledWall then return end
+
+		local origColor = ledWall.Color
+		ledWall.Color = Color3.fromRGB(0, 242, 254)
+		if spotLight then spotLight.Brightness = 12 end
+
+		task.delay(duration, function()
+			pcall(function()
+				ledWall.Color = origColor
+				if spotLight then spotLight.Brightness = 6 end
+			end)
+		end)
+	end)
+end
+
+-- 4. SHOW_MESSAGE Action Handler
+ActionHandlers.SHOW_MESSAGE = function(action, context)
+	pcall(function()
+		local params = action.parameters or {}
+		local msgText = params.template or string.format("🎁 %s vừa tặng quà!", context.tiktokUsername or "Khán giả")
+		print("[RobloxAction] SHOW_MESSAGE: " .. msgText)
+	end)
+end
+
+-- 5. CHANGE_MUSIC Action Handler
+ActionHandlers.CHANGE_MUSIC = function(action, context)
+	pcall(function()
+		local params = action.parameters or {}
+		local musicId = params.musicId
+		if musicId then changeStageMusic(musicId) end
+	end)
+end
+
+-- Execute Game Event & Actions Sequence
+local function executeGameEvent(gameEvent)
+	if not gameEvent or not gameEvent.eventId then return end
+	if processedEventIds[gameEvent.eventId] then return end
+	processedEventIds[gameEvent.eventId] = true
+
+	print(string.format("[TikTokDanceManager] Executing GameEvent [%s] (%s actions)", gameEvent.eventId, tostring(#(gameEvent.actions or {}))))
+
+	local allSuccess = true
+	local lastErr = nil
+
+	for _, action in ipairs(gameEvent.actions or {}) do
+		local handler = ActionHandlers[action.type]
+		if handler then
+			local ok, err = pcall(function()
+				handler(action, gameEvent.context or {})
+			end)
+			if not ok then
+				allSuccess = false
+				lastErr = tostring(err)
+				warn(string.format("[TikTokDanceManager] Action error [%s]: %s", action.type, tostring(err)))
+			end
+		end
+	end
+
+	-- Send ACK to Backend
+	pcall(function()
+		local ackUrl = BASE_URL .. "/game-events/" .. gameEvent.eventId .. "/ack"
+		local body = HttpService:JSONEncode({ success = allSuccess, error = lastErr })
+		HttpService:PostAsync(ackUrl, body, Enum.HttpContentType.ApplicationJson)
+	end)
+end
+
+-- Create Nametag
 local function createNametag(character, tiktokUsername, robloxUsername, isVIP)
 	pcall(function()
 		local head = character:FindFirstChild("Head")
@@ -284,30 +359,21 @@ local function createNametag(character, tiktokUsername, robloxUsername, isVIP)
 	end)
 end
 
--- Play Emote Dance Animation
+-- Play Dance Animation
 local function playDanceAnimation(character, animAssetId)
 	pcall(function()
 		local humanoid = character:WaitForChild("Humanoid", 4)
 		if not humanoid then return end
-
 		humanoid.WalkSpeed = 0
 		humanoid.JumpPower = 0
 
-		local animator = humanoid:FindFirstChildOfClass("Animator")
-		if not animator then
-			animator = Instance.new("Animator")
-			animator.Parent = humanoid
-		end
+		local animator = humanoid:FindFirstChildOfClass("Animator") or Instance.new("Animator", humanoid)
 
 		task.wait(0.2)
-
 		local anim = Instance.new("Animation")
 		anim.AnimationId = (animAssetId and animAssetId ~= "") and animAssetId or "rbxassetid://507771019"
 
-		local success, track = pcall(function()
-			return animator:LoadAnimation(anim)
-		end)
-
+		local success, track = pcall(function() return animator:LoadAnimation(anim) end)
 		if success and track then
 			track.Priority = Enum.AnimationPriority.Action4
 			track.Looped = true
@@ -316,28 +382,16 @@ local function playDanceAnimation(character, animAssetId)
 	end)
 end
 
--- Spawn Player Avatar on Stage without snapping existing dancers
+-- Spawn Player Avatar on Stage
 local function spawnDancer(robloxUsername, tiktokUsername, animationId, isVIP, giftDetails, customTitle, customColor)
 	print(string.format("[TikTokDanceManager] Spawning avatar for TikTok: @%s (Roblox: %s)", tostring(tiktokUsername), tostring(robloxUsername)))
 
-	local getUserIdSuccess, userId = pcall(function()
-		return Players:GetUserIdFromNameAsync(robloxUsername)
-	end)
+	local getUserIdSuccess, userId = pcall(function() return Players:GetUserIdFromNameAsync(robloxUsername) end)
+	if not getUserIdSuccess or not userId then userId = 1 end
 
-	if not getUserIdSuccess or not userId then
-		userId = 1
-	end
+	local loadModelSuccess, characterModel = pcall(function() return Players:CreateHumanoidModelFromUserIdAsync(userId) end)
+	if not loadModelSuccess or not characterModel then return end
 
-	local loadModelSuccess, characterModel = pcall(function()
-		return Players:CreateHumanoidModelFromUserIdAsync(userId)
-	end)
-
-	if not loadModelSuccess or not characterModel then
-		warn("[TikTokDanceManager] Could not create HumanoidModel for UserId: " .. tostring(userId))
-		return
-	end
-
-	-- Remove oldest if stage is full
 	if #activeDancersList >= MAX_STAGE_DANCERS then
 		local oldestDancer = table.remove(activeDancersList, 1)
 		if oldestDancer and oldestDancer.model and oldestDancer.model.Parent then
@@ -348,7 +402,6 @@ local function spawnDancer(robloxUsername, tiktokUsername, animationId, isVIP, g
 	characterModel.Name = robloxUsername
 	characterModel.Parent = Workspace
 
-	-- Position in assigned slot offset without rearranging existing dancers
 	local slotIdx = ((nextSlotIndex - 1) % MAX_STAGE_DANCERS) + 1
 	nextSlotIndex = nextSlotIndex + 1
 
@@ -368,14 +421,9 @@ local function spawnDancer(robloxUsername, tiktokUsername, animationId, isVIP, g
 		spawnTime = tick()
 	})
 
-	pcall(function()
-		if hrp then triggerGiftSpecialEffects(hrp.Position, isVIP, giftDetails) end
-	end)
-
 	createNametag(characterModel, tiktokUsername, robloxUsername, isVIP)
 	playDanceAnimation(characterModel, animationId)
 
-	-- Focus camera ONLY on this newest dancer
 	if focusEvent then
 		pcall(function()
 			focusEvent:FireAllClients(characterModel, tiktokUsername, robloxUsername, #activeDancersList, isVIP, customTitle, customColor)
@@ -383,24 +431,7 @@ local function spawnDancer(robloxUsername, tiktokUsername, animationId, isVIP, g
 	end
 end
 
--- Change Music (SINGLE TRACK ENFORCED: stops ALL sounds before playing new one)
-local function changeStageMusic(musicAssetId)
-	pcall(function()
-		if not musicAssetId then return end
-		-- Stop every Sound object in SoundService to guarantee single playback
-		for _, snd in ipairs(SoundService:GetChildren()) do
-			if snd:IsA("Sound") then
-				pcall(function() snd:Stop() end)
-			end
-		end
-		stageMusic.SoundId = musicAssetId
-		stageMusic.Volume = 1.0
-		stageMusic.Looped = true
-		stageMusic:Play()
-	end)
-end
-
--- Smooth Despawn expiration loop (Destroys expired dancer cleanly without camera jump)
+-- Despawn loop
 task.spawn(function()
 	while true do
 		task.wait(1)
@@ -420,25 +451,36 @@ task.spawn(function()
 	end
 end)
 
--- Main Polling Loop to Node.js Backend
+-- Heartbeat Loop to Backend
 task.spawn(function()
-	print(string.format("[TikTokDanceManager] Multi-Tenant Poller started [API Key: %s] -> %s", API_KEY, SERVER_URL))
+	local heartbeatUrl = BASE_URL .. "/heartbeat"
+	while true do
+		pcall(function()
+			local payload = HttpService:JSONEncode({
+				placeId = tostring(game.PlaceId),
+				jobId = tostring(game.JobId),
+				scriptVer = "1.0.0"
+			})
+			HttpService:PostAsync(heartbeatUrl, payload, Enum.HttpContentType.ApplicationJson)
+		end)
+		task.wait(10)
+	end
+end)
+
+-- Main Polling Loop to Backend (Current Player & Game Events)
+task.spawn(function()
+	print(string.format("[TikTokDanceManager] Multi-Tenant Poller & Action Engine started [API Key: %s]", API_KEY))
+
+	local playerUrl = BASE_URL .. "/current-player"
+	local eventsUrl = BASE_URL .. "/game-events"
 
 	while true do
-		local fetchSuccess, response = pcall(function()
-			return HttpService:GetAsync(SERVER_URL)
-		end)
-
-		if fetchSuccess and response then
-			local decodeSuccess, data = pcall(function()
-				return HttpService:JSONDecode(response)
-			end)
-
-			if decodeSuccess and data and data.success then
-				if data.danceDuration then
-					danceDurationSeconds = tonumber(data.danceDuration) or 12
-				end
-
+		-- 1. Poll Current Active Player (Dancer Queue)
+		pcall(function()
+			local response = HttpService:GetAsync(playerUrl)
+			local data = HttpService:JSONDecode(response)
+			if data and data.success then
+				if data.danceDuration then danceDurationSeconds = tonumber(data.danceDuration) or 12 end
 				if data.currentMusicId and data.currentMusicId ~= currentMusicId then
 					currentMusicId = data.currentMusicId
 					changeStageMusic(currentMusicId)
@@ -457,10 +499,21 @@ task.spawn(function()
 					)
 				end
 			end
-		end
+		end)
+
+		-- 2. Poll Game Events Queue (Gift Effects, Lights, Animations)
+		pcall(function()
+			local response = HttpService:GetAsync(eventsUrl)
+			local data = HttpService:JSONDecode(response)
+			if data and data.success and data.events then
+				for _, gameEvent in ipairs(data.events) do
+					executeGameEvent(gameEvent)
+				end
+			end
+		end)
 
 		task.wait(POLL_INTERVAL)
 	end
 end)
 
-print("[TikTokDanceManager] TikTok Live Comment Auto Dance System Initialized.")
+print("[TikTokDanceManager] TikTok Live Comment & Game Event Engine Initialized.")

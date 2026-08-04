@@ -30,15 +30,137 @@ async function validateRobloxUsername(username) {
     return { name: username };
 }
 
-// Resolve music from coin milestones (Tikfanny-style)
-// Returns the musicId of the highest milestone whose minCoins <= coins
 function resolveMusicByCoins(tenant, coins) {
     if (!coins || isNaN(coins) || coins <= 0) return null;
     const milestones = tenant.coinMilestones || [];
-    // Sort descending by minCoins, pick first match
     const sorted = [...milestones].sort((a, b) => b.minCoins - a.minCoins);
     const match = sorted.find(m => coins >= m.minCoins);
     return match ? match.musicId : null;
+}
+
+function renderTemplateVariables(template, context) {
+    if (typeof template !== 'string') return template;
+    return template
+        .replace(/\{tiktokUsername\}/g, context.tiktokUsername || 'Khán giả')
+        .replace(/\{nickname\}/g, context.nickname || context.tiktokUsername || 'Khán giả')
+        .replace(/\{giftName\}/g, context.giftName || 'Quà')
+        .replace(/\{repeatCount\}/g, context.repeatCount || 1)
+        .replace(/\{singleCoinValue\}/g, context.singleCoinValue || 0)
+        .replace(/\{totalCoins\}/g, context.totalCoins || 0)
+        .replace(/\{robloxUsername\}/g, context.robloxUsername || 'Roblox User');
+}
+
+/**
+ * Core Gift Event Processor according to Section 21 of Spec.
+ * Decouples gift actions from comment queue into unique GameEvents with ACK tracking.
+ */
+function processGiftEventForTenant(apiKey, giftPayload) {
+    const tenant = getTenant(apiKey);
+    const { giftId, giftName, repeatCount = 1, singleCoinValue = 0, totalCoins = 0, tiktokUsername, nickname } = giftPayload;
+
+    const context = {
+        tiktokUsername: tiktokUsername || 'Anonymous',
+        nickname: nickname || tiktokUsername || 'Anonymous',
+        giftId: giftId || 'gift',
+        giftName: giftName || 'TikTok Gift',
+        repeatCount,
+        singleCoinValue,
+        totalCoins
+    };
+
+    const activeMappings = (tenant.eventMappings || []).filter(m => m.enabled);
+    const sortedMappings = [...activeMappings].sort((a, b) => (b.priority || 0) - (a.priority || 0));
+
+    let matchedAnyMapping = false;
+
+    for (const mapping of sortedMappings) {
+        const trigger = mapping.trigger || {};
+        if (trigger.type !== 'TIKTOK_GIFT') continue;
+
+        // Check Gift ID / Gift Name match
+        const idMatch = trigger.giftId && (trigger.giftId.toLowerCase() === (giftId || '').toLowerCase() || trigger.giftId.toLowerCase() === (giftName || '').toLowerCase());
+        const nameMatch = trigger.giftName && trigger.giftName.toLowerCase() === (giftName || '').toLowerCase();
+        
+        if (!idMatch && !nameMatch && trigger.giftId) continue;
+
+        // Check Repeat & Coin thresholds
+        if (trigger.minRepeatCount && repeatCount < trigger.minRepeatCount) continue;
+        if (trigger.minTotalCoins && totalCoins < trigger.minTotalCoins) continue;
+
+        // Resolve actions for this mapping
+        const resolvedActions = [];
+        for (const actionRef of (mapping.actions || [])) {
+            const actionDef = (tenant.actionDefs || []).find(a => a.id === actionRef.actionId && a.enabled);
+            if (!actionDef) continue;
+
+            const parsedParams = typeof actionDef.parameters === 'string' ? JSON.parse(actionDef.parameters) : (actionDef.parameters || {});
+            const renderedParams = {};
+
+            for (const [key, val] of Object.entries(parsedParams)) {
+                if (typeof val === 'string') {
+                    renderedParams[key] = renderTemplateVariables(val, context);
+                } else {
+                    renderedParams[key] = val;
+                }
+            }
+
+            resolvedActions.push({
+                actionId: actionDef.id,
+                name: actionDef.name,
+                type: actionDef.type,
+                delayMs: actionRef.delayMs || actionDef.defaultDelayMs || 0,
+                durationMs: actionRef.durationMs || actionDef.defaultDurationMs || 5000,
+                parameters: renderedParams
+            });
+        }
+
+        if (resolvedActions.length > 0) {
+            const gameEvent = {
+                eventId: 'evt_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 7),
+                tenantId: apiKey,
+                mappingId: mapping.id,
+                mappingName: mapping.name,
+                eventType: 'gift_effect',
+                actions: resolvedActions,
+                context: context,
+                createdAt: new Date().toISOString(),
+                expiresAt: new Date(Date.now() + 60000).toISOString(), // 60s TTL
+                status: 'QUEUED',
+                deliveryAttempts: 0
+            };
+
+            tenant.gameEventQueue.push(gameEvent);
+            tenant.gameEventsHistory.unshift(gameEvent);
+            if (tenant.gameEventsHistory.length > 100) tenant.gameEventsHistory.pop();
+
+            addTenantLog(apiKey, `🎯 Event Match: "${mapping.name}" → Tạo GameEvent [${gameEvent.eventId}] (${resolvedActions.length} actions)`, true);
+            matchedAnyMapping = true;
+
+            if (mapping.stopProcessingAfterMatch) break;
+        }
+    }
+
+    // Fallback: Coin Milestone Music Switch if no exact mapping matched or if coin value > 0
+    let giftCoins = singleCoinValue || totalCoins;
+    if (!giftCoins && giftName) {
+        const catalogueEntry = TIKTOK_GIFTS.find(g =>
+            g.name.toLowerCase() === giftName.toLowerCase() ||
+            g.id === giftName.toLowerCase().replace(/[^a-z0-9]/g, '_')
+        );
+        if (catalogueEntry) giftCoins = catalogueEntry.coins;
+    }
+
+    if (giftCoins > 0) {
+        const mappedMusicId = resolveMusicByCoins(tenant, giftCoins);
+        if (mappedMusicId) {
+            tenant.currentMusicId = mappedMusicId;
+            const milestone = (tenant.coinMilestones || []).find(m => giftCoins >= m.minCoins && giftCoins <= m.maxCoins);
+            const label = milestone ? milestone.label : `${giftCoins} xu`;
+            addTenantLog(apiKey, `🎵 Quà "${giftName}" (${giftCoins}🪙) → Milestone: ${label} → 🎵 ${mappedMusicId}`, true);
+        }
+    }
+
+    return { matchedAnyMapping, queueLength: tenant.gameEventQueue.length };
 }
 
 async function processNewCommentForTenant(apiKey, tiktokUsername, commentText, isVIP = false, giftDetails = null) {
@@ -75,31 +197,6 @@ async function processNewCommentForTenant(apiKey, tiktokUsername, commentText, i
     }
 
     userCooldowns.set(cooldownKey, now);
-
-    // Gift → Music: resolve coin value from gift name → find matching milestone
-    if (giftDetails && (giftDetails.giftName || giftDetails.coins)) {
-        // Lookup coins from catalogue by gift name, or use coins passed directly
-        let giftCoins = giftDetails.coins || 0;
-        if (!giftCoins && giftDetails.giftName) {
-            const catalogueEntry = TIKTOK_GIFTS.find(g =>
-                g.name.toLowerCase() === giftDetails.giftName.toLowerCase() ||
-                g.id === giftDetails.giftName.toLowerCase().replace(/[^a-z0-9]/g, '_')
-            );
-            if (catalogueEntry) giftCoins = catalogueEntry.coins;
-        }
-
-        const mappedMusicId = resolveMusicByCoins(tenant, giftCoins);
-        if (mappedMusicId) {
-            tenant.currentMusicId = mappedMusicId;
-            const milestone = (tenant.coinMilestones || []).find(m => giftCoins >= m.minCoins && giftCoins <= m.maxCoins);
-            const label = milestone ? milestone.label : `${giftCoins} xu`;
-            addTenantLog(apiKey,
-                `🎁 Quà "${giftDetails.giftName}" (${giftCoins}🪙) → ${label} → 🎵 ${mappedMusicId}`, true
-            );
-        } else {
-            addTenantLog(apiKey, `🎁 Quà "${giftDetails.giftName}" không khớp milestone nào (${giftCoins} xu).`);
-        }
-    }
 
     const playerData = {
         id: Date.now().toString() + '_' + Math.random().toString(36).substring(2, 5),
@@ -152,18 +249,23 @@ function connectTikTokForTenant(apiKey, uniqueId) {
     });
 
     connection.on('gift', data => {
-        if (data.giftType === 1 && data.repeatEnd === false) return;
+        if (data.giftType === 1 && data.repeatEnd === false) return; // Streak packet intermediate skip
         const giftName = data.giftName || 'TikTok Gift';
+        const giftId = (data.giftId || giftName).toString().toLowerCase().replace(/[^a-z0-9_]/g, '_');
         const giftCount = data.repeatCount || 1;
-        // giftDiamondCount = coin value of ONE gift; total = coins * count
         const singleCoinValue = data.giftDetails?.diamondCount || data.diamondCount || 0;
         const totalCoins = singleCoinValue * giftCount;
-        addTenantLog(apiKey, `🎁 @${data.uniqueId} tặng ${giftCount}x ${giftName} (${singleCoinValue}🪙 mỗi quà = ${totalCoins}🪙 tổng)!`, true);
-        processNewCommentForTenant(apiKey, data.uniqueId, data.uniqueId, true, {
+
+        addTenantLog(apiKey, `🎁 @${data.uniqueId} tặng ${giftCount}x ${giftName} (${totalCoins}🪙)!`, true);
+
+        processGiftEventForTenant(apiKey, {
+            giftId,
             giftName,
-            giftCount,
-            coins: singleCoinValue, // use per-gift coin value for milestone matching
-            totalCoins
+            repeatCount: giftCount,
+            singleCoinValue,
+            totalCoins,
+            tiktokUsername: data.uniqueId,
+            nickname: data.nickname || data.uniqueId
         });
     });
 
@@ -189,4 +291,9 @@ function disconnectTikTokForTenant(apiKey) {
     addTenantLog(apiKey, `Đã ngắt kết nối TikTok.`);
 }
 
-module.exports = { connectTikTokForTenant, disconnectTikTokForTenant, processNewCommentForTenant };
+module.exports = {
+    connectTikTokForTenant,
+    disconnectTikTokForTenant,
+    processNewCommentForTenant,
+    processGiftEventForTenant
+};
