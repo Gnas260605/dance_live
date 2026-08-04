@@ -486,7 +486,7 @@ local function spawnDancer(robloxUsername, tiktokUsername, animationId, isVIP, g
 	characterModel:PivotTo(targetCFrame)
 
 	local hrp = characterModel:FindFirstChild("HumanoidRootPart") or characterModel.PrimaryPart
-	if hrp then hrp.Anchored = false end
+	if hrp then hrp.Anchored = true end
 
 	table.insert(activeDancersList, {
 		model = characterModel,
