@@ -12,8 +12,22 @@ local SoundService = game:GetService("SoundService")
 -- ====================================
 -- CONFIGURATION
 -- ====================================
+local RunService = game:GetService("RunService")
+
 local API_KEY = script:GetAttribute("API_KEY") or "demo-api-key-sg-music"
-local DOMAIN_URL = script:GetAttribute("DOMAIN_URL") or "https://tame-maps-prove.loca.lt"
+local PUBLIC_URL = "https://tame-maps-prove.loca.lt"
+local LOCAL_URL = "http://localhost:3000"
+
+-- Automatically detect environment: Use localhost in Studio, Use Public URL on Roblox App
+local DOMAIN_URL = script:GetAttribute("DOMAIN_URL")
+if not DOMAIN_URL or DOMAIN_URL == "" then
+	if RunService:IsStudio() then
+		DOMAIN_URL = LOCAL_URL
+	else
+		DOMAIN_URL = PUBLIC_URL
+	end
+end
+
 local BASE_URL = DOMAIN_URL .. "/api/v1/streamer/" .. API_KEY
 
 local POLL_INTERVAL = 1.2
