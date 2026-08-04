@@ -209,7 +209,7 @@ local function getSlotOffset(index)
 	local xOffset = (col - 2) * xSpacing
 	local zOffset = (row - 0.5) * zSpacing
 	local stgSize = getStageSize(stage)
-	return Vector3.new(xOffset, stgSize.Y / 2 + 1.8, zOffset)
+	return Vector3.new(xOffset, stgSize.Y / 2 - 0.5, zOffset)
 end
 
 -- Change Stage Music
