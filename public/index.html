@@ -440,7 +440,10 @@
 
             <!-- Library điệu nhảy mẫu phổ biến (Presets) -->
             <div class="card">
-                <div class="card-title-bar"><div class="card-title-text"><i class="ri-magic-line"></i> Thư Viện Điệu Nhảy Mẫu Roblox Studio</div></div>
+                <div class="card-title-bar" style="justify-content:space-between;">
+                    <div class="card-title-text"><i class="ri-magic-line"></i> Thư Viện Điệu Nhảy Mẫu Roblox Studio</div>
+                    <button class="btn btn-gold btn-xs" onclick="handleSelectRandomDance()"><i class="ri-shuffle-line"></i> 🎲 Nhảy Ngẫu Nhiên (Random)</button>
+                </div>
                 <div style="display:flex;flex-direction:column;gap:8px;max-height:280px;overflow-y:auto;">
                     <div class="preset-chip" onclick="quickSelectPresetDance('Phonk Hype Dance', '507771019', 'PHONK')">
                         <div style="font-weight:700;color:var(--accent-cyan);">⚡ Phonk Hype Dance</div>
@@ -457,6 +460,14 @@
                     <div class="preset-chip" onclick="quickSelectPresetDance('Vibing Chill Groove', '1847648398', 'CHILL')">
                         <div style="font-weight:700;color:#a78bfa;">🌸 Vibing Chill Groove</div>
                         <div style="font-size:11px;color:var(--text-muted);">Asset ID: <code>1847648398</code> • Chill</div>
+                    </div>
+                    <div class="preset-chip" onclick="quickSelectPresetDance('Floss Dance Classic', '10714340543', 'HIPHOP')">
+                        <div style="font-weight:700;color:#10b981;">⚡ Floss Dance Classic</div>
+                        <div style="font-size:11px;color:var(--text-muted);">Asset ID: <code>10714340543</code> • Trend Hype</div>
+                    </div>
+                    <div class="preset-chip" onclick="quickSelectPresetDance('Hypnotic Hype Wave', '10714345754', 'PHONK')">
+                        <div style="font-weight:700;color:#ec4899;">👑 Hypnotic Hype Wave</div>
+                        <div style="font-size:11px;color:var(--text-muted);">Asset ID: <code>10714345754</code> • Phonk / VIP</div>
                     </div>
                 </div>
             </div>
@@ -981,6 +992,24 @@ async function handleAddDanceEmote() {
     const danceId = document.getElementById('input-dance-id').value;
     await fetch(`${API_BASE}/api/v1/dashboard/dance`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({name, danceId}) });
     notify('💃 Emote saved!', 'success');
+}
+
+async function handleSelectRandomDance() {
+    const presetDances = [
+        { name: 'Phonk Hype Dance', id: '507771019' },
+        { name: 'K-Pop Idol Routine', id: '507771959' },
+        { name: 'Trendy Shuffle Dance', id: '9043887091' },
+        { name: 'Vibing Chill Groove', id: '1847648398' },
+        { name: 'Floss Dance Classic', id: '10714340543' },
+        { name: 'Hypnotic Hype Wave', id: '10714345754' }
+    ];
+    const picked = presetDances[Math.floor(Math.random() * presetDances.length)];
+    await fetch(`${API_BASE}/api/v1/dashboard/dance`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: picked.name, danceId: picked.id })
+    });
+    notify(`🎲 Đã đổi ngẫu nhiên sang: ${picked.name}`, 'gold');
 }
 
 async function handleSaveOverlayAndTiming() {
