@@ -43,10 +43,17 @@ end
 
 -- Play a sound by category name with optional volume override
 local function playGiftSound(soundKey, volume)
-	local snd = preloadSounds[soundKey]
+	local snd = preloadedSounds[soundKey]
 	if snd then
-		snd.Volume = volume or 0.8
-		pcall(function() snd:Play() end)
+		pcall(function()
+			local playInst = snd:Clone()
+			playInst.Volume = volume or 0.8
+			playInst.Parent = SoundService
+			playInst:Play()
+			task.delay(playInst.TimeLength + 0.5, function()
+				pcall(function() playInst:Destroy() end)
+			end)
+		end)
 	end
 end
 
