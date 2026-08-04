@@ -208,8 +208,15 @@ local function getSlotOffset(index)
 	local zSpacing = 7.5
 	local xOffset = (col - 2) * xSpacing
 	local zOffset = (row - 0.5) * zSpacing
-	local stgSize = getStageSize(stage)
-	return Vector3.new(xOffset, stgSize.Y / 2 - 0.5, zOffset)
+	
+	local stageFloor = Workspace:FindFirstChild("StageFloor")
+	if stageFloor then
+		local stageFloorPos = stageFloor.Position
+		local stagePos = stage.Position
+		local relY = stageFloorPos.Y + 1.2 - stagePos.Y
+		return Vector3.new(xOffset, relY, zOffset)
+	end
+	return Vector3.new(xOffset, -5.5, zOffset)
 end
 
 -- Change Stage Music
