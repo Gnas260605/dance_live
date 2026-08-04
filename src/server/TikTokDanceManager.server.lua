@@ -23,6 +23,20 @@ local danceDurationSeconds = 12
 local DEFAULT_MUSIC_ID = "rbxassetid://1837879082"
 local GIFT_FANFARE_SOUND_ID = "rbxassetid://9043887091"
 
+-- AUTOMATED SCRIPT CLEANUP: Clean up broken third-party scripts that crash the server immediately
+pcall(function()
+	local namesToClean = { "LightConfig", "qPerfectionWeld", "PackageLink", "FlashChance", "CoreSkyboxSystem", "PoseTexture" }
+	for _, desc in ipairs(Workspace:GetDescendants()) do
+		if desc:IsA("Script") or desc:IsA("LocalScript") or desc:IsA("ModuleScript") then
+			local dName = desc.Name
+			local isDecor = desc:FindFirstAncestor("MapDecor") or desc:FindFirstAncestor("StoreAssets")
+			if table.find(namesToClean, dName) or isDecor then
+				pcall(function() desc:Destroy() end)
+			end
+		end
+	end
+end)
+
 Players.CharacterAutoLoads = false
 
 -- Balanced Stage Lighting (Không bị chói nhân vật)
