@@ -25,13 +25,13 @@ local GIFT_FANFARE_SOUND_ID = "rbxassetid://9043887091"
 
 Players.CharacterAutoLoads = false
 
--- Bright Stage Lighting
+-- Balanced Stage Lighting (Không bị chói nhân vật)
 pcall(function()
 	Lighting.ClockTime = 14
-	Lighting.Brightness = 2.5
+	Lighting.Brightness = 1.0
 	Lighting.GlobalShadows = true
-	Lighting.Ambient = Color3.fromRGB(170, 170, 190)
-	Lighting.OutdoorAmbient = Color3.fromRGB(140, 140, 160)
+	Lighting.Ambient = Color3.fromRGB(110, 110, 130)
+	Lighting.OutdoorAmbient = Color3.fromRGB(90, 90, 110)
 end)
 
 -- Remote Event for Camera & HUD Focus
@@ -120,7 +120,7 @@ if not lightPart then
 
 	spotLight = Instance.new("SpotLight")
 	spotLight.Name = "SpotLight"
-	spotLight.Brightness = 6
+	spotLight.Brightness = 1.8
 	spotLight.Range = 45
 	spotLight.Angle = 90
 	spotLight.Face = Enum.NormalId.Bottom
@@ -217,7 +217,7 @@ ActionHandlers.CHANGE_STAGE_LIGHT = function(action, context)
 
 		local origColor = ledWall.Color
 		ledWall.Color = Color3.fromRGB(0, 242, 254)
-		if spotLight then spotLight.Brightness = 12 end
+		if spotLight then spotLight.Brightness = 3.5 end
 
 		if giftEffectEvent then
 			giftEffectEvent:FireAllClients({ giftId = "galaxy", giftName = "Galaxy" }, context.tiktokUsername or "Viewer", getStageCFrame(stage).Position, true)
@@ -226,7 +226,7 @@ ActionHandlers.CHANGE_STAGE_LIGHT = function(action, context)
 		task.delay(duration, function()
 			pcall(function()
 				ledWall.Color = origColor
-				if spotLight then spotLight.Brightness = 6 end
+				if spotLight then spotLight.Brightness = 1.8 end
 			end)
 		end)
 	end)

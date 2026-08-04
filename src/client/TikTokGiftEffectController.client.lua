@@ -454,6 +454,119 @@ local function flashStageLights(color, duration)
 end
 
 -- ====================================
+-- ADVANCED CINEMATIC & 3D CUTSCENE EFFECTS
+-- ====================================
+
+local Camera = Workspace.CurrentCamera
+
+-- 1. Camera Shake Effect
+local function applyScreenShake(intensity, duration)
+	task.spawn(function()
+		local startTime = tick()
+		while (tick() - startTime) < duration do
+			local offsetX = (math.random() - 0.5) * intensity
+			local offsetY = (math.random() - 0.5) * intensity
+			local offsetZ = (math.random() - 0.5) * intensity
+			Camera.CFrame = Camera.CFrame * CFrame.new(offsetX, offsetY, offsetZ)
+			task.wait(0.03)
+		end
+	end)
+end
+
+-- 2. 3D Spotlight Beam & Spinning Aura Ring on Dancer
+local function spawnStageBeamAndAura(centerPos, color, duration)
+	task.spawn(function()
+		-- 3D Spotlight Beam
+		local beamPart = Instance.new("Part")
+		beamPart.Name = "GiftSpotlightBeam"
+		beamPart.Shape = Enum.PartType.Cylinder
+		beamPart.Size = Vector3.new(60, 10, 10)
+		beamPart.CFrame = CFrame.new(centerPos + Vector3.new(0, 30, 0)) * CFrame.Angles(0, 0, math.rad(90))
+		beamPart.Material = Enum.Material.Neon
+		beamPart.Color = color
+		beamPart.Transparency = 0.6
+		beamPart.CanCollide = false
+		beamPart.Anchored = true
+		beamPart.Parent = Workspace
+
+		-- Spinning Aura Ring on Floor
+		local auraPart = Instance.new("Part")
+		auraPart.Name = "GiftAuraRing"
+		auraPart.Size = Vector3.new(16, 0.2, 16)
+		auraPart.CFrame = CFrame.new(centerPos + Vector3.new(0, 0.2, 0))
+		auraPart.Material = Enum.Material.Neon
+		auraPart.Color = color
+		auraPart.Transparency = 0.3
+		auraPart.CanCollide = false
+		auraPart.Anchored = true
+		auraPart.Parent = Workspace
+
+		local auraMesh = Instance.new("SpecialMesh")
+		auraMesh.MeshType = Enum.MeshType.FileMesh
+		auraMesh.MeshId = "rbxassetid://3270017" -- Cylinder/Ring mesh
+		auraMesh.Scale = Vector3.new(18, 0.2, 18)
+		auraMesh.Parent = auraPart
+
+		-- Spin Aura ring
+		task.spawn(function()
+			local angle = 0
+			local startTime = tick()
+			while (tick() - startTime) < duration do
+				angle = angle + 5
+				auraPart.CFrame = CFrame.new(centerPos + Vector3.new(0, 0.2, 0)) * CFrame.Angles(0, math.rad(angle), 0)
+				task.wait(0.03)
+			end
+		end)
+
+		-- Fade out and destroy
+		task.delay(duration - 0.8, function()
+			if beamPart and beamPart.Parent then
+				TweenService:Create(beamPart, TweenInfo.new(0.8), { Transparency = 1 }):Play()
+			end
+			if auraPart and auraPart.Parent then
+				TweenService:Create(auraPart, TweenInfo.new(0.8), { Transparency = 1 }):Play()
+			end
+		end)
+
+		task.wait(duration)
+		if beamPart and beamPart.Parent then beamPart:Destroy() end
+		if auraPart and auraPart.Parent then auraPart:Destroy() end
+	end)
+end
+
+-- 3. Cinematic Camera Cutscene (Dramatic Close-Up Zoom & Orbit)
+local function playCinematicCameraCutscene(centerPos, duration)
+	task.spawn(function()
+		local originalCamType = Camera.CameraType
+		local originalCamCF = Camera.CFrame
+		Camera.CameraType = Enum.CameraType.Scriptable
+
+		-- Start Position: Low Angle Close-up facing the dancer
+		local targetPos = centerPos + Vector3.new(0, 4, 0)
+		local startCamCF = CFrame.new(centerPos + Vector3.new(0, 3, 12), targetPos)
+		local endCamCF = CFrame.new(centerPos + Vector3.new(-8, 7, 8), targetPos)
+
+		Camera.CFrame = startCamCF
+
+		-- Smooth cinematic movement across dancer
+		local tween = TweenService:Create(Camera, TweenInfo.new(duration, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
+			CFrame = endCamCF
+		})
+		tween:Play()
+		tween.Completed:Wait()
+
+		-- Restore camera back to player control smoothly
+		local restoreTween = TweenService:Create(Camera, TweenInfo.new(0.8, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut), {
+			CFrame = originalCamCF
+		})
+		restoreTween:Play()
+		restoreTween.Completed:Wait()
+
+		Camera.CameraType = originalCamType
+	end)
+end
+
+-- ====================================
 -- EFFECT 5: Screen Flash (VIP only)
 -- ====================================
 local function flashScreen(color)
@@ -895,12 +1008,21 @@ local function triggerGiftEffect(giftDetails, senderName, stagePos, isVIP)
 	-- Always show notification banner
 	showGiftBanner(config.emoji, displayName, senderName, isVIP, config.color)
 
-	-- Always flash stage lights
-	flashStageLights(config.color, 2)
+	-- Always flash stage lights and spawn 3D Spotlight Beam + Floor Aura Ring
+	flashStageLights(config.color, 3)
+	spawnStageBeamAndAura(centerPos, config.color, 4)
+
+	-- Apply Cinematic Cutscenes & Screen Shake based on gift tier / VIP status
+	if isVIP or effectType == "vip" or effectType == "firework" or effectType == "orbit" or effectType == "spiral" then
+		-- Big / VIP gifts (Galaxy, Lion, Rocket, Crown, Universe...) -> Dramatic Cinematic Camera Cutscene & Shake
+		playCinematicCameraCutscene(centerPos, 3.5)
+		applyScreenShake(0.8, 1.5)
+	elseif effectType == "burst" or effectType == "shockwave" then
+		-- Medium gifts -> Light screen shake
+		applyScreenShake(0.4, 0.8)
+	end
 
 	-- Trigger specific effect
-	local effectType = config.effect
-
 	if effectType == "floatUp" then
 		spawnFloatingEmojis(config.emoji, config.count, centerPos, true)
 
@@ -932,10 +1054,10 @@ local function triggerGiftEffect(giftDetails, senderName, stagePos, isVIP)
 
 	elseif effectType == "vip" then
 		-- VIP: Everything at once!
-		spawnFireworks(centerPos, 12)
+		spawnFireworks(centerPos, 14)
 		spawnConfettiRain(centerPos, 6)
 		spawnFloatingEmojis(config.emoji, config.count, centerPos, true)
-		spawnFloatingEmojis("\u{2728}", 20, centerPos, true)
+		spawnFloatingEmojis("\u{2728}", 25, centerPos, true)
 		task.spawn(function() flashScreen(config.color) end)
 	end
 end
