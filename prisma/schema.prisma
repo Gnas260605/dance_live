@@ -1,0 +1,99 @@
+// schema.prisma
+// Production Relational Database Schema for TikTok Live Roblox SaaS
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  CREATOR
+}
+
+enum PlanTier {
+  FREE
+  PRO
+  ENTERPRISE
+}
+
+model User {
+  id           String         @id @default(uuid())
+  email        String         @unique
+  name         String
+  passwordHash String
+  role         Role           @default(CREATOR)
+  planTier     PlanTier       @default(PRO)
+  apiKey       String         @unique @default(uuid())
+  apiSecret    String         @default(uuid())
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  streamConfig StreamConfig?
+  musicTracks  MusicTrack[]
+  danceEmotes  DanceAnimation[]
+  sessions     StreamSession[]
+}
+
+model StreamConfig {
+  id              String   @id @default(uuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tiktokUsername  String   @default("sandg.music")
+  activeTheme     String   @default("PHONK")
+  currentMusicId  String   @default("rbxassetid://1847648398")
+  selectedDanceId String   @default("rbxassetid://507771019")
+  overlayTitle    String   @default("🎵 S&G MUSIC - ROBLOX TIKTOK DANCE LIVE 🎵")
+  overlayColor    String   @default("#ff007f")
+  maxQueueSize    Int      @default(10)
+  isLive          Boolean  @default(false)
+  updatedAt       DateTime @updatedAt
+}
+
+model MusicTrack {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  soundId   String
+  genre     String   @default("PHONK")
+  isPublic  Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model DanceAnimation {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title       String
+  animationId String
+  genre       String   @default("PHONK")
+  isPublic    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}
+
+model StreamSession {
+  id                 String      @id @default(uuid())
+  userId             String
+  user               User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tiktokUsername     String
+  startedAt          DateTime    @default(now())
+  endedAt            DateTime?
+  totalComments      Int         @default(0)
+  totalGifts         Int         @default(0)
+  totalDancersSpawned Int        @default(0)
+  logs               StreamLog[]
+}
+
+model StreamLog {
+  id        String        @id @default(uuid())
+  sessionId String
+  session   StreamSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  level     String        @default("INFO")
+  message   String
+  timestamp DateTime      @default(now())
+}

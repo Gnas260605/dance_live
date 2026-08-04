@@ -1,0 +1,15 @@
+services:
+  app:
+    build: .
+    container_name: roblox-tiktok-autodance
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - NODE_ENV=production
+      - DATABASE_URL=file:../data/production.db
+      - JWT_SECRET=sg_music_roblox_production_secret_2026_key
+    volumes:
+      - ./data:/app/data
+      - ./public:/app/public

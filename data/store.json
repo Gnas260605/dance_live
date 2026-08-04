@@ -1,0 +1,13 @@
+{
+  "users": [
+    {
+      "id": "usr_demo_1",
+      "email": "admin@sgmusic.com",
+      "name": "S&G Music Official",
+      "passwordHash": "$2b$10$qSrbEplMaVPnl6Ju7rC38.SbSsR9mNV8Cjb.So49CnH.mBOsuOnN.",
+      "apiKey": "demo-api-key-sg-music",
+      "planTier": "PRO",
+      "createdAt": "2026-08-03T06:59:01.173Z"
+    }
+  ]
+}
