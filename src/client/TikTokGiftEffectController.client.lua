@@ -1003,6 +1003,7 @@ end
 -- ====================================
 local function triggerGiftEffect(giftDetails, senderName, stagePos, isVIP)
 	local config, giftName = getGiftConfig(giftDetails)
+	local effectType = config.effect or "floatUp"
 	local centerPos = stagePos or getStageCenter()
 	local displayName = (giftName ~= "" and giftName) or "Qu\u{00E0} t\u{1EB7}ng"
 
@@ -1019,15 +1020,9 @@ local function triggerGiftEffect(giftDetails, senderName, stagePos, isVIP)
 	flashStageLights(config.color, 3)
 	spawnStageBeamAndAura(centerPos, config.color, 4)
 
-	-- Apply Cinematic Cutscenes & Screen Shake based on gift tier / VIP status
-	if isVIP or effectType == "vip" or effectType == "firework" or effectType == "orbit" or effectType == "spiral" then
-		-- Big / VIP gifts (Galaxy, Lion, Rocket, Crown, Universe...) -> Dramatic Cinematic Camera Cutscene & Shake
-		playCinematicCameraCutscene(centerPos, 3.5)
-		applyScreenShake(0.8, 1.5)
-	elseif effectType == "burst" or effectType == "shockwave" then
-		-- Medium gifts -> Light screen shake
-		applyScreenShake(0.4, 0.8)
-	end
+	-- Apply Cinematic Cutscenes & Screen Shake for all gifts
+	playCinematicCameraCutscene(centerPos, 3.5)
+	applyScreenShake(0.8, 1.5)
 
 	-- Trigger specific effect
 	if effectType == "floatUp" then
