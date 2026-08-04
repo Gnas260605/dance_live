@@ -883,10 +883,19 @@ async function triggerStagePreset(presetType, colorHex) {
     notify(`🪩 Đã kích hoạt Stage Preset: ${presetType}`, 'success');
 }
 
+async function testRoseEvent() {
+    const res = await fetch(`${API_BASE}/api/v1/dashboard/mock-gift`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ giftId: 'rose', giftName: 'Rose', tiktokUsername: 'Rose_Gifter', repeatCount: 1, singleCoinValue: 1, totalCoins: 1 })
+    });
+    const data = await res.json();
+    notify('🌹 Test Rose → Flower Rain Effect Triggered!', 'success');
+}
+
 async function testGalaxyEvent() {
     const res = await fetch(`${API_BASE}/api/v1/dashboard/mock-gift`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ giftId: 'galaxy', giftName: 'Galaxy', tiktokUsername: 'VIP_Gifter_01', repeatCount: 1 })
+        body: JSON.stringify({ giftId: 'galaxy', giftName: 'Galaxy', tiktokUsername: 'VIP_Gifter_01', repeatCount: 1, singleCoinValue: 1000, totalCoins: 1000 })
     });
     const data = await res.json();
     notify('🌌 Test Galaxy → Cosmic Cutscene Triggered!', 'warning');
