@@ -81,12 +81,12 @@ const TIKTOK_GIFTS = [
 ];
 
 const DEFAULT_COIN_MILESTONES = [
-    { id: 'milestone_1', label: '🌸 Nhỏ xinh', description: 'Quà 1–9 xu', minCoins: 1, maxCoins: 9, emoji: '🌸', color: '#9ca3af', musicId: 'rbxassetid://1837879082', musicName: 'K-Pop Chill' },
-    { id: 'milestone_2', label: '💙 Dễ thương', description: 'Quà 10–99 xu', minCoins: 10, maxCoins: 99, emoji: '💙', color: '#60a5fa', musicId: 'rbxassetid://9043887091', musicName: 'EDM Festival' },
-    { id: 'milestone_3', label: '💜 Sang chảnh', description: 'Quà 100–999 xu', minCoins: 100, maxCoins: 999, emoji: '💜', color: '#a78bfa', musicId: 'rbxassetid://1847648398', musicName: 'Phonk Bass' },
-    { id: 'milestone_4', label: '⭐ Khủng', description: 'Quà 1000–9999 xu', minCoins: 1000, maxCoins: 9999, emoji: '⭐', color: '#f59e0b', musicId: 'rbxassetid://1847648398', musicName: 'Boss Phonk Drop' },
-    { id: 'milestone_5', label: '🔥 VIP Boss', description: 'Quà 10000–29998 xu', minCoins: 10000, maxCoins: 29998, emoji: '🔥', color: '#ff007f', musicId: 'rbxassetid://1837879082', musicName: 'VIP Hype Track' },
-    { id: 'milestone_6', label: '💎 Legendary', description: 'Quà 29999+ xu (Lion, Universe...)', minCoins: 29999, maxCoins: Infinity, emoji: '💎', color: '#00f2fe', musicId: 'rbxassetid://1847648398', musicName: 'Legendary Anthem' }
+    { id: 'milestone_1', label: '🌸 Nhỏ xinh', description: 'Quà 1–9 xu', minCoins: 1, maxCoins: 9, emoji: '🌸', color: '#ff007f', musicId: 'rbxassetid://1837879082', musicName: 'K-Pop High Beat' },
+    { id: 'milestone_2', label: '⚡ Vừa phải', description: 'Quà 10–99 xu', minCoins: 10, maxCoins: 99, emoji: '⚡', color: '#00f2fe', musicId: 'rbxassetid://1837879082', musicName: 'Cyber EDM Drop' },
+    { id: 'milestone_3', label: '💜 Sang chảnh', description: 'Quà 100–999 xu', minCoins: 100, maxCoins: 999, emoji: '💜', color: '#a78bfa', musicId: 'rbxassetid://1837879082', musicName: 'Phonk Bass' },
+    { id: 'milestone_4', label: '⭐ Khủng', description: 'Quà 1000–9999 xu', minCoins: 1000, maxCoins: 9999, emoji: '⭐', color: '#f59e0b', musicId: 'rbxassetid://1837879082', musicName: 'Boss Phonk Drop' },
+    { id: 'milestone_5', label: '👑 Siêu Khủng', description: 'Quà 10000–29998 xu', minCoins: 10000, maxCoins: 29998, emoji: '👑', color: '#ec4899', musicId: 'rbxassetid://1837879082', musicName: 'Superstar Fanfare' },
+    { id: 'milestone_6', label: '💎 Legendary', description: 'Quà 29999+ xu (Lion, Universe...)', minCoins: 29999, maxCoins: Infinity, emoji: '💎', color: '#00f2fe', musicId: 'rbxassetid://1837879082', musicName: 'Legendary Anthem' }
 ];
 
 // Pre-seeded Action Definitions
