@@ -554,6 +554,16 @@ router.delete('/v1/dashboard/music-library/:trackId', optionalAuth, (req, res) =
     res.json({ success: true, tracks: tenant.customMusic });
 });
 
+router.get('/v1/dashboard/dance', optionalAuth, (req, res) => {
+    const apiKey = getApiKeyFromReq(req);
+    const tenant = getTenant(apiKey);
+    res.json({
+        success: true,
+        selectedDanceId: tenant.selectedDanceId,
+        dances: tenant.customDances || []
+    });
+});
+
 router.post('/v1/dashboard/dance', optionalAuth, (req, res) => {
     const apiKey = getApiKeyFromReq(req);
     const { name, danceId, genre } = req.body;
@@ -564,10 +574,24 @@ router.post('/v1/dashboard/dance', optionalAuth, (req, res) => {
 
     const tenant = getTenant(apiKey);
     tenant.selectedDanceId = formattedId;
+    if (!tenant.customDances) tenant.customDances = [];
     tenant.customDances.unshift({ id: Date.now().toString(), name: name || formattedId, danceId: formattedId, genre: genre || 'PHONK' });
-    addTenantLog(apiKey, `💃 Đã chuyển điệu nhảy mới: ${name || formattedId}`, true);
+    addTenantLog(apiKey, `💃 Đã thêm & chuyển điệu nhảy mới: ${name || formattedId}`, true);
 
     res.json({ success: true, selectedDanceId: formattedId, dances: tenant.customDances });
+});
+
+router.delete('/v1/dashboard/dance/:id', optionalAuth, (req, res) => {
+    const apiKey = getApiKeyFromReq(req);
+    const tenant = getTenant(apiKey);
+    const { id } = req.params;
+
+    const idx = (tenant.customDances || []).findIndex(d => d.id === id);
+    if (idx === -1) return res.status(404).json({ error: 'Dance emote not found' });
+
+    const removed = tenant.customDances.splice(idx, 1)[0];
+    addTenantLog(apiKey, `🗑️ Đã xóa điệu nhảy: "${removed.name}"`);
+    res.json({ success: true, dances: tenant.customDances });
 });
 
 router.post('/v1/dashboard/overlay', optionalAuth, (req, res) => {

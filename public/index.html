@@ -409,19 +409,67 @@
         </div>
     </div>
 
-    <!-- ====== VIEW: Dance Emotes ====== -->
+    <!-- ====== VIEW: Dance Emotes Manager ====== -->
     <div id="view-dance" class="view-panel">
-        <div class="card" style="max-width:600px;">
-            <div class="card-title-bar"><div class="card-title-text">💃 Roblox Dance Emote ID</div></div>
-            <div class="form-group">
-                <label class="form-label">Animation Name</label>
-                <input type="text" id="input-dance-title" class="form-input" value="Viral Phonk Emote">
+        <div class="grid-2col" style="margin-bottom:20px;">
+            <!-- Form: Thêm & Đổi điệu nhảy -->
+            <div class="card">
+                <div class="card-title-bar"><div class="card-title-text"><i class="ri-user-star-line"></i> Tùy Chỉnh Điệu Nhảy Roblox (Animation Asset ID)</div></div>
+                <div class="form-group">
+                    <label class="form-label">Tên điệu nhảy (Dance Name)</label>
+                    <input type="text" id="input-dance-title" class="form-input" placeholder="Phonk Hype Dance">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Roblox Animation Asset ID</label>
+                    <input type="text" id="input-dance-id" class="form-input" placeholder="507771019 hoặc rbxassetid://507771019">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Thể loại / Style</label>
+                    <select id="input-dance-genre" class="form-select">
+                        <option value="PHONK">⚡ Phonk / Hype</option>
+                        <option value="KPOP">🔥 K-Pop Dance</option>
+                        <option value="HIPHOP">🎤 Hip-Hop Breakdance</option>
+                        <option value="CHILL">🌸 Chill Vibing</option>
+                    </select>
+                </div>
+                <div style="display:flex;gap:8px;">
+                    <button class="btn btn-primary" style="flex:1;" onclick="handleAddDanceEmote()"><i class="ri-save-line"></i> Lưu Thư Viện</button>
+                    <button class="btn btn-gold" onclick="handleAddAndSwitchDance()"><i class="ri-play-circle-line"></i> Lưu & Kích Hoạt Ngay</button>
+                </div>
             </div>
-            <div class="form-group">
-                <label class="form-label">Roblox Animation Asset ID</label>
-                <input type="text" id="input-dance-id" class="form-input" value="507771019">
+
+            <!-- Library điệu nhảy mẫu phổ biến (Presets) -->
+            <div class="card">
+                <div class="card-title-bar"><div class="card-title-text"><i class="ri-magic-line"></i> Thư Viện Điệu Nhảy Mẫu Roblox Studio</div></div>
+                <div style="display:flex;flex-direction:column;gap:8px;max-height:280px;overflow-y:auto;">
+                    <div class="preset-chip" onclick="quickSelectPresetDance('Phonk Hype Dance', '507771019', 'PHONK')">
+                        <div style="font-weight:700;color:var(--accent-cyan);">⚡ Phonk Hype Dance</div>
+                        <div style="font-size:11px;color:var(--text-muted);">Asset ID: <code>507771019</code> • Phonk / Hype</div>
+                    </div>
+                    <div class="preset-chip" onclick="quickSelectPresetDance('K-Pop Idol Routine', '507771959', 'KPOP')">
+                        <div style="font-weight:700;color:var(--accent-pink);">🔥 K-Pop Idol Routine</div>
+                        <div style="font-size:11px;color:var(--text-muted);">Asset ID: <code>507771959</code> • K-Pop Dance</div>
+                    </div>
+                    <div class="preset-chip" onclick="quickSelectPresetDance('Trendy Shuffle Dance', '9043887091', 'HIPHOP')">
+                        <div style="font-weight:700;color:var(--accent-gold);">🕺 Trendy Shuffle Dance</div>
+                        <div style="font-size:11px;color:var(--text-muted);">Asset ID: <code>9043887091</code> • Hip-Hop / Shuffle</div>
+                    </div>
+                    <div class="preset-chip" onclick="quickSelectPresetDance('Vibing Chill Groove', '1847648398', 'CHILL')">
+                        <div style="font-weight:700;color:#a78bfa;">🌸 Vibing Chill Groove</div>
+                        <div style="font-size:11px;color:var(--text-muted);">Asset ID: <code>1847648398</code> • Chill</div>
+                    </div>
+                </div>
             </div>
-            <button class="btn btn-primary" onclick="handleAddDanceEmote()">💃 Save Emote</button>
+        </div>
+
+        <!-- Bảng danh sách điệu nhảy trong thư viện -->
+        <div class="card">
+            <div class="card-title-bar">
+                <div class="card-title-text"><div class="card-title-text"><i class="ri-list-check"></i> Danh Sách Điệu Nhảy Đã Lưu</div></div>
+            </div>
+            <div id="dance-library-container">
+                <div style="color:var(--text-muted);padding:20px;text-align:center;">Đang tải danh sách điệu nhảy...</div>
+            </div>
         </div>
     </div>
 
@@ -624,11 +672,101 @@ function navigate(viewId, el) {
     if (viewId === 'gift-catalogue') loadGiftCatalogue();
     if (viewId === 'events-monitor') loadEventsMonitor();
     if (viewId === 'leaderboard') loadLeaderboard();
+    if (viewId === 'dance') loadDanceLibrary();
     if (viewId === 'music') { loadMusicLibrary(); loadCoinMilestones(); }
 }
 
 function escapeHtml(str) {
     return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+let danceLibrary = [];
+let selectedDanceId = null;
+
+async function loadDanceLibrary() {
+    const container = document.getElementById('dance-library-container');
+    try {
+        const res = await fetch(`${API_BASE}/api/v1/dashboard/dance`);
+        const data = await res.json();
+        danceLibrary = data.dances || [];
+        if (data.selectedDanceId) selectedDanceId = data.selectedDanceId;
+        renderDanceLibrary();
+    } catch (e) {
+        if (container) container.innerHTML = `<div style="color:var(--state-danger);">Lỗi tải danh sách điệu nhảy: ${e.message}</div>`;
+    }
+}
+
+function renderDanceLibrary() {
+    const container = document.getElementById('dance-library-container');
+    if (!container) return;
+    if (danceLibrary.length === 0) {
+        container.innerHTML = '<div style="color:var(--text-muted);padding:20px;text-align:center;">Chưa có điệu nhảy tùy chỉnh nào được lưu.</div>';
+        return;
+    }
+    const rows = danceLibrary.map((d, i) => {
+        const isCurrent = (selectedDanceId === d.danceId);
+        return `<tr>
+            <td>${i+1}</td>
+            <td>
+                <strong>${escapeHtml(d.name)}</strong>
+                ${isCurrent ? '<span class="badge badge-cyan" style="margin-left:8px;">● ĐANG DÙNG</span>' : ''}
+            </td>
+            <td><code style="font-size:11px;">${escapeHtml(d.danceId)}</code></td>
+            <td><span class="badge badge-warning">${escapeHtml(d.genre || 'PHONK')}</span></td>
+            <td style="display:flex;gap:6px;">
+                <button class="btn btn-primary btn-xs" onclick="handleSwitchDance('${escapeHtml(d.danceId)}', '${escapeHtml(d.name)}')"><i class="ri-play-circle-line"></i> Kích Hoạt</button>
+                <button class="btn btn-danger btn-xs" onclick="handleDeleteDanceEmote('${d.id}')"><i class="ri-delete-bin-line"></i></button>
+            </td>
+        </tr>`;
+    }).join('');
+    container.innerHTML = `<table class="data-table"><thead><tr><th>#</th><th>Tên Điệu Nhảy</th><th>Animation Asset ID</th><th>Genre</th><th>Thao tác</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+function quickSelectPresetDance(name, assetId, genre) {
+    document.getElementById('input-dance-title').value = name;
+    document.getElementById('input-dance-id').value = assetId;
+    document.getElementById('input-dance-genre').value = genre;
+    notify(`✨ Đã chọn preset: ${name}`, 'primary');
+}
+
+async function handleAddDanceEmote() {
+    const name = document.getElementById('input-dance-title').value.trim();
+    const danceId = document.getElementById('input-dance-id').value.trim();
+    const genre = document.getElementById('input-dance-genre').value;
+    if (!danceId) return notify('Vui lòng nhập Roblox Animation Asset ID', 'danger');
+
+    await fetch(`${API_BASE}/api/v1/dashboard/dance`, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({ name: name || danceId, danceId, genre })
+    });
+    loadDanceLibrary();
+    notify('💃 Đã lưu điệu nhảy mới thành công!', 'success');
+}
+
+async function handleAddAndSwitchDance() {
+    await handleAddDanceEmote();
+    const danceId = document.getElementById('input-dance-id').value.trim();
+    const name = document.getElementById('input-dance-title').value.trim();
+    if (danceId) {
+        handleSwitchDance(danceId, name);
+    }
+}
+
+async function handleSwitchDance(danceId, name) {
+    await fetch(`${API_BASE}/api/v1/dashboard/dance`, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({ name, danceId })
+    });
+    selectedDanceId = danceId.startsWith('rbxassetid://') ? danceId : 'rbxassetid://' + danceId;
+    loadDanceLibrary();
+    notify(`💃 Đã kích hoạt điệu nhảy: ${name || danceId}`, 'success');
+}
+
+async function handleDeleteDanceEmote(id) {
+    if (!confirm('Xóa điệu nhảy này khỏi thư viện?')) return;
+    await fetch(`${API_BASE}/api/v1/dashboard/dance/${id}`, { method:'DELETE' });
+    loadDanceLibrary();
+    notify('🗑️ Đã xóa điệu nhảy khỏi thư viện', 'warning');
 }
 
 function updateOverlayPreview() {
