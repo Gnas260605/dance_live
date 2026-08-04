@@ -189,6 +189,23 @@ async function processNewCommentForTenant(apiKey, tiktokUsername, commentText, i
     const isAlreadyQueued = tenant.playerQueue.some(p => p.robloxUsername.toLowerCase() === verifiedUsername.toLowerCase());
 
     if (isCurrentlyActive || isAlreadyQueued) {
+        // If testing via web simulator, replace active player ID to re-trigger spawn
+        if (tiktokUsername.startsWith('viewer_')) {
+            const freshPlayerData = {
+                id: Date.now().toString() + '_' + Math.random().toString(36).substring(2, 5),
+                robloxUsername: verifiedUsername,
+                tiktokUsername: tiktokUsername,
+                commentText: commentText,
+                animationId: tenant.selectedDanceId || 'rbxassetid://507771019',
+                isVIP: isVIP,
+                giftDetails: giftDetails,
+                timestamp: now
+            };
+            tenant.activePlayer = freshPlayerData;
+            addTenantLog(apiKey, `💬 Test Comment: "${commentText}" → Roblox Avatar Test: "${verifiedUsername}"`);
+            return { success: true, playerData: freshPlayerData };
+        }
+
         addTenantLog(apiKey, `[Bỏ qua] "${verifiedUsername}" đã có trên sân nhảy hoặc trong hàng đợi.`);
         return {
             success: false,
