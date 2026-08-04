@@ -253,10 +253,20 @@ function connectTikTokForTenant(apiKey, uniqueId) {
         const giftName = data.giftName || 'TikTok Gift';
         const giftId = (data.giftId || giftName).toString().toLowerCase().replace(/[^a-z0-9_]/g, '_');
         const giftCount = data.repeatCount || 1;
-        const singleCoinValue = data.giftDetails?.diamondCount || data.diamondCount || 0;
+        let singleCoinValue = data.giftDetails?.diamondCount || data.diamondCount || data.coins || 0;
+
+        if (!singleCoinValue && giftName) {
+            const catalogueEntry = TIKTOK_GIFTS.find(g =>
+                g.name.toLowerCase() === giftName.toLowerCase() ||
+                g.id === giftId ||
+                g.id === giftName.toLowerCase().replace(/[^a-z0-9]/g, '_')
+            );
+            if (catalogueEntry) singleCoinValue = catalogueEntry.coins;
+        }
+
         const totalCoins = singleCoinValue * giftCount;
 
-        addTenantLog(apiKey, `🎁 @${data.uniqueId} tặng ${giftCount}x ${giftName} (${totalCoins}🪙)!`, true);
+        addTenantLog(apiKey, `🎁 @${data.uniqueId} tặng ${giftCount}x ${giftName} (${singleCoinValue}🪙/quà = ${totalCoins}🪙)!`, true);
 
         processGiftEventForTenant(apiKey, {
             giftId,
