@@ -65,6 +65,21 @@ local function getStageSize(stg)
 	return Vector3.new(44, 3, 28)
 end
 
+-- AUTOMATED SCRIPT CLEANUP: Clean up broken third-party scripts that crash the server
+pcall(function()
+	local namesToClean = { "LightConfig", "qPerfectionWeld", "PackageLink", "FlashChance", "CoreSkyboxSystem" }
+	for _, desc in ipairs(Workspace:GetDescendants()) do
+		if desc:IsA("Script") or desc:IsA("LocalScript") or desc:IsA("ModuleScript") then
+			local dName = desc.Name
+			local pName = desc.Parent and desc.Parent.Name or ""
+			local isDecor = desc:FindFirstAncestor("MapDecor") or desc:FindFirstAncestor("StoreAssets")
+			if table.find(namesToClean, dName) or isDecor then
+				pcall(function() desc:Destroy() end)
+			end
+		end
+	end
+end)
+
 -- Ensure Stage Exists
 local stage = Workspace:FindFirstChild("KPopStage") or Workspace:FindFirstChild("DanceStage")
 if not stage then
