@@ -225,12 +225,16 @@ async function processNewCommentForTenant(apiKey, tiktokUsername, commentText, i
 
 function connectTikTokForTenant(apiKey, uniqueId) {
     if (!uniqueId) return;
+    const cleanUniqueId = uniqueId.trim().replace(/^@/, '');
     disconnectTikTokForTenant(apiKey);
     const tenant = getTenant(apiKey);
-    tenant.tiktokUsername = uniqueId;
-    addTenantLog(apiKey, `Đang kết nối tới TikTok Live: @${uniqueId}...`, true);
+    tenant.tiktokUsername = cleanUniqueId;
+    addTenantLog(apiKey, `Đang kết nối tới TikTok Live: @${cleanUniqueId}...`, true);
 
-    const connection = new WebcastPushConnection(uniqueId, {
+    const tiktokConnectorModule = require('tiktok-live-connector');
+    const ConnectionClass = tiktokConnectorModule.TikTokLiveConnection || tiktokConnectorModule.WebcastPushConnection;
+
+    const connection = new ConnectionClass(cleanUniqueId, {
         processInitialData: false,
         enableExtendedGiftInfo: true
     });
@@ -238,10 +242,15 @@ function connectTikTokForTenant(apiKey, uniqueId) {
 
     connection.connect().then(state => {
         tenant.isConnected = true;
-        addTenantLog(apiKey, `🟢 Kết nối thành công tới TikTok Live ID: ${state.roomId}`, true);
+        addTenantLog(apiKey, `🟢 Kết nối thành công tới TikTok Live ID: ${state ? (state.roomId || state.roomInfo?.roomId || 'LiveActive') : 'LiveActive'}`, true);
     }).catch(err => {
         tenant.isConnected = false;
-        addTenantLog(apiKey, `❌ Lỗi kết nối @${uniqueId}: ${err.message}`, true);
+        const msg = err && err.message ? err.message : String(err);
+        if (msg.includes("isn't online") || msg.includes("offline")) {
+            addTenantLog(apiKey, `❌ Lỗi kết nối @${cleanUniqueId}: Kênh TikTok này hiện đang OFF Live (chưa bật nút Phát Live)`, true);
+        } else {
+            addTenantLog(apiKey, `❌ Lỗi kết nối @${cleanUniqueId}: ${msg}`, true);
+        }
     });
 
     connection.on('chat', data => {
