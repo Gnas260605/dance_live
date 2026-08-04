@@ -31,19 +31,19 @@ local SOUND_IDS = {
 }
 
 -- Preload all sounds into SoundService (shared, reused)
-local preloadedSounds = {}
+local preloadSounds = {}
 for name, soundId in pairs(SOUND_IDS) do
 	local snd = Instance.new("Sound")
 	snd.Name = "GiftSFX_" .. name
 	snd.SoundId = soundId
 	snd.Volume = 0.8
 	snd.Parent = SoundService
-	preloadedSounds[name] = snd
+	preloadSounds[name] = snd
 end
 
 -- Play a sound by category name with optional volume override
 local function playGiftSound(soundKey, volume)
-	local snd = preloadedSounds[soundKey]
+	local snd = preloadSounds[soundKey]
 	if snd then
 		snd.Volume = volume or 0.8
 		pcall(function() snd:Play() end)
