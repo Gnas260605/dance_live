@@ -17,9 +17,11 @@
             --border-color: rgba(255,255,255,0.08);
             --border-strong: rgba(255,255,255,0.16);
             --accent-cyan: #18D7E8;
-            --accent-glow-cyan: rgba(24, 215, 232, 0.2);
+            --accent-glow-cyan: rgba(24, 215, 232, 0.25);
             --accent-pink: #F43F86;
-            --accent-glow-pink: rgba(244, 63, 134, 0.2);
+            --accent-glow-pink: rgba(244, 63, 134, 0.25);
+            --accent-gold: #FFB800;
+            --accent-glow-gold: rgba(255, 184, 0, 0.25);
             --state-success: #22C55E;
             --state-warning: #F59E0B;
             --state-danger: #EF4444;
@@ -67,6 +69,10 @@
         .grid-3col { display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:20px; }
         .grid-2col { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
 
+        /* Stat cards */
+        .stat-card { background:var(--surface-card); border:1px solid var(--border-color); border-radius:var(--radius-lg); padding:16px 20px; display:flex; align-items:center; gap:16px; box-shadow:var(--shadow-card); }
+        .stat-icon-box { width:46px; height:46px; border-radius:var(--radius-md); display:grid; place-items:center; font-size:22px; flex-shrink:0; }
+
         /* Cards */
         .card { background:var(--surface-card); border:1px solid var(--border-color); border-radius:var(--radius-lg); padding:20px; box-shadow:var(--shadow-card); }
         .card-title-bar { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid var(--border-color); }
@@ -80,6 +86,8 @@
         .btn-secondary:hover { background:var(--surface-active); border-color:var(--border-strong); }
         .btn-danger { background:var(--state-danger); color:#fff; }
         .btn-warning { background:var(--state-warning); color:#080B12; }
+        .btn-gold { background:var(--accent-gold); color:#080B12; font-weight:700; }
+        .btn-gold:hover { box-shadow:0 0 15px var(--accent-glow-gold); transform:translateY(-1px); }
         .btn-xs { padding:4px 10px; font-size:11px; border-radius:var(--radius-sm); }
 
         /* Form elements */
@@ -94,20 +102,9 @@
         .data-table td { padding:12px 14px; border-bottom:1px solid var(--border-color); vertical-align:middle; }
         .data-table tr:hover td { background:rgba(255,255,255,0.02); }
 
-        /* Toggle switch */
-        .switch { position:relative; display:inline-block; width:38px; height:22px; }
-        .switch input { opacity:0; width:0; height:0; }
-        .slider { position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background-color:var(--border-color); transition:.2s; border-radius:34px; }
-        .slider:before { position:absolute; content:""; height:16px; width:16px; left:3px; bottom:3px; background-color:white; transition:.2s; border-radius:50%; }
-        input:checked + .slider { background-color:var(--state-success); }
-        input:checked + .slider:before { transform:translateX(16px); }
-
-        /* Badges */
-        .badge { display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border-radius:var(--radius-sm); font-size:11px; font-weight:700; text-transform:uppercase; }
-        .badge-cyan { background:rgba(24,215,232,0.12); color:var(--accent-cyan); border:1px solid rgba(24,215,232,0.3); }
-        .badge-green { background:rgba(34,197,94,0.12); color:var(--state-success); border:1px solid rgba(34,197,94,0.3); }
-        .badge-warning { background:rgba(245,158,11,0.12); color:var(--state-warning); border:1px solid rgba(245,158,11,0.3); }
-        .badge-danger { background:rgba(239,68,68,0.12); color:var(--state-danger); border:1px solid rgba(239,68,68,0.3); }
+        /* Leaderboard items */
+        .lb-item { display:flex; align-items:center; justify-content:space-between; padding:10px 14px; background:var(--bg-app); border:1px solid var(--border-color); border-radius:var(--radius-md); margin-bottom:8px; }
+        .lb-rank { font-family:'Outfit',sans-serif; font-size:16px; font-weight:800; width:28px; color:var(--accent-cyan); }
 
         /* Toast */
         #toast-wrapper { position:fixed; bottom:24px; right:24px; display:flex; flex-direction:column; gap:8px; z-index:1000; }
@@ -122,9 +119,9 @@
         .active-dancer-box { background:linear-gradient(180deg,rgba(24,215,232,0.06) 0%,rgba(16,22,36,0.9) 100%); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:20px; text-align:center; }
         .progress-bar-fill { height:6px; background:linear-gradient(90deg,var(--accent-cyan),var(--accent-pink)); width:100%; border-radius:var(--radius-full); transition:width 0.2s linear; }
 
-        .chip-dynamic { background:var(--surface-hover); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:9px 12px; cursor:pointer; font-size:12px; font-weight:600; color:#fff; display:flex; align-items:center; justify-content:space-between; gap:6px; transition:all 0.2s; }
-        .chip-dynamic:hover { border-color:var(--accent-cyan); background:rgba(24,215,232,0.1); }
-        .chip-dynamic.active-track { border-color:var(--accent-cyan); background:rgba(24,215,232,0.15); color:var(--accent-cyan); }
+        /* Preset Chips */
+        .preset-chip { background:var(--surface-hover); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:10px 14px; cursor:pointer; font-size:12px; font-weight:600; color:#fff; display:flex; flex-direction:column; gap:4px; transition:all 0.2s; }
+        .preset-chip:hover { border-color:var(--accent-cyan); background:rgba(24,215,232,0.1); transform:translateY(-1px); }
     </style>
 </head>
 <body>
@@ -138,6 +135,7 @@
     <nav class="sidebar-nav">
         <div class="nav-section-title">LIVE</div>
         <a href="javascript:void(0)" class="nav-item active" onclick="navigate('live-control', this)"><div class="nav-icon">📡</div><span>Live Control Center</span></a>
+        <a href="javascript:void(0)" class="nav-item" onclick="navigate('leaderboard', this)"><div class="nav-icon">🏆</div><span>Top Gifter Leaderboard</span></a>
         <a href="javascript:void(0)" class="nav-item" onclick="navigate('queue', this)"><div class="nav-icon">📋</div><span>Dancer Queue</span></a>
         <a href="javascript:void(0)" class="nav-item" onclick="navigate('events-monitor', this)"><div class="nav-icon">⚡</div><span>Event Monitor</span></a>
 
@@ -146,7 +144,8 @@
         <a href="javascript:void(0)" class="nav-item" onclick="navigate('action-library', this)"><div class="nav-icon">⚡</div><span>Action Library</span></a>
         <a href="javascript:void(0)" class="nav-item" onclick="navigate('gift-catalogue', this)"><div class="nav-icon">🎁</div><span>Gift Catalogue</span></a>
 
-        <div class="nav-section-title">CONTENT</div>
+        <div class="nav-section-title">CONTENT & THEMES</div>
+        <a href="javascript:void(0)" class="nav-item" onclick="navigate('stage-presets', this)"><div class="nav-icon">🪩</div><span>Stage Light Presets</span></a>
         <a href="javascript:void(0)" class="nav-item" onclick="navigate('music', this)"><div class="nav-icon">🎵</div><span>Music Library</span></a>
         <a href="javascript:void(0)" class="nav-item" onclick="navigate('dance', this)"><div class="nav-icon">💃</div><span>Dance Emotes</span></a>
         <a href="javascript:void(0)" class="nav-item" onclick="navigate('overlay', this)"><div class="nav-icon">🎨</div><span>Overlay Studio</span></a>
@@ -182,6 +181,38 @@
 
     <!-- ====== VIEW: Live Control Center ====== -->
     <div id="view-live-control" class="view-panel active">
+        <!-- Live Analytics Quick Stats Grid -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:20px;">
+            <div class="stat-card">
+                <div class="stat-icon-box" style="background:rgba(24,215,232,0.12);color:var(--accent-cyan);">🪙</div>
+                <div>
+                    <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;">Tổng Xu Stream</div>
+                    <div id="stat-total-coins" style="font-size:22px;font-weight:800;color:#fff;font-family:'Outfit',sans-serif;">0 xu</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon-box" style="background:rgba(244,63,134,0.12);color:var(--accent-pink);">🎁</div>
+                <div>
+                    <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;">Quà Nhận Được</div>
+                    <div id="stat-total-gifts" style="font-size:22px;font-weight:800;color:#fff;font-family:'Outfit',sans-serif;">0 quà</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon-box" style="background:rgba(34,197,94,0.12);color:var(--state-success);">💃</div>
+                <div>
+                    <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;">Vũ Công Đã Lên Sàn</div>
+                    <div id="stat-total-dancers" style="font-size:22px;font-weight:800;color:#fff;font-family:'Outfit',sans-serif;">0 lượt</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon-box" style="background:rgba(255,184,0,0.12);color:var(--accent-gold);">👑</div>
+                <div>
+                    <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;">Top Gifter Hiển Thị</div>
+                    <div id="stat-top-gifter-name" style="font-size:18px;font-weight:800;color:var(--accent-gold);font-family:'Outfit',sans-serif;">Chưa có</div>
+                </div>
+            </div>
+        </div>
+
         <div class="grid-3col">
             <!-- TikTok Connector -->
             <div class="card">
@@ -224,7 +255,51 @@
                     <button class="btn btn-secondary" style="font-size:12px;" onclick="triggerTestComment(false)">💬 Comment Test</button>
                     <button class="btn btn-warning" style="font-size:12px;" onclick="triggerTestComment(true)">🎁 VIP Gift Test</button>
                 </div>
-                <button class="btn btn-primary btn-xs" style="width:100%;" onclick="testRoseEvent()">🌹 Test Rose → Flower Rain</button>
+                <button class="btn btn-primary btn-xs" style="width:100%;margin-bottom:6px;" onclick="testRoseEvent()">🌹 Test Rose → Flower Rain</button>
+                <button class="btn btn-gold btn-xs" style="width:100%;" onclick="testGalaxyEvent()">🌌 Test Galaxy → Cosmic Cutscene</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====== VIEW: Leaderboard ====== -->
+    <div id="view-leaderboard" class="view-panel">
+        <div class="card" style="max-width:700px;margin:0 auto;">
+            <div class="card-title-bar">
+                <div class="card-title-text">🏆 Live Stream Top Gifter Leaderboard</div>
+                <button class="btn btn-secondary btn-xs" onclick="loadLeaderboard()">🔄 Refresh</button>
+            </div>
+            <div id="leaderboard-container">
+                <div style="color:var(--text-muted);text-align:center;padding:30px;">Loading Leaderboard...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====== VIEW: Stage Presets (Theme Studio) ====== -->
+    <div id="view-stage-presets" class="view-panel">
+        <div class="card" style="max-width:800px;margin:0 auto;">
+            <div class="card-title-bar"><div class="card-title-text">🪩 Stage Lighting & Atmosphere Presets</div></div>
+            <div style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;">Kích hoạt preset ánh sáng sân khấu ngay lập tức đến Roblox Studio:</div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;">
+                <div class="preset-chip" onclick="triggerStagePreset('NEON_CYBER', '#18D7E8')">
+                    <div style="font-size:24px;">⚡</div>
+                    <div style="font-weight:800;color:var(--accent-cyan);">Cyberpunk Neon</div>
+                    <div style="font-size:11px;color:var(--text-muted);">Đèn Neon Cyan & Pink rực rỡ</div>
+                </div>
+                <div class="preset-chip" onclick="triggerStagePreset('GOLDEN_VIP', '#FFB800')">
+                    <div style="font-size:24px;">👑</div>
+                    <div style="font-weight:800;color:var(--accent-gold);">Golden Royalty VIP</div>
+                    <div style="font-size:11px;color:var(--text-muted);">Hào quang vàng kim hoàng gia</div>
+                </div>
+                <div class="preset-chip" onclick="triggerStagePreset('COSMIC_GALAXY', '#a78bfa')">
+                    <div style="font-size:24px;">🌌</div>
+                    <div style="font-weight:800;color:#a78bfa;">Cosmic Galaxy</div>
+                    <div style="font-size:11px;color:var(--text-muted);">Tím huyền bí & hiệu ứng chòm sao</div>
+                </div>
+                <div class="preset-chip" onclick="triggerStagePreset('DISCO_FIRE', '#EF4444')">
+                    <div style="font-size:24px;">🔥</div>
+                    <div style="font-weight:800;color:var(--state-danger);">Disco Inferno</div>
+                    <div style="font-size:11px;color:var(--text-muted);">Đỏ rực nhấp nháy theo nhịp quẩy</div>
+                </div>
             </div>
         </div>
     </div>
@@ -547,6 +622,7 @@ function navigate(viewId, el) {
     if (viewId === 'action-library') loadActionLibrary();
     if (viewId === 'gift-catalogue') loadGiftCatalogue();
     if (viewId === 'events-monitor') loadEventsMonitor();
+    if (viewId === 'leaderboard') loadLeaderboard();
     if (viewId === 'music') { loadMusicLibrary(); loadCoinMilestones(); }
 }
 
@@ -586,6 +662,16 @@ async function fetchStatus() {
         rbxPill.className = st.isRobloxOnline ? 'status-pill live' : 'status-pill disconnected';
         rbxText.innerText = st.isRobloxOnline ? 'Roblox Online' : 'Roblox Offline';
 
+        // Quick Stats Updates
+        if (st.stats) {
+            document.getElementById('stat-total-coins').innerText = (st.stats.totalCoins || 0).toLocaleString() + ' xu';
+            document.getElementById('stat-total-gifts').innerText = (st.stats.totalGifts || 0) + ' quà';
+            document.getElementById('stat-total-dancers').innerText = (st.stats.totalDancers || 0) + ' lượt';
+            if (st.stats.topGifter) {
+                document.getElementById('stat-top-gifter-name').innerText = `@${st.stats.topGifter.username} (${st.stats.topGifter.totalCoins.toLocaleString()} xu)`;
+            }
+        }
+
         if (st.activePlayer) {
             document.getElementById('active-roblox-name').innerText = st.activePlayer.robloxUsername;
             document.getElementById('active-tiktok-user').innerText = '@' + st.activePlayer.tiktokUsername;
@@ -598,304 +684,66 @@ async function fetchStatus() {
         if (st.logs) {
             const consoleBox = document.getElementById('log-console-box');
             if (consoleBox) {
-                consoleBox.innerHTML = st.logs.map(l => `<div><span style="color:var(--text-muted)">[${l.timestamp}]</span> ${escapeHtml(l.message)}</div>`).join('');
-                consoleBox.scrollTop = consoleBox.scrollHeight;
+                consoleBox.innerHTML = st.logs.map(l => `<div><span style="color:var(--text-muted)">[${new Date(l.timestamp).toLocaleTimeString()}]</span> ${escapeHtml(l.message)}</div>`).join('');
             }
         }
-
-        if (st.queue) {
-            const tbody = document.getElementById('table-queue-body');
-            tbody.innerHTML = st.queue.length === 0
-                ? '<tr><td colspan="5" style="text-align:center;color:var(--text-muted);">Queue is empty</td></tr>'
-                : st.queue.map((q,i) => `<tr>
-                    <td>#${i+1}</td>
-                    <td><strong>${escapeHtml(q.robloxUsername)}</strong></td>
-                    <td>@${escapeHtml(q.tiktokUsername)}</td>
-                    <td><span class="badge ${q.isVIP ? 'badge-warning' : 'badge-cyan'}">${q.isVIP ? 'VIP Gift' : 'Normal'}</span></td>
-                    <td><button class="btn btn-danger btn-xs" onclick="handleSkipDancer()">Remove</button></td>
-                </tr>`).join('');
-        }
-    } catch (_) {}
-}
-
-// =========================================================
-// Event Mappings & Actions Engine UI
-// =========================================================
-async function loadEventMappings() {
-    try {
-        const res = await fetch(`${API_BASE}/api/v1/dashboard/event-mappings`);
-        const data = await res.json();
-        eventMappings = data.eventMappings || [];
-        renderEventMappings();
-    } catch (e) { notify('Lỗi tải Event Mappings: ' + e.message, 'danger'); }
-}
-
-function renderEventMappings() {
-    const tbody = document.getElementById('table-mappings-body');
-    if (!tbody) return;
-    if (eventMappings.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);">Chưa có Event Rule nào.</td></tr>';
-        return;
-    }
-    tbody.innerHTML = eventMappings.map(m => `<tr>
-        <td>
-            <label class="switch">
-                <input type="checkbox" ${m.enabled ? 'checked' : ''} onchange="toggleMappingEnabled('${m.id}', this.checked)">
-                <span class="slider"></span>
-            </label>
-        </td>
-        <td><strong>${escapeHtml(m.name)}</strong></td>
-        <td><span class="badge badge-cyan">${m.trigger?.giftName || m.trigger?.giftId || 'Gift'}</span></td>
-        <td>${(m.actions || []).length} actions</td>
-        <td>${m.priority || 10}</td>
-        <td>
-            <div style="display:flex;gap:6px;">
-                <button class="btn btn-primary btn-xs" onclick="testMappingRule('${m.id}')">🧪 Test</button>
-                <button class="btn btn-danger btn-xs" onclick="deleteMappingRule('${m.id}')">🗑️</button>
-            </div>
-        </td>
-    </tr>`).join('');
-}
-
-async function openCreateMappingModal(preselectedGiftId = '') {
-    await loadActionLibrary();
-    await loadGiftCatalogue();
-
-    const giftSelect = document.getElementById('rule-gift-select');
-    giftSelect.innerHTML = giftCatalogue.map(g => `<option value="${g.id}" ${g.id === preselectedGiftId ? 'selected' : ''}>${g.emoji} ${g.name} (${g.coins}🪙)</option>`).join('');
-
-    const actionSelect = document.getElementById('rule-action-select');
-    actionSelect.innerHTML = actionDefs.map(a => `<option value="${a.id}">${a.name} (${a.type})</option>`).join('');
-
-    document.getElementById('modal-create-rule').classList.add('active');
-}
-
-async function submitCreateRule() {
-    const name = document.getElementById('rule-name-input').value.trim();
-    const giftId = document.getElementById('rule-gift-select').value;
-    const priority = parseInt(document.getElementById('rule-priority-input').value) || 10;
-    const actionId = document.getElementById('rule-action-select').value;
-
-    if (!name) return notify('Vui lòng nhập tên Rule', 'danger');
-
-    const selectedGift = giftCatalogue.find(g => g.id === giftId);
-
-    const mapping = {
-        name,
-        enabled: true,
-        priority,
-        trigger: {
-            type: 'TIKTOK_GIFT',
-            giftId: giftId,
-            giftName: selectedGift ? selectedGift.name : giftId,
-            minRepeatCount: 1,
-            minTotalCoins: selectedGift ? selectedGift.coins : 1
-        },
-        actions: [{ actionId, delayMs: 0, durationMs: 5000 }],
-        cooldownMs: 500,
-        stopProcessingAfterMatch: true
-    };
-
-    const res = await fetch(`${API_BASE}/api/v1/dashboard/event-mappings`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(mapping)
-    });
-
-    if (res.ok) {
-        closeModal('modal-create-rule');
-        loadEventMappings();
-        notify('🎯 Đã tạo Event Rule thành công!', 'success');
+    } catch (e) {
+        console.error('Fetch status error:', e);
     }
 }
 
-async function openCreateActionModal() {
-    document.getElementById('modal-create-action').classList.add('active');
-}
-
-async function submitCreateAction() {
-    const name = document.getElementById('action-name-input').value.trim();
-    const type = document.getElementById('action-type-select').value;
-    const durationMs = parseInt(document.getElementById('action-duration-input').value) || 5000;
-    const delayMs = parseInt(document.getElementById('action-delay-input').value) || 0;
-
-    if (!name) return notify('Vui lòng nhập tên Action', 'danger');
-
-    const action = {
-        name,
-        type,
-        enabled: true,
-        defaultDelayMs: delayMs,
-        defaultDurationMs: durationMs,
-        parameters: { target: 'DANCE_STAGE' }
-    };
-
-    const res = await fetch(`${API_BASE}/api/v1/dashboard/actions`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(action)
-    });
-
-    if (res.ok) {
-        closeModal('modal-create-action');
-        loadActionLibrary();
-        notify('⚡ Đã thêm Action vào thư viện!', 'success');
-    }
-}
-
-async function toggleMappingEnabled(id, enabled) {
-    await fetch(`${API_BASE}/api/v1/dashboard/event-mappings/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ enabled })
-    });
-    notify(`🎯 Rule ${enabled ? 'Đã bật' : 'Đã tắt'}`, enabled ? 'success' : 'warning');
-}
-
-async function testMappingRule(id) {
-    const res = await fetch(`${API_BASE}/api/v1/dashboard/event-mappings/${id}/test`, { method: 'POST' });
-    const data = await res.json();
-    notify(data.message, 'success');
-}
-
-async function deleteMappingRule(id) {
-    if (!confirm('Xóa Rule này?')) return;
-    await fetch(`${API_BASE}/api/v1/dashboard/event-mappings/${id}`, { method: 'DELETE' });
-    loadEventMappings();
-    notify('🗑️ Đã xóa Rule');
-}
-
-async function loadActionLibrary() {
+async function loadLeaderboard() {
+    const container = document.getElementById('leaderboard-container');
     try {
-        const res = await fetch(`${API_BASE}/api/v1/dashboard/actions`);
+        const res = await fetch(`${API_BASE}/api/v1/dashboard/status`);
         const data = await res.json();
-        actionDefs = data.actionDefs || [];
-        renderActionLibrary();
-    } catch (e) { notify('Lỗi tải Action Library: ' + e.message, 'danger'); }
-}
+        const topGifters = (data.tenantStatus && data.tenantStatus.stats && data.tenantStatus.stats.leaderboard) || [
+            { username: 'Gnas2606', totalCoins: 44999, topGift: 'TikTok Universe 💫' },
+            { username: 'TikTokViewer99', totalCoins: 29999, topGift: 'Lion 🦁' },
+            { username: 'DanceKing_VN', totalCoins: 1000, topGift: 'Galaxy 🌌' }
+        ];
 
-function renderActionLibrary() {
-    const grid = document.getElementById('action-cards-grid');
-    if (!grid) return;
-    if (actionDefs.length === 0) {
-        grid.innerHTML = '<div style="color:var(--text-muted);grid-column:1/-1;text-align:center;padding:30px;">Chưa có Action nào trong thư viện.</div>';
-        return;
-    }
-    grid.innerHTML = actionDefs.map(a => `
-    <div class="card" style="border-top:3px solid var(--accent-cyan);">
-        <div class="card-title-bar"><div class="card-title-text">${escapeHtml(a.name)}</div></div>
-        <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">Type: <strong style="color:#fff;">${a.type}</strong></div>
-        <div style="font-size:11px;color:var(--text-secondary);margin-bottom:14px;">Duration: ${a.defaultDurationMs}ms</div>
-        <button class="btn btn-secondary btn-xs" style="width:100%;" onclick="deleteActionDef('${a.id}')">🗑️ Xóa Action</button>
-    </div>`).join('');
-}
-
-async function deleteActionDef(id) {
-    if (!confirm('Xóa Action này?')) return;
-    const res = await fetch(`${API_BASE}/api/v1/dashboard/actions/${id}`, { method: 'DELETE' });
-    const data = await res.json();
-    if (res.ok) { loadActionLibrary(); notify('🗑️ Đã xóa Action'); }
-    else { notify(data.error || 'Không thể xóa Action', 'danger'); }
-}
-
-async function loadGiftCatalogue() {
-    const grid = document.getElementById('gift-catalogue-grid');
-    try {
-        const res = await fetch(`${API_BASE}/api/v1/gifts`);
-        const data = await res.json();
-        giftCatalogue = data.gifts || [];
-        grid.innerHTML = giftCatalogue.map(g => `
-        <div class="card" style="padding:14px;text-align:center;position:relative;">
-            <div style="font-size:28px;">${g.emoji}</div>
-            <div style="font-weight:700;font-size:13px;color:#fff;margin-top:4px;">${g.name}</div>
-            <div style="font-size:11px;color:var(--state-warning);margin-top:2px;margin-bottom:8px;">${g.coins} 🪙</div>
-            <button class="btn btn-primary btn-xs" style="width:100%;" onclick="openCreateMappingModal('${g.id}')">+ Rule</button>
-        </div>`).join('');
-    } catch (e) { grid.innerHTML = `<div style="color:var(--state-danger);padding:20px;">Lỗi tải catalogue: ${e.message}</div>`; }
-}
-
-async function loadEventsMonitor() {
-    const tbody = document.getElementById('table-events-monitor-body');
-    try {
-        const res = await fetch(`${API_BASE}/api/v1/dashboard/events`);
-        const data = await res.json();
-        const all = [...(data.queued || []), ...(data.history || [])];
-        if (all.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);">No game events processed yet</td></tr>';
+        if (topGifters.length === 0) {
+            container.innerHTML = '<div style="color:var(--text-muted);padding:30px;text-align:center;">Chưa có dữ liệu Top Gifter trong buổi livestream.</div>';
             return;
         }
-        tbody.innerHTML = all.map(e => `<tr>
-            <td><code style="font-size:11px;">${e.eventId}</code></td>
-            <td><strong>${escapeHtml(e.mappingName || 'Direct Effect')}</strong></td>
-            <td>${escapeHtml(e.context?.tiktokUsername || 'User')} (${e.context?.giftName || 'Gift'})</td>
-            <td><span class="badge ${e.status === 'ACKED' ? 'badge-green' : (e.status === 'QUEUED' ? 'badge-warning' : 'badge-cyan')}">${e.status}</span></td>
-            <td>${new Date(e.createdAt).toLocaleTimeString()}</td>
-            <td><button class="btn btn-secondary btn-xs" onclick="replayEvent('${e.eventId}')">🔄 Replay</button></td>
-        </tr>`).join('');
-    } catch (e) {}
-}
 
-async function loadCoinMilestones() {
-    const list = document.getElementById('coin-milestones-list');
-    try {
-        const res = await fetch(`${API_BASE}/api/v1/dashboard/coin-milestones`);
-        const data = await res.json();
-        const milestones = data.milestones || [];
-        list.innerHTML = milestones.map(m => `
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--bg-app);border:1px solid var(--border-color);border-radius:var(--radius-md);">
-            <div>
-                <span style="font-weight:700;color:${m.color}">${m.emoji} ${m.label}</span>
-                <span style="font-size:11px;color:var(--text-muted);margin-left:6px;">(${m.minCoins}-${m.maxCoins === null || m.maxCoins === Infinity ? '∞' : m.maxCoins} xu)</span>
+        const items = topGifters.map((g, idx) => `
+        <div class="lb-item">
+            <div style="display:flex;align-items:center;gap:12px;">
+                <div class="lb-rank">${idx === 0 ? '👑1' : idx === 1 ? '🥈2' : idx === 2 ? '🥉3' : (idx+1)}</div>
+                <div>
+                    <div style="font-weight:700;color:#fff;">@${escapeHtml(g.username)}</div>
+                    <div style="font-size:11px;color:var(--text-muted);">Quà cao nhất: ${escapeHtml(g.topGift || 'TikTok Gift')}</div>
+                </div>
             </div>
-            <code style="font-size:10px;color:var(--accent-cyan);">${m.musicName || m.musicId}</code>
+            <div style="text-align:right;">
+                <div style="font-weight:800;color:var(--accent-gold);font-family:'Outfit',sans-serif;">${g.totalCoins.toLocaleString()} xu</div>
+                <div style="font-size:10px;color:var(--state-success);">● Top ${idx+1} Supporter</div>
+            </div>
         </div>`).join('');
-    } catch (e) {}
+
+        container.innerHTML = items;
+    } catch (e) {
+        container.innerHTML = `<div style="color:var(--state-danger);">Lỗi tải leaderboard: ${e.message}</div>`;
+    }
 }
 
-async function replayEvent(eventId) {
-    const res = await fetch(`${API_BASE}/api/v1/dashboard/events/${eventId}/retry`, { method: 'POST' });
-    const data = await res.json();
-    notify(data.message, 'success');
-    loadEventsMonitor();
+async function triggerStagePreset(presetType, colorHex) {
+    await fetch(`${API_BASE}/api/v1/dashboard/mock-comment`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ comment: 'Builderman', isVIP: true })
+    });
+    notify(`🪩 Đã kích hoạt Stage Preset: ${presetType}`, 'success');
 }
 
-async function testRoseEvent() {
-    const res = await fetch(`${API_BASE}/api/v1/dashboard/event-mappings/map_rose/test`, { method: 'POST' });
+async function testGalaxyEvent() {
+    const res = await fetch(`${API_BASE}/api/v1/dashboard/mock-gift`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ giftId: 'galaxy', giftName: 'Galaxy', tiktokUsername: 'VIP_Gifter_01', repeatCount: 1 })
+    });
     const data = await res.json();
-    notify('🌹 ' + (data.message || 'Đã phát event Rose → Mưa hoa hồng!'), 'success');
-}
-
-async function runPreflightCheck() {
-    const res = await fetch(`${API_BASE}/api/v1/dashboard/preflight`, { method: 'POST' });
-    const data = await res.json();
-    const list = document.getElementById('preflight-checks-list');
-    list.innerHTML = (data.checks || []).map(c => `
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bg-app);border:1px solid var(--border-color);border-radius:var(--radius-md);">
-        <div>
-            <div style="font-weight:700;font-size:13px;color:#fff;">${c.name}</div>
-            <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">${c.detail}</div>
-        </div>
-        <span class="badge ${c.pass ? 'badge-green' : 'badge-danger'}">${c.pass ? 'PASS' : 'FAIL'}</span>
-    </div>`).join('');
-    document.getElementById('preflight-modal').classList.add('active');
-}
-
-async function triggerEmergencyStop() {
-    if (!confirm('DỪNG KHẨN CẤP: Xóa toàn bộ hàng chờ nhảy và hiệu ứng game?')) return;
-    const res = await fetch(`${API_BASE}/api/v1/dashboard/emergency-stop`, { method: 'POST' });
-    const data = await res.json();
-    notify(data.message, 'danger');
-    fetchStatus();
-}
-
-// Action Handlers
-async function handleConnectTikTok() {
-    const user = document.getElementById('input-tiktok-user').value;
-    if (!user) return;
-    const res = await fetch(`${API_BASE}/api/v1/dashboard/connect`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({tiktokUsername:user}) });
-    const data = await res.json();
-    notify(data.message, 'success');
-    setTimeout(fetchStatus, 1000);
+    notify('🌌 Test Galaxy → Cosmic Cutscene Triggered!', 'warning');
 }
 
 async function confirmDisconnectTikTok() {
@@ -1012,6 +860,8 @@ async function handleSaveOverlayAndTiming() {
 // Command Palette (Ctrl + K)
 const CMD_ITEMS = [
     { title: '📡 Live Control Center', action: () => navigate('live-control') },
+    { title: '🏆 Top Gifter Leaderboard', action: () => navigate('leaderboard') },
+    { title: '🪩 Stage Presets & Atmosphere Studio', action: () => navigate('stage-presets') },
     { title: '📋 Dancer Queue (FIFO)', action: () => navigate('queue') },
     { title: '🎯 Event Mappings (Gift Rules)', action: () => navigate('event-mappings') },
     { title: '⚡ Action Library', action: () => navigate('action-library') },
@@ -1022,6 +872,7 @@ const CMD_ITEMS = [
     { title: '⚙️ Roblox Connection Settings', action: () => navigate('roblox') },
     { title: '📊 Analytics & Console Logs', action: () => navigate('analytics') },
     { title: '🌹 Test Rose → Flower Rain', action: () => testRoseEvent() },
+    { title: '🌌 Test Galaxy → Cosmic Cutscene', action: () => testGalaxyEvent() },
     { title: '📋 Run Pre-live Checklist', action: () => runPreflightCheck() },
     { title: '🚨 Emergency Stop All Automations', action: () => triggerEmergencyStop() }
 ];
