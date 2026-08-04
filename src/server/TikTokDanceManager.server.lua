@@ -176,6 +176,10 @@ local function changeStageMusic(musicAssetId)
 		if not string.find(musicAssetId, "rbxassetid://") then
 			musicAssetId = "rbxassetid://" .. musicAssetId
 		end
+		if stageMusic.SoundId == musicAssetId and stageMusic.IsPlaying then
+			return -- Already playing this track, don't restart loop!
+		end
+		stageMusic:Stop()
 		stageMusic.SoundId = musicAssetId
 		stageMusic.Volume = 1.0
 		stageMusic.Looped = true
