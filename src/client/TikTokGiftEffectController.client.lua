@@ -31,14 +31,14 @@ local SOUND_IDS = {
 }
 
 -- Preload all sounds into SoundService (shared, reused)
-local preloadSounds = {}
+local preloadedSounds = {}
 for name, soundId in pairs(SOUND_IDS) do
 	local snd = Instance.new("Sound")
 	snd.Name = "GiftSFX_" .. name
 	snd.SoundId = soundId
 	snd.Volume = 0.8
 	snd.Parent = SoundService
-	preloadSounds[name] = snd
+	preloadedSounds[name] = snd
 end
 
 -- Play a sound by category name with optional volume override

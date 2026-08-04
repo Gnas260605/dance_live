@@ -191,10 +191,6 @@ local ActionHandlers = {}
 -- 1. FLOWER_RAIN Action Handler
 ActionHandlers.FLOWER_RAIN = function(action, context)
 	pcall(function()
-		local params = action.parameters or {}
-		local count = math.clamp(tonumber(params.count) or 25, 5, 100)
-		local duration = (action.durationMs or 5000) / 1000
-
 		local pos = getStageCFrame(stage).Position
 		if giftEffectEvent then
 			giftEffectEvent:FireAllClients({ giftId = "rose", giftName = "Rose" }, context.tiktokUsername or "Viewer", pos, true)
@@ -223,6 +219,10 @@ ActionHandlers.CHANGE_STAGE_LIGHT = function(action, context)
 		ledWall.Color = Color3.fromRGB(0, 242, 254)
 		if spotLight then spotLight.Brightness = 12 end
 
+		if giftEffectEvent then
+			giftEffectEvent:FireAllClients({ giftId = "galaxy", giftName = "Galaxy" }, context.tiktokUsername or "Viewer", getStageCFrame(stage).Position, true)
+		end
+
 		task.delay(duration, function()
 			pcall(function()
 				ledWall.Color = origColor
@@ -232,7 +232,37 @@ ActionHandlers.CHANGE_STAGE_LIGHT = function(action, context)
 	end)
 end
 
--- 4. SHOW_MESSAGE Action Handler
+-- 4. FIREWORKS Action Handler
+ActionHandlers.FIREWORKS = function(action, context)
+	pcall(function()
+		local pos = getStageCFrame(stage).Position
+		if giftEffectEvent then
+			giftEffectEvent:FireAllClients({ giftId = "fireworks", giftName = "Fireworks" }, context.tiktokUsername or "Viewer", pos, true)
+		end
+	end)
+end
+
+-- 5. DRAGON_AURA Action Handler
+ActionHandlers.DRAGON_AURA = function(action, context)
+	pcall(function()
+		local pos = getStageCFrame(stage).Position
+		if giftEffectEvent then
+			giftEffectEvent:FireAllClients({ giftId = "dragon", giftName = "Dragon" }, context.tiktokUsername or "Viewer", pos, true)
+		end
+	end)
+end
+
+-- 6. LION_KING Action Handler
+ActionHandlers.LION_KING = function(action, context)
+	pcall(function()
+		local pos = getStageCFrame(stage).Position
+		if giftEffectEvent then
+			giftEffectEvent:FireAllClients({ giftId = "lion", giftName = "Lion King" }, context.tiktokUsername or "Viewer", pos, true)
+		end
+	end)
+end
+
+-- 7. SHOW_MESSAGE Action Handler
 ActionHandlers.SHOW_MESSAGE = function(action, context)
 	pcall(function()
 		local params = action.parameters or {}
@@ -241,7 +271,7 @@ ActionHandlers.SHOW_MESSAGE = function(action, context)
 	end)
 end
 
--- 5. CHANGE_MUSIC Action Handler
+-- 8. CHANGE_MUSIC Action Handler
 ActionHandlers.CHANGE_MUSIC = function(action, context)
 	pcall(function()
 		local params = action.parameters or {}
