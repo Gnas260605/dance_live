@@ -613,13 +613,23 @@ async function saveMilestone(milestoneId) {
 // ===========================
 // Music Switcher (dynamic chips from library)
 // ===========================
-async function quickSelectMusic(musicId, trackName, chipId) {
+function escapeHtml(str) {
+    return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+async function quickSelectMusic(trackId) {
+    const track = musicLibrary.find(t => t.id === trackId || t.musicId === trackId);
+    if (!track) return;
+    const musicId = track.musicId;
+    const trackName = track.name;
+    const chipId = 'chip_' + track.id;
+
     playWebSoundFX(880, 0.2);
-    // Clear old active chip
     document.querySelectorAll('.chip-dynamic, .music-chip').forEach(c => c.classList.remove('active-track'));
     const chip = document.getElementById(chipId);
     if (chip) chip.classList.add('active-track');
     currentActiveChipId = chipId;
+
     try {
         await fetch(`${API_BASE}/api/v1/dashboard/music`, {
             method: 'POST',
@@ -628,7 +638,6 @@ async function quickSelectMusic(musicId, trackName, chipId) {
         });
         currentMusicId = musicId.startsWith('rbxassetid://') ? musicId : 'rbxassetid://' + musicId;
         notify(`🎵 Phát: ${trackName}`, 'success');
-        // Re-render library to update Now Playing badge
         renderMusicLibrary();
     } catch (e) { notify('Error: ' + e.message, 'danger'); }
 }
@@ -638,18 +647,16 @@ function renderChipGrid() {
     if (!grid) return;
     if (musicLibrary.length === 0) {
         grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--text-muted);font-size:12px;">
-            Chưa có nhạc — <a href="#" onclick="navigate('music', document.querySelector('[onclick*=music]'))" style="color:var(--accent-primary);">Thêm bài nhạc</a>
+            Chưa có nhạc — <a href="javascript:void(0)" onclick="navigate('music')" style="color:var(--accent-primary);">Thêm bài nhạc</a>
         </div>`;
         return;
     }
-    // Show up to 6 most recent tracks as chips
     const chips = musicLibrary.slice(0, 6);
     grid.innerHTML = chips.map(t => {
         const isPlaying = t.musicId === currentMusicId;
         const chipId = 'chip_' + t.id;
-        return `<div class="chip-dynamic ${isPlaying ? 'active-track' : ''}" id="${chipId}"
-            onclick="quickSelectMusic('${t.musicId}','${t.name.replace(/'/g, '\\'')}','${chipId}')">
-            <span class="chip-name">${t.name}</span><span>▶</span>
+        return `<div class="chip-dynamic ${isPlaying ? 'active-track' : ''}" id="${chipId}" onclick="quickSelectMusic('${t.id}')">
+            <span class="chip-name">${escapeHtml(t.name)}</span><span>▶</span>
         </div>`;
     }).join('');
 }
@@ -789,15 +796,15 @@ function renderMusicLibrary() {
         return `<tr>
             <td style="color:var(--text-muted);">${i + 1}</td>
             <td>
-                <div class="track-name">${t.name}</div>
+                <div class="track-name">${escapeHtml(t.name)}</div>
                 ${isPlaying ? '<div style="margin-top:4px;"><span class="badge-playing">🔴 Đang Phát</span></div>' : ''}
             </td>
             <td class="track-id">${shortId}</td>
             <td style="color:var(--text-muted);font-size:11px;">${addedDate}</td>
             <td>
                 <div style="display:flex;gap:6px;">
-                    <button class="btn btn-primary btn-xs" onclick="handlePlayTrack('${t.id}','${t.musicId}','${t.name.replace(/'/g, '\\'')}')">▶ Phát</button>
-                    <button class="btn btn-danger btn-xs" onclick="handleDeleteTrack('${t.id}','${t.name.replace(/'/g, '\\'')}')">🗑️</button>
+                    <button class="btn btn-primary btn-xs" onclick="handlePlayTrack('${t.id}')">▶ Phát</button>
+                    <button class="btn btn-danger btn-xs" onclick="handleDeleteTrack('${t.id}')">🗑️</button>
                 </div>
             </td>
         </tr>`;
@@ -879,12 +886,14 @@ async function handleAddAndPlayTrack() {
     } catch (e) { errEl.innerText = 'Lỗi phát nhạc: ' + e.message; errEl.style.display = 'block'; }
 }
 
-async function handlePlayTrack(trackId, musicId, trackName) {
+async function handlePlayTrack(trackId) {
+    const track = musicLibrary.find(t => t.id === trackId);
+    if (!track) return;
     try {
         const res = await fetch(`${API_BASE}/api/v1/dashboard/music`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name: trackName, musicId })
+            body: JSON.stringify({ name: track.name, musicId: track.musicId })
         });
         const data = await res.json();
         if (data.success) {
@@ -892,13 +901,15 @@ async function handlePlayTrack(trackId, musicId, trackName) {
             renderMusicLibrary();
             renderChipGrid();
             playWebSoundFX(880, 0.2);
-            notify(`🎵 Phát: "${trackName}" trong Roblox`, 'success');
+            notify(`🎵 Phát: "${track.name}" trong Roblox`, 'success');
         }
     } catch (e) { notify('Lỗi: ' + e.message, 'danger'); }
 }
 
-async function handleDeleteTrack(trackId, trackName) {
-    if (!confirm(`Xóa "${trackName}" khỏi Music Library?`)) return;
+async function handleDeleteTrack(trackId) {
+    const track = musicLibrary.find(t => t.id === trackId);
+    if (!track) return;
+    if (!confirm(`Xóa "${track.name}" khỏi Music Library?`)) return;
     try {
         const res = await fetch(`${API_BASE}/api/v1/dashboard/music-library/${trackId}`, { method: 'DELETE' });
         const data = await res.json();
@@ -906,7 +917,7 @@ async function handleDeleteTrack(trackId, trackName) {
             musicLibrary = data.tracks;
             renderMusicLibrary();
             renderChipGrid();
-            notify(`🗑️ Đã xóa "${trackName}" khỏi library.`);
+            notify(`🗑️ Đã xóa "${track.name}" khỏi library.`);
         }
     } catch (e) { notify('Lỗi xóa: ' + e.message, 'danger'); }
 }
