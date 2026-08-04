@@ -42,6 +42,14 @@ if not focusEvent then
 	focusEvent.Parent = ReplicatedStorage
 end
 
+-- Remote Event for Client-side Gift Visual & Audio Effects
+local giftEffectEvent = ReplicatedStorage:FindFirstChild("GiftEffectEvent")
+if not giftEffectEvent then
+	giftEffectEvent = Instance.new("RemoteEvent")
+	giftEffectEvent.Name = "GiftEffectEvent"
+	giftEffectEvent.Parent = ReplicatedStorage
+end
+
 -- Stage Helpers
 local function getStageCFrame(stg)
 	if not stg then return CFrame.new(0, 1.5, 0) end
@@ -187,58 +195,20 @@ ActionHandlers.FLOWER_RAIN = function(action, context)
 		local count = math.clamp(tonumber(params.count) or 25, 5, 100)
 		local duration = (action.durationMs or 5000) / 1000
 
-		local attachment = Instance.new("Attachment")
-		attachment.Position = getStageCFrame(stage).Position + Vector3.new(0, 15, 0)
-		attachment.Parent = Workspace.Terrain
-
-		local emitter = Instance.new("ParticleEmitter")
-		emitter.Texture = "rbxassetid://243664672" -- Flower / Petal texture
-		emitter.Color = ColorSequence.new(Color3.fromRGB(255, 0, 127), Color3.fromRGB(255, 182, 193))
-		emitter.Size = NumberSequence.new({NumberSequenceKeypoint.new(0, 1.8), NumberSequenceKeypoint.new(1, 0.4)})
-		emitter.Speed = NumberRange.new(8, 18)
-		emitter.Lifetime = NumberRange.new(2.5, 4.0)
-		emitter.Rate = count
-		emitter.Parent = attachment
-
-		task.delay(duration, function()
-			pcall(function() emitter.Enabled = false end)
-			task.wait(4)
-			pcall(function() attachment:Destroy() end)
-		end)
+		local pos = getStageCFrame(stage).Position
+		if giftEffectEvent then
+			giftEffectEvent:FireAllClients({ giftId = "rose", giftName = "Rose" }, context.tiktokUsername or "Viewer", pos, true)
+		end
 	end)
 end
 
 -- 2. HEART_BURST Action Handler
 ActionHandlers.HEART_BURST = function(action, context)
 	pcall(function()
-		local params = action.parameters or {}
-		local count = math.clamp(tonumber(params.count) or 20, 5, 60)
-		local duration = (action.durationMs or 4000) / 1000
-
-		local targetPos = getStageCFrame(stage).Position + Vector3.new(0, 5, 0)
-		if #activeDancersList > 0 and activeDancersList[#activeDancersList].model then
-			local hrp = activeDancersList[#activeDancersList].model:FindFirstChild("HumanoidRootPart")
-			if hrp then targetPos = hrp.Position end
+		local pos = getStageCFrame(stage).Position
+		if giftEffectEvent then
+			giftEffectEvent:FireAllClients({ giftId = "hand_heart", giftName = "Hand Heart" }, context.tiktokUsername or "Viewer", pos, true)
 		end
-
-		local attachment = Instance.new("Attachment")
-		attachment.Position = targetPos
-		attachment.Parent = Workspace.Terrain
-
-		local emitter = Instance.new("ParticleEmitter")
-		emitter.Texture = "rbxassetid://258128463" -- Heart texture
-		emitter.Color = ColorSequence.new(Color3.fromRGB(255, 20, 147), Color3.fromRGB(255, 105, 180))
-		emitter.Size = NumberSequence.new({NumberSequenceKeypoint.new(0, 2.5), NumberSequenceKeypoint.new(1, 0.2)})
-		emitter.Speed = NumberRange.new(12, 25)
-		emitter.Lifetime = NumberRange.new(1.5, 3.0)
-		emitter.Rate = count
-		emitter.Parent = attachment
-
-		task.delay(duration, function()
-			pcall(function() emitter.Enabled = false end)
-			task.wait(3)
-			pcall(function() attachment:Destroy() end)
-		end)
 	end)
 end
 
@@ -423,6 +393,12 @@ local function spawnDancer(robloxUsername, tiktokUsername, animationId, isVIP, g
 
 	createNametag(characterModel, tiktokUsername, robloxUsername, isVIP)
 	playDanceAnimation(characterModel, animationId)
+
+	if giftDetails and giftEffectEvent then
+		pcall(function()
+			giftEffectEvent:FireAllClients(giftDetails, tiktokUsername, targetCFrame.Position, isVIP)
+		end)
+	end
 
 	if focusEvent then
 		pcall(function()
