@@ -499,7 +499,7 @@ task.spawn(function()
 				jobId = tostring(game.JobId),
 				scriptVer = "1.0.0"
 			})
-			HttpService:PostAsync(heartbeatUrl, payload, Enum.HttpContentType.ApplicationJson)
+			HttpService:PostAsync(heartbeatUrl, payload, Enum.HttpContentType.ApplicationJson, false, { ["bypass-tunnel-reminder"] = "true" })
 		end)
 		task.wait(10)
 	end
@@ -511,11 +511,12 @@ task.spawn(function()
 
 	local playerUrl = BASE_URL .. "/current-player"
 	local eventsUrl = BASE_URL .. "/game-events"
+	local customHeaders = { ["bypass-tunnel-reminder"] = "true" }
 
 	while true do
 		-- 1. Poll Current Active Player (Dancer Queue)
 		pcall(function()
-			local response = HttpService:GetAsync(playerUrl)
+			local response = HttpService:GetAsync(playerUrl, false, customHeaders)
 			local data = HttpService:JSONDecode(response)
 			if data and data.success then
 				if data.danceDuration then danceDurationSeconds = tonumber(data.danceDuration) or 12 end
@@ -541,7 +542,7 @@ task.spawn(function()
 
 		-- 2. Poll Game Events Queue (Gift Effects, Lights, Animations)
 		pcall(function()
-			local response = HttpService:GetAsync(eventsUrl)
+			local response = HttpService:GetAsync(eventsUrl, false, customHeaders)
 			local data = HttpService:JSONDecode(response)
 			if data and data.success and data.events then
 				for _, gameEvent in ipairs(data.events) do
