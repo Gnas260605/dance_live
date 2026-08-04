@@ -28,82 +28,65 @@ const DEFAULT_THEMES = {
     }
 };
 
-// Full TikTok Live Gift Catalogue with coin values and categories
+// Official TikTok Live Gift Catalogue with exact Coin values
 const TIKTOK_GIFTS = [
-    // Tier 1 - Free/Very Small (1-9 coins)
+    // Tier 1 - Very Small (1-9 xu)
     { id: 'rose',           name: 'Rose',            emoji: '🌹', coins: 1,      category: 'tier1' },
-    { id: 'heart',          name: 'Finger Heart',    emoji: '🤞', coins: 1,      category: 'tier1' },
-    { id: 'rainbow_puke',   name: 'Rainbow Puke',    emoji: '🌈', coins: 1,      category: 'tier1' },
     { id: 'like',           name: 'TikTok Like',     emoji: '👍', coins: 1,      category: 'tier1' },
+    { id: 'ice_cream',      name: 'Ice Cream',       emoji: '🍦', coins: 1,      category: 'tier1' },
     { id: 'sunglasses',     name: 'Sunglasses',      emoji: '😎', coins: 1,      category: 'tier1' },
     { id: 'hat',            name: 'Cowboy Hat',      emoji: '🤠', coins: 1,      category: 'tier1' },
     { id: 'bell',           name: 'Bell',            emoji: '🔔', coins: 1,      category: 'tier1' },
+    { id: 'heart',          name: 'Finger Heart',    emoji: '🤞', coins: 5,      category: 'tier1' },
     { id: 'chocolate',      name: 'Chocolate',       emoji: '🍫', coins: 5,      category: 'tier1' },
     { id: 'hands',          name: 'Two Clapping',    emoji: '👏', coins: 5,      category: 'tier1' },
 
-    // Tier 2 - Small (10-99 coins)
+    // Tier 2 - Small (10-99 xu)
+    { id: 'lollipop',       name: 'Lollipop',        emoji: '🍭', coins: 10,     category: 'tier2' },
+    { id: 'perfume',        name: 'Perfume',         emoji: '🌸', coins: 20,     category: 'tier2' },
     { id: 'donut',          name: 'Donut',           emoji: '🍩', coins: 30,     category: 'tier2' },
-    { id: 'ice_cream',      name: 'Ice Cream',       emoji: '🍦', coins: 30,     category: 'tier2' },
-    { id: 'lollipop',       name: 'Lollipop',        emoji: '🍭', coins: 30,     category: 'tier2' },
-    { id: 'perfume',        name: 'Perfume',         emoji: '🌸', coins: 35,     category: 'tier2' },
-    { id: 'cap',            name: 'TikTok Cap',      emoji: '🧢', coins: 49,     category: 'tier2' },
     { id: 'mic',            name: 'Mic',             emoji: '🎤', coins: 50,     category: 'tier2' },
-    { id: 'soccer',         name: 'Soccer Ball',     emoji: '⚽', coins: 55,     category: 'tier2' },
-    { id: 'hand_heart',     name: 'Hand Heart',      emoji: '🫶', coins: 55,     category: 'tier2' },
     { id: 'balloon',        name: 'Balloon',         emoji: '🎈', coins: 65,     category: 'tier2' },
     { id: 'cake',           name: 'Birthday Cake',   emoji: '🎂', coins: 69,     category: 'tier2' },
     { id: 'paper_crane',    name: 'Paper Crane',     emoji: '🕊️', coins: 99,     category: 'tier2' },
+    { id: 'cap',            name: 'TikTok Cap',      emoji: '🧢', coins: 99,     category: 'tier2' },
 
-    // Tier 3 - Medium (100-499 coins)
+    // Tier 3 - Medium (100-999 xu)
+    { id: 'hand_heart',     name: 'Hand Heart',      emoji: '🫶', coins: 100,    category: 'tier3' },
     { id: 'friendship',     name: 'Friendship',      emoji: '🤝', coins: 100,    category: 'tier3' },
-    { id: 'concert',        name: 'Concert',         emoji: '🎸', coins: 100,    category: 'tier3' },
-    { id: 'planet',         name: 'Planet',          emoji: '🪐', coins: 100,    category: 'tier3' },
-    { id: 'elephant',       name: 'Elephant',        emoji: '🐘', coins: 100,    category: 'tier3' },
-    { id: 'cheer',          name: 'Cheer',           emoji: '🥂', coins: 150,    category: 'tier3' },
-    { id: 'crown',          name: 'Crown',           emoji: '👑', coins: 200,    category: 'tier3' },
     { id: 'gem',            name: 'Gem',             emoji: '💎', coins: 200,    category: 'tier3' },
     { id: 'boxing',         name: 'Boxing Gloves',   emoji: '🥊', coins: 200,    category: 'tier3' },
-    { id: 'dj_decks',       name: 'DJ Decks',        emoji: '🎧', coins: 200,    category: 'tier3' },
     { id: 'star_meteor',    name: 'Shooting Star',   emoji: '🌠', coins: 299,    category: 'tier3' },
-    { id: 'diamond',        name: 'Diamond',         emoji: '💍', coins: 399,    category: 'tier3' },
+    { id: 'diamond',        name: 'Diamond',         emoji: '💍', coins: 300,    category: 'tier3' },
     { id: 'thunder',        name: 'Thunder',         emoji: '⚡', coins: 400,    category: 'tier3' },
-    { id: 'football',       name: 'Football',        emoji: '🏈', coins: 499,    category: 'tier3' },
+    { id: 'concert',        name: 'Concert',         emoji: '🎸', coins: 500,    category: 'tier3' },
+    { id: 'fire',           name: 'Fire',            emoji: '🔥', coins: 500,    category: 'tier3' },
 
-    // Tier 4 - Big (500-1999 coins)
-    { id: 'galaxy',         name: 'Galaxy',          emoji: '🌌', coins: 500,    category: 'tier4' },
-    { id: 'fire',           name: 'Fire',            emoji: '🔥', coins: 500,    category: 'tier4' },
-    { id: 'transformer',    name: 'Transformer',     emoji: '🤖', coins: 500,    category: 'tier4' },
-    { id: 'eagle',          name: 'Eagle',           emoji: '🦅', coins: 500,    category: 'tier4' },
-    { id: 'rainbow',        name: 'Rainbow',         emoji: '🌈', coins: 699,    category: 'tier4' },
-    { id: 'tiger',          name: 'Tiger',           emoji: '🐯', coins: 999,    category: 'tier4' },
-    { id: 'buffalo',        name: 'Buffalo',         emoji: '🐃', coins: 999,    category: 'tier4' },
-    { id: 'gorilla',        name: 'Gorilla',         emoji: '🦍', coins: 1000,   category: 'tier4' },
-    { id: 'castle',         name: 'Castle',          emoji: '🏰', coins: 1000,   category: 'tier4' },
-    { id: 'sports_car',     name: 'Sports Car',      emoji: '🏎️', coins: 1000,   category: 'tier4' },
-    { id: 'jet',            name: 'Jet',             emoji: '✈️', coins: 1000,   category: 'tier4' },
-    { id: 'moon_crystal',   name: 'Moon Crystal',    emoji: '🌙', coins: 1500,   category: 'tier4' },
-    { id: 'boxing_king',    name: 'Boxing King',     emoji: '🥇', coins: 1999,   category: 'tier4' },
+    // Tier 4 - Big (1000-9999 xu)
+    { id: 'galaxy',         name: 'Galaxy',          emoji: '🌌', coins: 1000,   category: 'tier4' },
+    { id: 'fireworks',      name: 'Fireworks',       emoji: '🎆', coins: 1088,   category: 'tier4' },
+    { id: 'crown',          name: 'Crown',           emoji: '👑', coins: 1500,   category: 'tier4' },
+    { id: 'submarine',      name: 'Submarine',       emoji: '⚓', coins: 5199,   category: 'tier4' },
+    { id: 'sports_car',     name: 'Sports Car',      emoji: '🏎️', coins: 7000,   category: 'tier4' },
 
-    // Tier 5 - VIP Boss (2000+ coins)
-    { id: 'rose_bouquet',   name: 'Rose Bouquet',    emoji: '💐', coins: 2000,   category: 'tier5' },
-    { id: 'cruise',         name: 'Cruise Ship',     emoji: '🚢', coins: 2999,   category: 'tier5' },
-    { id: 'dragon',         name: 'Dragon',          emoji: '🐉', coins: 3000,   category: 'tier5' },
-    { id: 'lion',           name: 'Lion',            emoji: '🦁', coins: 3000,   category: 'tier5' },
-    { id: 'rocket',         name: 'Rocket',          emoji: '🚀', coins: 5000,   category: 'tier5' },
-    { id: 'phoenix',        name: 'Phoenix',         emoji: '🦅', coins: 5000,   category: 'tier5' },
-    { id: 'universe',       name: 'Universe',        emoji: '🌌', coins: 10000,  category: 'tier5' },
-    { id: 'tiktok_universe',name: 'TikTok Universe', emoji: '💫', coins: 10000,  category: 'tier5' },
-    { id: 'lion_king',      name: 'Lion King',       emoji: '🦁', coins: 15000,  category: 'tier5' },
-    { id: 'spaceship',      name: 'Spaceship',       emoji: '🛸', coins: 20000,  category: 'tier5' },
+    // Tier 5 - VIP / Boss (10000+ xu)
+    { id: 'planet',         name: 'Planet',          emoji: '🪐', coins: 15000,  category: 'tier5' },
+    { id: 'rocket',         name: 'Rocket',          emoji: '🚀', coins: 20000,  category: 'tier5' },
+    { id: 'castle',         name: 'Castle',          emoji: '🏰', coins: 20000,  category: 'tier5' },
+    { id: 'phoenix',        name: 'Phoenix',         emoji: '🦅', coins: 25999,  category: 'tier5' },
+    { id: 'dragon',         name: 'Dragon',          emoji: '🐉', coins: 26999,  category: 'tier5' },
+    { id: 'lion',           name: 'Lion',            emoji: '🦁', coins: 29999,  category: 'tier5' },
+    { id: 'lion_king',      name: 'Lion King',       emoji: '🦁', coins: 29999,  category: 'tier5' },
+    { id: 'tiktok_universe',name: 'TikTok Universe', emoji: '💫', coins: 44999,  category: 'tier5' },
 ];
 
 const DEFAULT_COIN_MILESTONES = [
     { id: 'milestone_1', label: '🌸 Nhỏ xinh', description: 'Quà 1–9 xu', minCoins: 1, maxCoins: 9, emoji: '🌸', color: '#9ca3af', musicId: 'rbxassetid://1837879082', musicName: 'K-Pop Chill' },
     { id: 'milestone_2', label: '💙 Dễ thương', description: 'Quà 10–99 xu', minCoins: 10, maxCoins: 99, emoji: '💙', color: '#60a5fa', musicId: 'rbxassetid://9043887091', musicName: 'EDM Festival' },
-    { id: 'milestone_3', label: '💜 Sang chảnh', description: 'Quà 100–499 xu', minCoins: 100, maxCoins: 499, emoji: '💜', color: '#a78bfa', musicId: 'rbxassetid://1847648398', musicName: 'Phonk Bass' },
-    { id: 'milestone_4', label: '⭐ Khủng', description: 'Quà 500–1999 xu', minCoins: 500, maxCoins: 1999, emoji: '⭐', color: '#f59e0b', musicId: 'rbxassetid://1847648398', musicName: 'Boss Phonk Drop' },
-    { id: 'milestone_5', label: '🔥 VIP Boss', description: 'Quà 2000–9999 xu', minCoins: 2000, maxCoins: 9999, emoji: '🔥', color: '#ff007f', musicId: 'rbxassetid://1837879082', musicName: 'VIP Hype Track' },
-    { id: 'milestone_6', label: '💎 Legendary', description: 'Quà 10000+ xu', minCoins: 10000, maxCoins: Infinity, emoji: '💎', color: '#00f2fe', musicId: 'rbxassetid://1847648398', musicName: 'Legendary Anthem' },
+    { id: 'milestone_3', label: '💜 Sang chảnh', description: 'Quà 100–999 xu', minCoins: 100, maxCoins: 999, emoji: '💜', color: '#a78bfa', musicId: 'rbxassetid://1847648398', musicName: 'Phonk Bass' },
+    { id: 'milestone_4', label: '⭐ Khủng', description: 'Quà 1000–9999 xu', minCoins: 1000, maxCoins: 9999, emoji: '⭐', color: '#f59e0b', musicId: 'rbxassetid://1847648398', musicName: 'Boss Phonk Drop' },
+    { id: 'milestone_5', label: '🔥 VIP Boss', description: 'Quà 10000–29998 xu', minCoins: 10000, maxCoins: 29998, emoji: '🔥', color: '#ff007f', musicId: 'rbxassetid://1837879082', musicName: 'VIP Hype Track' },
+    { id: 'milestone_6', label: '💎 Legendary', description: 'Quà 29999+ xu (Lion, Universe...)', minCoins: 29999, maxCoins: Infinity, emoji: '💎', color: '#00f2fe', musicId: 'rbxassetid://1847648398', musicName: 'Legendary Anthem' }
 ];
 
 // Pre-seeded Action Definitions
@@ -151,7 +134,7 @@ const DEFAULT_EVENT_MAPPINGS = [
     {
         id: 'map_rose',
         name: '🌹 Rose → Mưa hoa hồng',
-        description: 'Tặng Rose sẽ kích hoạt mưa hoa rơi trên sân khấu Roblox',
+        description: 'Tặng Rose (1 xu) sẽ kích hoạt mưa hoa rơi trên sân khấu Roblox',
         enabled: true,
         priority: 10,
         trigger: {
@@ -173,7 +156,7 @@ const DEFAULT_EVENT_MAPPINGS = [
     {
         id: 'map_hand_heart',
         name: '🫶 Hand Heart → Trái tim quanh Dancer',
-        description: 'Tặng Hand Heart sẽ bắn trái tim xoay quanh avatar đang nhảy',
+        description: 'Tặng Hand Heart (100 xu) sẽ bắn trái tim xoay quanh avatar đang nhảy',
         enabled: true,
         priority: 10,
         trigger: {
@@ -181,7 +164,7 @@ const DEFAULT_EVENT_MAPPINGS = [
             giftId: 'hand_heart',
             giftName: 'Hand Heart',
             minRepeatCount: 1,
-            minTotalCoins: 55,
+            minTotalCoins: 100,
             userFilter: 'ANY'
         },
         actions: [
@@ -195,7 +178,7 @@ const DEFAULT_EVENT_MAPPINGS = [
     {
         id: 'map_galaxy',
         name: '🌌 Galaxy → Show ánh sáng hoành tráng',
-        description: 'Tặng Galaxy đổi đèn sân khấu và thông báo toàn máy chủ',
+        description: 'Tặng Galaxy (1000 xu) đổi đèn sân khấu và thông báo toàn máy chủ',
         enabled: true,
         priority: 20,
         trigger: {
@@ -203,7 +186,7 @@ const DEFAULT_EVENT_MAPPINGS = [
             giftId: 'galaxy',
             giftName: 'Galaxy',
             minRepeatCount: 1,
-            minTotalCoins: 500,
+            minTotalCoins: 1000,
             userFilter: 'ANY'
         },
         actions: [
@@ -277,8 +260,8 @@ function initTenantConfig(apiKey) {
             coinMilestones: DEFAULT_COIN_MILESTONES.map(m => ({ ...m })),
             actionDefs: JSON.parse(JSON.stringify(DEFAULT_ACTION_DEFS)),
             eventMappings: JSON.parse(JSON.stringify(DEFAULT_EVENT_MAPPINGS)),
-            gameEventQueue: [],       // Queued Game Events for Roblox polling
-            gameEventsHistory: [],    // Audit history of processed events
+            gameEventQueue: [],
+            gameEventsHistory: [],
             robloxHeartbeat: { lastHeartbeat: null, isOnline: false, placeId: null, jobId: null },
             customMusic: [],
             customDances: [],
