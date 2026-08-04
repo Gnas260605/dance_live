@@ -493,7 +493,7 @@ end)
 task.spawn(function()
 	local heartbeatUrl = BASE_URL .. "/heartbeat"
 	while true do
-		pcall(function()
+		local ok, err = pcall(function()
 			local payload = HttpService:JSONEncode({
 				placeId = tostring(game.PlaceId),
 				jobId = tostring(game.JobId),
@@ -501,6 +501,9 @@ task.spawn(function()
 			})
 			HttpService:PostAsync(heartbeatUrl, payload, Enum.HttpContentType.ApplicationJson, false, { ["bypass-tunnel-reminder"] = "true" })
 		end)
+		if not ok then
+			warn("[TikTokDanceManager] Heartbeat HTTP Error: " .. tostring(err))
+		end
 		task.wait(10)
 	end
 end)
@@ -515,7 +518,7 @@ task.spawn(function()
 
 	while true do
 		-- 1. Poll Current Active Player (Dancer Queue)
-		pcall(function()
+		local ok1, err1 = pcall(function()
 			local response = HttpService:GetAsync(playerUrl, false, customHeaders)
 			local data = HttpService:JSONDecode(response)
 			if data and data.success then
@@ -539,9 +542,12 @@ task.spawn(function()
 				end
 			end
 		end)
+		if not ok1 then
+			warn("[TikTokDanceManager] Player Poll Error: " .. tostring(err1))
+		end
 
 		-- 2. Poll Game Events Queue (Gift Effects, Lights, Animations)
-		pcall(function()
+		local ok2, err2 = pcall(function()
 			local response = HttpService:GetAsync(eventsUrl, false, customHeaders)
 			local data = HttpService:JSONDecode(response)
 			if data and data.success and data.events then
@@ -550,6 +556,9 @@ task.spawn(function()
 				end
 			end
 		end)
+		if not ok2 then
+			warn("[TikTokDanceManager] Events Poll Error: " .. tostring(err2))
+		end
 
 		task.wait(POLL_INTERVAL)
 	end
