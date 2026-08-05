@@ -1125,7 +1125,17 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
+function handleHashChange() {
+    const hash = window.location.hash.replace('#', '');
+    if (hash) {
+        navigate(hash);
+    }
+}
+
+window.addEventListener('hashchange', handleHashChange);
+
 // Init
+handleHashChange();
 setInterval(fetchStatus, 3000);
 fetchStatus();
 </script>
