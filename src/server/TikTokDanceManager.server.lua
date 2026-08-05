@@ -197,6 +197,7 @@ stageMusic:Play()
 -- State Tracking
 local lastProcessedPlayerId = ""
 local currentMusicId = DEFAULT_MUSIC_ID
+local currentSelectedDanceId = "rbxassetid://507771019"
 local activeDancersList = {}
 local nextSlotIndex = 1
 local processedEventIds = {}
@@ -589,6 +590,13 @@ task.spawn(function()
 						data.overlayTitle,
 						data.overlayColor
 					)
+				elseif data.selectedDanceId and data.selectedDanceId ~= currentSelectedDanceId then
+					currentSelectedDanceId = data.selectedDanceId
+					for _, dancer in ipairs(activeDancersList) do
+						if dancer and dancer.model and dancer.model.Parent then
+							playDanceAnimation(dancer.model, currentSelectedDanceId)
+						end
+					end
 				end
 			end
 		end)
