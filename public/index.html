@@ -260,6 +260,21 @@
                 <button class="btn btn-gold btn-xs" style="width:100%;" onclick="testGalaxyEvent()">🌌 Test Galaxy → Cosmic Cutscene</button>
             </div>
         </div>
+
+        <!-- Quick Dance Customization Bar -->
+        <div class="card" style="margin-top:20px;">
+            <div class="card-title-bar" style="justify-content:space-between;">
+                <div class="card-title-text"><i class="ri-user-star-line"></i> Tùy Chỉnh Nhanh Điệu Nhảy Sân Khấu (Quick Dance Selector)</div>
+                <button class="btn btn-secondary btn-xs" onclick="navigate('dance')"><i class="ri-settings-line"></i> Quản Lý Thư Viện</button>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;">
+                <button class="btn btn-primary" onclick="quickSelectPresetDance('Phonk Hype Dance', '507771019', 'PHONK')">⚡ Phonk Hype Dance</button>
+                <button class="btn btn-primary" style="background:#ec4899;" onclick="quickSelectPresetDance('K-Pop Idol Routine', '507771959', 'KPOP')">🔥 K-Pop Idol Routine</button>
+                <button class="btn btn-gold" onclick="quickSelectPresetDance('Trendy Shuffle Dance', '9043887091', 'HIPHOP')">🕺 Trendy Shuffle</button>
+                <button class="btn btn-primary" style="background:#a78bfa;" onclick="quickSelectPresetDance('Vibing Chill Groove', '1847648398', 'CHILL')">🌸 Vibing Chill</button>
+                <button class="btn btn-gold" style="background:#10b981;" onclick="handleSelectRandomDance()">🎲 Nhảy Ngẫu Nhiên (Random)</button>
+            </div>
+        </div>
     </div>
 
     <!-- ====== VIEW: Leaderboard ====== -->
