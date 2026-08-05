@@ -916,11 +916,27 @@ async function loadLeaderboard() {
 }
 
 async function triggerStagePreset(presetType, colorHex) {
-    await fetch(`${API_BASE}/api/v1/dashboard/mock-comment`, {
+    const themeMusicMap = {
+        'TIKTOK_VN_TREND': { name: 'See Tình (Remix Beat)', musicId: '1837879082' },
+        'KPOP_VIRAL': { name: 'Super Shy (Dance Beat)', musicId: '1847648398' },
+        'EDM_FESTIVAL': { name: 'Ultra Rave Drop 2026', musicId: '1841234567' },
+        'HIPHOP_STREET': { name: 'Street Trap Beat', musicId: '1843456789' },
+        'LATIN_REGGAETON': { name: 'Dákiti (Remix Beat)', musicId: '1837879082' },
+        'BRAZIL_FUNK': { name: 'Baile Funk (TikTok Edit)', musicId: '1847648398' },
+        'JAPAN_JPOP': { name: 'YOASOBI - Idol (Remix)', musicId: '1841234567' },
+        'AFROBEAT': { name: 'Calm Down (Rema Remix)', musicId: '1844567890' },
+        'US_POP_HITS': { name: 'Flowers (Miley Remix)', musicId: '1847890123' }
+    };
+    const targetTrack = themeMusicMap[presetType] || { name: presetType, musicId: '1837879082' };
+    await fetch(`${API_BASE}/api/v1/dashboard/music`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ comment: 'Builderman', isVIP: true })
+        body: JSON.stringify({ name: targetTrack.name, musicId: targetTrack.musicId })
     });
-    notify(`🪩 Đã kích hoạt Stage Preset: ${presetType}`, 'success');
+    await fetch(`${API_BASE}/api/v1/dashboard/overlay`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ overlayTitle: `🪩 STAGE THEME: ${presetType}`, overlayColor: colorHex || '#18D7E8' })
+    });
+    notify(`🪩 Đã chuyển Stage Preset & Nhạc: ${presetType}`, 'success');
 }
 
 async function testRoseEvent() {
