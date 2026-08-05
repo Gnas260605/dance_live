@@ -920,74 +920,90 @@ end
 -- ====================================
 -- EFFECT 11: Gift Notification Banner (slides in from right)
 -- ====================================
+-- ====================================
+-- EFFECT 11: Gift Notification Banner (Modern Glassmorphism & Neon Glow)
+-- ====================================
 local function showGiftBanner(emoji, giftName, senderName, isVIP, color)
 	local screenGui = ensureGiftHUD()
 	if not screenGui then return end
 
 	local banner = Instance.new("Frame")
-	banner.Size = UDim2.new(0, 420, 0, 70)
-	banner.Position = UDim2.new(1, 0, 0.25, 0)
-	banner.BackgroundColor3 = isVIP and Color3.fromRGB(45, 30, 5) or Color3.fromRGB(12, 14, 24)
-	banner.BackgroundTransparency = 0.1
+	banner.Size = UDim2.new(0, 380, 0, 64)
+	banner.Position = UDim2.new(1, 0, 0.22, 0)
+	banner.BackgroundColor3 = isVIP and Color3.fromRGB(24, 18, 5) or Color3.fromRGB(15, 18, 30)
+	banner.BackgroundTransparency = 0.15
 	banner.BorderSizePixel = 0
 	banner.Parent = screenGui
 
 	local corner = Instance.new("UICorner")
-	corner.CornerRadius = UDim.new(0, 12)
+	corner.CornerRadius = UDim.new(0, 16)
 	corner.Parent = banner
 
 	local stroke = Instance.new("UIStroke")
-	stroke.Color = color
-	stroke.Thickness = isVIP and 3 or 2
+	stroke.Color = isVIP and Color3.fromRGB(255, 215, 0) or (color or Color3.fromRGB(0, 242, 254))
+	stroke.Thickness = isVIP and 2.5 or 1.8
+	stroke.Transparency = 0.1
 	stroke.Parent = banner
 
-	-- Emoji icon
+	-- Emoji / Icon Circle Container
+	local iconCircle = Instance.new("Frame")
+	iconCircle.Size = UDim2.new(0, 48, 0, 48)
+	iconCircle.Position = UDim2.new(0, 8, 0.5, -24)
+	iconCircle.BackgroundColor3 = isVIP and Color3.fromRGB(255, 215, 0) or color
+	iconCircle.BackgroundTransparency = 0.8
+	iconCircle.BorderSizePixel = 0
+	iconCircle.Parent = banner
+
+	local iconCorner = Instance.new("UICorner")
+	iconCorner.CornerRadius = UDim.new(1, 0)
+	iconCorner.Parent = iconCircle
+
 	local emojiLabel = Instance.new("TextLabel")
-	emojiLabel.Size = UDim2.new(0, 55, 0, 55)
-	emojiLabel.Position = UDim2.new(0, 8, 0.5, -27)
+	emojiLabel.Size = UDim2.new(1, 0, 1, 0)
+	emojiLabel.Position = UDim2.new(0, 0, 0, 0)
 	emojiLabel.BackgroundTransparency = 1
 	emojiLabel.Text = emoji
 	emojiLabel.TextScaled = true
 	emojiLabel.Font = Enum.Font.GothamBold
-	emojiLabel.Parent = banner
+	emojiLabel.Parent = iconCircle
 
-	-- Gift name label
+	-- Gift Title Label
 	local nameLabel = Instance.new("TextLabel")
-	nameLabel.Size = UDim2.new(1, -75, 0, 35)
-	nameLabel.Position = UDim2.new(0, 68, 0.08, 0)
+	nameLabel.Size = UDim2.new(1, -70, 0, 28)
+	nameLabel.Position = UDim2.new(0, 64, 0.1, 0)
 	nameLabel.BackgroundTransparency = 1
-	nameLabel.Text = isVIP and ("\u{1F451} " .. giftName) or giftName
-	nameLabel.TextColor3 = isVIP and Color3.fromRGB(255, 215, 0) or color
+	nameLabel.Text = isVIP and ("👑 " .. giftName:upper()) or giftName
+	nameLabel.TextColor3 = isVIP and Color3.fromRGB(255, 215, 0) or Color3.fromRGB(255, 255, 255)
 	nameLabel.TextScaled = true
 	nameLabel.Font = Enum.Font.GothamBold
 	nameLabel.TextXAlignment = Enum.TextXAlignment.Left
 	nameLabel.Parent = banner
 
-	-- Sender label
+	-- Sender Label
 	local senderLabel = Instance.new("TextLabel")
-	senderLabel.Size = UDim2.new(1, -75, 0, 22)
-	senderLabel.Position = UDim2.new(0, 68, 0.55, 0)
+	senderLabel.Size = UDim2.new(1, -70, 0, 20)
+	senderLabel.Position = UDim2.new(0, 64, 0.54, 0)
 	senderLabel.BackgroundTransparency = 1
-	senderLabel.Text = "\u{1F381} t\u{1EEB} @" .. (senderName or "Unknown")
-	senderLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+	senderLabel.Text = "🎁 từ @" .. (senderName or "Khán giả")
+	senderLabel.TextColor3 = Color3.fromRGB(0, 242, 254)
 	senderLabel.TextScaled = true
 	senderLabel.Font = Enum.Font.GothamMedium
 	senderLabel.TextXAlignment = Enum.TextXAlignment.Left
 	senderLabel.Parent = banner
 
-	-- Slide in from right
+	-- Smooth Spring Slide in from right
 	local slideIn = TweenService:Create(banner,
-		TweenInfo.new(0.6, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
-		{ Position = UDim2.new(1, -440, 0.25, 0) }
+		TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+		{ Position = UDim2.new(1, -400, 0.22, 0) }
 	)
 	slideIn:Play()
 
-	-- Slide out after 5 seconds
-	task.delay(5, function()
+	-- Slide out smoothly after 4 seconds
+	task.delay(4, function()
 		if banner and banner.Parent then
 			local slideOut = TweenService:Create(banner,
-				TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
-				{ Position = UDim2.new(1, 0, 0.25, 0) }
+				TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
+				{ Position = UDim2.new(1, 20, 0.22, 0) }
 			)
 			slideOut:Play()
 			slideOut.Completed:Wait()
