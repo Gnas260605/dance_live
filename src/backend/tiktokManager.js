@@ -7,11 +7,28 @@ const userCooldowns = new Map();
 const COOLDOWN_MS = 30000;
 
 function extractRobloxUsername(text) {
-    if (!text) return null;
-    const danceCmdMatch = text.match(/!dance\s+([a-zA-Z0-9_]{3,20})/i);
-    if (danceCmdMatch) return danceCmdMatch[1];
-    const standaloneMatch = text.trim().match(/^([a-zA-Z0-9_]{3,20})$/);
+    if (!text || typeof text !== 'string') return null;
+    const cleanText = text.trim();
+
+    // 1. Check !dance <username> or /dance <username> or dance <username>
+    const cmdMatch = cleanText.match(/(?:!|\/)?dance\s+@?([a-zA-Z0-9_]{3,20})/i);
+    if (cmdMatch) return cmdMatch[1];
+
+    // 2. Check direct username with optional @ or punctuation
+    const standaloneMatch = cleanText.match(/^@?([a-zA-Z0-9_]{3,20})[.!:]?$/);
     if (standaloneMatch) return standaloneMatch[1];
+
+    // 3. Scan words in comment for any valid Roblox username (3-20 chars alphanumeric + _)
+    const words = cleanText.split(/\s+/);
+    for (const word of words) {
+        const cleanedWord = word.replace(/^@/, '').replace(/[.!:]$/, '');
+        if (/^[a-zA-Z0-9_]{3,20}$/.test(cleanedWord)) {
+            const lower = cleanedWord.toLowerCase();
+            if (!['hello', 'xinchao', 'chao', 'like', 'follow', 'share', 'dance', 'sub', 'gift'].includes(lower)) {
+                return cleanedWord;
+            }
+        }
+    }
     return null;
 }
 
@@ -165,10 +182,9 @@ function processGiftEventForTenant(apiKey, giftPayload) {
 
 async function processNewCommentForTenant(apiKey, tiktokUsername, commentText, isVIP = false, giftDetails = null) {
     const tenant = getTenant(apiKey);
-    const rawUsername = extractRobloxUsername(commentText);
-    if (!rawUsername) {
-        return { success: false, reason: 'INVALID_SYNTAX', error: 'Cú pháp không hợp lệ. Vui lòng nhập: !dance Username' };
-    }
+    const extracted = extractRobloxUsername(commentText);
+    const fallbackUser = (tiktokUsername || 'Viewer').replace(/^@/, '').replace(/[^a-zA-Z0-9_]/g, '');
+    const rawUsername = extracted || (fallbackUser.length >= 3 ? fallbackUser : 'Builderman');
 
     const now = Date.now();
     const cooldownKey = `${apiKey}_${tiktokUsername}`;
@@ -189,39 +205,30 @@ async function processNewCommentForTenant(apiKey, tiktokUsername, commentText, i
     const isAlreadyQueued = tenant.playerQueue.some(p => p.robloxUsername.toLowerCase() === verifiedUsername.toLowerCase());
 
     if (isCurrentlyActive || isAlreadyQueued) {
-        // If testing via web simulator or test viewer, generate fresh player ID to re-trigger spawn immediately
-        if (tiktokUsername.startsWith('viewer_') || tiktokUsername.startsWith('rose_fan_') || tiktokUsername.startsWith('test_') || tiktokUsername.startsWith('user_') || isVIP) {
-            const freshPlayerData = {
-                id: Date.now().toString() + '_' + Math.random().toString(36).substring(2, 5),
-                robloxUsername: verifiedUsername,
-                tiktokUsername: tiktokUsername,
-                commentText: commentText,
-                animationId: tenant.selectedDanceId || 'rbxassetid://507771019',
+        // Generate fresh player ID to re-trigger spawn immediately
+        const freshPlayerData = {
+            id: Date.now().toString() + '_' + Math.random().toString(36).substring(2, 5),
+            robloxUsername: verifiedUsername,
+            tiktokUsername: tiktokUsername,
+            commentText: commentText,
+            animationId: tenant.selectedDanceId || 'rbxassetid://507771019',
+            danceStyle: tenant.selectedDanceStyle || 'bounce',
+            danceName: tenant.selectedDanceName || 'Bounce Starter',
+            danceVerification: {
+                success: false,
+                mode: 'pending',
+                danceId: tenant.selectedDanceId || 'rbxassetid://507771019',
                 danceStyle: tenant.selectedDanceStyle || 'bounce',
-                danceName: tenant.selectedDanceName || 'Bounce Starter',
-                danceVerification: {
-                    success: false,
-                    mode: 'pending',
-                    danceId: tenant.selectedDanceId || 'rbxassetid://507771019',
-                    danceStyle: tenant.selectedDanceStyle || 'bounce',
-                    message: 'Dang cho Roblox xac nhan nhan vat bat dau nhay.',
-                    verifiedAt: null
-                },
-                isVIP: isVIP,
-                giftDetails: giftDetails,
-                timestamp: now
-            };
-            tenant.activePlayer = freshPlayerData;
-            addTenantLog(apiKey, `💬 Comment/Test: "${commentText}" → Spawn Avatar: "${verifiedUsername}"`);
-            return { success: true, playerData: freshPlayerData };
-        }
-
-        addTenantLog(apiKey, `[Bỏ qua] "${verifiedUsername}" đã có trên sân nhảy hoặc trong hàng đợi.`);
-        return {
-            success: false,
-            reason: 'ALREADY_QUEUED',
-            error: `"${verifiedUsername}" đã có trên sân nhảy! Nhập tên khác hoặc bấm Next ⏭️`
+                message: 'Dang cho Roblox xac nhan nhan vat bat dau nhay.',
+                verifiedAt: null
+            },
+            isVIP: isVIP,
+            giftDetails: giftDetails,
+            timestamp: now
         };
+        tenant.activePlayer = freshPlayerData;
+        addTenantLog(apiKey, `💬 Comment: "${commentText}" → Spawn Avatar: "${verifiedUsername}" (@${tiktokUsername})`);
+        return { success: true, playerData: freshPlayerData };
     }
 
     userCooldowns.set(cooldownKey, now);
