@@ -70,39 +70,47 @@ local ALL_VERIFIED_EMOTE_IDS = {
 local DEFAULT_MUSIC_ID = ""
 local GIFT_FANFARE_SOUND_ID = "rbxassetid://9043887091"
 
--- AUTOMATED CONTINUOUS VIRUS & FAKE ERROR 501 PURGE ENGINE
+-- AUTOMATED CONTINUOUS VIRUS & FAKE ERROR 501 / BACKDOOR PURGE ENGINE
 task.spawn(function()
 	while true do
 		pcall(function()
-			-- 1. Destroy any Error 501 GUI elements instantly
+			-- 1. Destroy any Virus GUI / Backdoor Textbox elements instantly
 			for _, desc in ipairs(game:GetDescendants()) do
-				if desc:IsA("TextLabel") or desc:IsA("TextButton") or desc:IsA("TextBox") or desc:IsA("Hint") or desc:IsA("Message") then
-					local txt = tostring(desc.Text or ""):lower()
-					if string.find(txt, "501") or string.find(txt, "something went wrong") or string.find(txt, "command bar") or string.find(txt, "issue with a model") or string.find(txt, "copy the text") then
-						local targetGui = desc:FindFirstAncestorWhichIsA("SurfaceGui") 
-							or desc:FindFirstAncestorWhichIsA("BillboardGui") 
-							or desc:FindFirstAncestorWhichIsA("ScreenGui") 
-							or desc.Parent
-						if targetGui and targetGui.Name ~= "Workspace" then
-							pcall(function() targetGui:Destroy() end)
-						else
+				pcall(function()
+					if desc:IsA("TextLabel") or desc:IsA("TextButton") or desc:IsA("TextBox") or desc:IsA("Hint") or desc:IsA("Message") then
+						local txt = tostring(desc.Text or ""):lower()
+						if string.find(txt, "501") or string.find(txt, "something went wrong") or string.find(txt, "command bar") or string.find(txt, "issue with a model") or string.find(txt, "copy the text") or string.find(txt, "getobjects") or string.find(txt, "rbxassetid") or string.find(txt, "getfullname") or string.find(txt, "split") or string.find(txt, "10979999") or string.find(txt, "103102799") then
+							local targetGui = desc:FindFirstAncestorWhichIsA("SurfaceGui") 
+								or desc:FindFirstAncestorWhichIsA("BillboardGui") 
+								or desc:FindFirstAncestorWhichIsA("ScreenGui") 
+								or desc.Parent
+							if targetGui and targetGui.Name ~= "Workspace" and targetGui.Name ~= "DataModel" then
+								pcall(function() targetGui:Destroy() end)
+							else
+								pcall(function() desc:Destroy() end)
+							end
+						end
+					elseif desc:IsA("SurfaceGui") or desc:IsA("BillboardGui") or desc:IsA("ScreenGui") then
+						if string.find(desc.Name:lower(), "error") or string.find(desc.Name:lower(), "backdoor") or string.find(desc.Name:lower(), "virus") or string.find(desc.Name:lower(), "toolbox") then
 							pcall(function() desc:Destroy() end)
 						end
 					end
-				end
+				end)
 			end
 
 			-- 2. Destroy any malicious third-party virus scripts in MapDecor, Workspace, Lighting, StarterGui
 			for _, desc in ipairs(game:GetDescendants()) do
-				if (desc:IsA("Script") or desc:IsA("LocalScript") or desc:IsA("ModuleScript")) and desc.Name ~= "TikTokDanceManager" and desc.Name ~= "ProceduralDance" then
-					local ancestor = desc.Parent
-					if ancestor and (desc:FindFirstAncestor("MapDecor") or desc:FindFirstAncestor("StoreAssets") or desc:FindFirstAncestor("Workspace") or desc:FindFirstAncestor("Lighting") or desc:FindFirstAncestor("StarterGui") or desc:FindFirstAncestor("StarterPlayer")) then
-						pcall(function() desc:Destroy() end)
+				pcall(function()
+					if (desc:IsA("Script") or desc:IsA("LocalScript") or desc:IsA("ModuleScript")) and desc.Name ~= "TikTokDanceManager" and desc.Name ~= "ProceduralDance" then
+						local scriptName = desc.Name:lower()
+						if string.find(scriptName, "virus") or string.find(scriptName, "backdoor") or string.find(scriptName, "weld") or string.find(scriptName, "error") or desc:FindFirstAncestor("MapDecor") or desc:FindFirstAncestor("StoreAssets") then
+							pcall(function() desc:Destroy() end)
+						end
 					end
-				end
+				end)
 			end
 		end)
-		task.wait(0.3)
+		task.wait(0.2)
 	end
 end)
 
