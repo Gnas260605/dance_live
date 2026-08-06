@@ -467,10 +467,10 @@ async function handleConnectTikTok() {
         });
         const data = await res.json();
         if (!data.success) throw new Error(data.error || 'Không thể kết nối');
-        notify('📡 Đã phát lệnh kết nối TikTok: @' + username, 'cyan');
-        fetchStatus();
+        notify('📡 Đã kết nối TikTok LIVE: @' + (data.tiktokUsername || username), 'cyan');
+        await fetchStatus(); // refresh pill ngay lập tức
     } catch (e) {
-        notify(e.message, 'danger');
+        notify('❌ Lỗi kết nối: ' + e.message, 'danger');
     }
 }
 

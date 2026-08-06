@@ -964,19 +964,19 @@ router.post('/v1/dashboard/connect-tiktok', optionalAuth, (req, res) => {
     if (!tiktokUsername) return res.status(400).json({ error: 'tiktokUsername required' });
 
     tenant.tiktokUsername = tiktokUsername.replace('@', '').trim();
-    tenant.tiktokConnected = true;
+    tenant.isConnected = true;  // matches /status endpoint field
     tenant.tiktokConnectedAt = new Date().toISOString();
     addTenantLog(apiKey, `📡 Dashboard: Yêu cầu kết nối TikTok LIVE @${tenant.tiktokUsername}`, true);
-    res.json({ success: true, tiktokUsername: tenant.tiktokUsername, message: 'Đã ghi nhận yêu cầu kết nối TikTok LIVE' });
+    res.json({ success: true, tiktokUsername: tenant.tiktokUsername, isConnected: true, message: '📡 Đã kết nối TikTok LIVE @' + tenant.tiktokUsername });
 });
 
 router.post('/v1/dashboard/disconnect-tiktok', optionalAuth, (req, res) => {
     const apiKey = getApiKeyFromReq(req);
     const tenant = getTenant(apiKey);
-    tenant.tiktokConnected = false;
+    tenant.isConnected = false;  // matches /status endpoint field
     tenant.tiktokUsername = null;
     addTenantLog(apiKey, '🔌 Dashboard: Đã ngắt kết nối TikTok LIVE', true);
-    res.json({ success: true, message: 'Đã ngắt kết nối TikTok LIVE' });
+    res.json({ success: true, isConnected: false, message: '🔌 Đã ngắt kết nối TikTok LIVE' });
 });
 
 // Emergency Stop - clear queue and remove active player
