@@ -15,11 +15,6 @@ COPY prisma ./prisma/
 # Install dependencies for all workspaces
 RUN npm ci
 
-# Set placeholder DATABASE_URL for build-time schema validation
-ENV DATABASE_URL="postgresql://localhost:5432/placeholder"
-
-# Generate Prisma Client
-RUN npx prisma generate
 
 # Copy the entire source code
 COPY . .
@@ -34,8 +29,7 @@ EXPOSE 3000
 
 ENV PORT=3000
 ENV NODE_ENV=production
-ENV DATABASE_URL="file:../data/production.db"
 ENV JWT_SECRET="sg_music_roblox_production_secret_2026_key"
 
-# Start the API backend workspace and auto push migrations
-CMD ["sh", "-c", "npx prisma db push && npm run start:api"]
+# Start the API backend workspace, generate client, push schema and start
+CMD ["sh", "-c", "npx prisma generate && npx prisma db push && npm run start:api"]
