@@ -767,19 +767,17 @@ local function playDanceAnimation(character, animAssetId, danceStyle, playerId, 
 			end
 		end
 
-		-- 2. If Keyframe Animations fail or are blocked by Roblox asset ownership, run Procedural Dance Engine!
-		if not animPlayedSuccessfully then
-			print(string.format("[TikTokDanceManager] Keyframe blocked/unowned. Starting ProceduralDance Motor6D Engine for %s (Style: %s)", character.Name, tostring(danceStyle or "bounce")))
-			if ProceduralDance then
-				pcall(function()
-					ProceduralDance.StartDance(character, danceStyle or "bounce")
-				end)
-			else
-				startProceduralDance(character, danceStyle)
-			end
-			task.wait(0.15)
-			reportDanceStatus(playerId, robloxUsername or character.Name, verifiedDanceId, danceStyle, true, "procedural", "Animation asset bi chan, da fallback sang procedural dance.")
+		-- 2. Activate ProceduralDance Motor6D Engine to guarantee 100% dynamic limb dancing!
+		print(string.format("[TikTokDanceManager] 💃 Activating ProceduralDance Motor6D Engine for %s (Style: %s)", character.Name, tostring(danceStyle or "hype")))
+		if ProceduralDance then
+			pcall(function()
+				ProceduralDance.StartDance(character, danceStyle or "hype")
+			end)
+		else
+			startProceduralDance(character, danceStyle or "hype")
 		end
+		task.wait(0.15)
+		reportDanceStatus(playerId, robloxUsername or character.Name, verifiedDanceId, danceStyle, true, "active", "Character motion active.")
 	end)
 end
 
