@@ -15,8 +15,19 @@ import {
   User,
   Info
 } from 'lucide-react';
+import { apiFetch } from '../lib/api';
 
 const API_BASE = 'http://localhost:3001/api';
+
+const fetch = async (url: string, options: any = {}) => {
+  const path = url.replace('http://localhost:3001/api', '').replace('/api', '');
+  const res = await apiFetch(path, options);
+  return {
+    ok: true,
+    status: 200,
+    json: async () => res
+  };
+};
 
 interface LogEntry {
   message: string;
