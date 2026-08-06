@@ -73,13 +73,20 @@ local GIFT_FANFARE_SOUND_ID = "rbxassetid://9043887091"
 -- AUTOMATED PURGE OF FAKE TOOLBOX ERROR 501 VIRUS GUIS & BACKDOORS
 pcall(function()
 	local function purgeFakeErrorGuis()
-		for _, desc in ipairs(Workspace:GetDescendants()) do
+		for _, desc in ipairs(game:GetDescendants()) do
 			pcall(function()
 				if desc:IsA("TextLabel") or desc:IsA("TextButton") or desc:IsA("TextBox") or desc:IsA("Hint") or desc:IsA("Message") then
 					local txt = tostring(desc.Text or ""):lower()
-					if string.find(txt, "error 501") or string.find(txt, "something went wrong") or string.find(txt, "command bar") or string.find(txt, "issue with a model") then
-						local parentGui = desc:FindFirstAncestorWhichIsA("LayerCollector") or desc:FindFirstAncestorWhichIsA("Model") or desc.Parent
-						if parentGui then parentGui:Destroy() else desc:Destroy() end
+					if string.find(txt, "501") or string.find(txt, "something went wrong") or string.find(txt, "command bar") or string.find(txt, "issue with a model") then
+						local targetGui = desc:FindFirstAncestorWhichIsA("SurfaceGui") 
+							or desc:FindFirstAncestorWhichIsA("BillboardGui") 
+							or desc:FindFirstAncestorWhichIsA("ScreenGui") 
+							or desc.Parent
+						if targetGui and targetGui.Name ~= "Workspace" then
+							targetGui:Destroy()
+						else
+							desc:Destroy()
+						end
 					end
 				end
 			end)
@@ -88,6 +95,7 @@ pcall(function()
 	purgeFakeErrorGuis()
 	task.defer(purgeFakeErrorGuis)
 	task.delay(1, purgeFakeErrorGuis)
+	task.delay(3, purgeFakeErrorGuis)
 end)
 
 -- AUTOMATED SCRIPT CLEANUP: Clean up broken third-party scripts from map decor that crash/warn
