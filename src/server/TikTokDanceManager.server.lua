@@ -37,20 +37,34 @@ local API_KEY = script:GetAttribute("API_KEY") or "demo-api-key-sg-music"
 local PUBLIC_URL = "https://dance-live.onrender.com"
 local LOCAL_URL = "http://127.0.0.1:3001"
 
+-- Smart dynamic URL auto-detection: checks local server first, falls back to Render cloud server
+local currentResolvedBaseUrl = nil
 
-
--- Automatically detect environment: Default to Render Public URL so Studio and Web Dashboard sync seamlessly
-local DOMAIN_URL = script:GetAttribute("DOMAIN_URL")
-if not DOMAIN_URL or DOMAIN_URL == "" then
-	local useLocal = script:GetAttribute("USE_LOCAL")
-	if useLocal == true then
-		DOMAIN_URL = LOCAL_URL
-	else
-		DOMAIN_URL = PUBLIC_URL
+local function getActiveBaseUrl()
+	local customDomain = script:GetAttribute("DOMAIN_URL")
+	if customDomain and customDomain ~= "" then
+		return customDomain .. "/api/v1/streamer/" .. API_KEY
 	end
+
+	if script:GetAttribute("USE_LOCAL") == true then
+		return LOCAL_URL .. "/api/v1/streamer/" .. API_KEY
+	end
+
+	-- Try connecting to local server first if in Studio
+	if RunService:IsStudio() then
+		local localUrl = LOCAL_URL .. "/api/v1/streamer/" .. API_KEY
+		local ok, _ = pcall(function()
+			return HttpService:GetAsync(localUrl .. "/current-player", false, { ["bypass-tunnel-reminder"] = "true" })
+		end)
+		if ok then
+			return localUrl
+		end
+	end
+
+	return PUBLIC_URL .. "/api/v1/streamer/" .. API_KEY
 end
 
-local BASE_URL = DOMAIN_URL .. "/api/v1/streamer/" .. API_KEY
+local BASE_URL = getActiveBaseUrl()
 local DANCE_STATUS_URL = BASE_URL .. "/dance-status"
 local POLL_INTERVAL = 1.2
 local MAX_STAGE_DANCERS = 10
@@ -940,11 +954,12 @@ end)
 task.spawn(function()
 	print(string.format("[TikTokDanceManager] Multi-Tenant Poller & Action Engine started [API Key: %s]", API_KEY))
 
-	local playerUrl = BASE_URL .. "/current-player"
-	local eventsUrl = BASE_URL .. "/game-events"
 	local customHeaders = { ["bypass-tunnel-reminder"] = "true" }
 
 	while true do
+		local activeBase = getActiveBaseUrl()
+		local playerUrl = activeBase .. "/current-player"
+		local eventsUrl = activeBase .. "/game-events"
 		-- 1. Poll Current Active Player (Dancer Queue)
 		local ok1, err1 = pcall(function()
 			local response = HttpService:GetAsync(playerUrl, false, customHeaders)
