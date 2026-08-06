@@ -639,46 +639,42 @@ local function playDanceAnimation(character, animAssetId, danceStyle, playerId, 
 			resolvedAnimId = "rbxassetid://" .. rawIdStr
 		end
 
-		local candidateIds = {}
+		local animPlayedSuccessfully = false
+		local verifiedDanceId = animAssetId or ""
 
-		-- Priority 1: User's selected Dance Animation from Web Dashboard
-		if resolvedAnimId and resolvedAnimId ~= "" and resolvedAnimId ~= "rbxassetid://" then
-			table.insert(candidateIds, resolvedAnimId)
-		end
-
-		-- Priority 2: Scan Roblox Studio Workspace/ReplicatedStorage for local Animation objects (e.g. ImportedAnimation)
+		-- Step 1: Scan for local Animation instances inside Roblox Studio (ReplicatedStorage, Workspace, ServerStorage, AnimSaves)
 		pcall(function()
 			for _, desc in ipairs(game:GetDescendants()) do
-				if desc:IsA("Animation") and desc.AnimationId and desc.AnimationId ~= "" then
-					if not table.find(candidateIds, desc.AnimationId) then
-						table.insert(candidateIds, desc.AnimationId)
+				if desc:IsA("Animation") then
+					local animName = desc.Name:lower()
+					local animId = desc.AnimationId or ""
+					if animId == resolvedAnimId or string.find(animName, "tung") or string.find(animName, "trend") or string.find(animName, "nhay") or string.find(animName, "custom") or string.find(animName, "import") then
+						local success, track = pcall(function() return animator:LoadAnimation(desc) end)
+						if success and track then
+							track.Priority = Enum.AnimationPriority.Action4
+							track.Looped = true
+							track:Play(0.15, 1, 1)
+							task.wait(0.2)
+							if track.IsPlaying then
+								animPlayedSuccessfully = true
+								verifiedDanceId = animId ~= "" and animId or desc.Name
+								print(string.format("[TikTokDanceManager] 💃 Playing LOCAL Studio Animation Object [%s] for %s!", desc.Name, character.Name))
+								reportDanceStatus(playerId, robloxUsername or character.Name, verifiedDanceId, danceStyle, true, "asset", "Local Studio Animation loaded and playing.")
+								return
+							else
+								pcall(function() track:Stop(0) end)
+							end
+						end
 					end
 				end
 			end
 		end)
 
-		-- Priority 3: Fallback catalog verified emotes
-		globalDanceCounter = globalDanceCounter + 1
-		local primaryEmoteIdx = ((globalDanceCounter - 1) % #ALL_VERIFIED_EMOTE_IDS) + 1
-		local primaryEmoteId = "rbxassetid://" .. ALL_VERIFIED_EMOTE_IDS[primaryEmoteIdx]
-		if not table.find(candidateIds, primaryEmoteId) then
-			table.insert(candidateIds, primaryEmoteId)
-		end
-
-		for _, eId in ipairs(ALL_VERIFIED_EMOTE_IDS) do
-			local fullStr = "rbxassetid://" .. eId
-			if not table.find(candidateIds, fullStr) then
-				table.insert(candidateIds, fullStr)
-			end
-		end
-
-		local animPlayedSuccessfully = false
-		local verifiedDanceId = animAssetId or ""
-
-		for _, candidateId in ipairs(candidateIds) do
+		-- Step 2: Try playing the requested Animation Asset ID directly
+		if not animPlayedSuccessfully and resolvedAnimId and resolvedAnimId ~= "" and resolvedAnimId ~= "rbxassetid://" then
+			print(string.format("[TikTokDanceManager] Attempting to load Animation Asset ID [%s] for %s...", resolvedAnimId, character.Name))
 			local anim = Instance.new("Animation")
-			anim.AnimationId = candidateId
-
+			anim.AnimationId = resolvedAnimId
 			local success, track = pcall(function() return animator:LoadAnimation(anim) end)
 			if success and track then
 				local playOk = pcall(function()
@@ -686,18 +682,42 @@ local function playDanceAnimation(character, animAssetId, danceStyle, playerId, 
 					track.Looped = true
 					track:Play(0.15, 1, 1)
 				end)
-
 				if playOk then
-					task.wait(0.2)
+					task.wait(0.25)
 					if track.IsPlaying then
 						animPlayedSuccessfully = true
-						verifiedDanceId = candidateId
-						print(string.format("[TikTokDanceManager] Successfully playing dance track [%s] for %s", candidateId, character.Name))
-						reportDanceStatus(playerId, robloxUsername or character.Name, candidateId, danceStyle, true, "asset", "Animation track da chay va IsPlaying = true.")
-						break
+						verifiedDanceId = resolvedAnimId
+						print(string.format("[TikTokDanceManager] 💃 Successfully playing custom dance track [%s] for %s!", resolvedAnimId, character.Name))
+						reportDanceStatus(playerId, robloxUsername or character.Name, resolvedAnimId, danceStyle, true, "asset", "Animation track loaded and playing.")
 					else
+						print(string.format("[TikTokDanceManager] ⚠️ Animation [%s] IsPlaying is false (Roblox Asset Ownership or Security Check failed).", resolvedAnimId))
 						pcall(function() track:Stop(0) end)
 					end
+				end
+			else
+				warn(string.format("[TikTokDanceManager] Failed to LoadAnimation for [%s]: %s", resolvedAnimId, tostring(track)))
+			end
+		end
+
+		-- Step 3: Fallback catalog verified emotes
+		if not animPlayedSuccessfully then
+			globalDanceCounter = globalDanceCounter + 1
+			local primaryEmoteIdx = ((globalDanceCounter - 1) % #ALL_VERIFIED_EMOTE_IDS) + 1
+			local primaryEmoteId = "rbxassetid://" .. ALL_VERIFIED_EMOTE_IDS[primaryEmoteIdx]
+			
+			local anim = Instance.new("Animation")
+			anim.AnimationId = primaryEmoteId
+			local success, track = pcall(function() return animator:LoadAnimation(anim) end)
+			if success and track then
+				track.Priority = Enum.AnimationPriority.Action4
+				track.Looped = true
+				track:Play(0.15, 1, 1)
+				task.wait(0.2)
+				if track.IsPlaying then
+					animPlayedSuccessfully = true
+					verifiedDanceId = primaryEmoteId
+					print(string.format("[TikTokDanceManager] Playing fallback emote [%s] for %s", primaryEmoteId, character.Name))
+					reportDanceStatus(playerId, robloxUsername or character.Name, primaryEmoteId, danceStyle, true, "asset", "Fallback catalog emote playing.")
 				end
 			end
 		end
