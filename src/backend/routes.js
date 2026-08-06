@@ -956,5 +956,14 @@ router.post('/v1/dashboard/coin-milestones', optionalAuth, (req, res) => {
 
     res.json({ success: true, milestones: tenant.coinMilestones });
 });
+// Emergency Stop - clear queue and remove active player
+router.post('/v1/dashboard/emergency-stop', optionalAuth, (req, res) => {
+    const apiKey = getApiKeyFromReq(req);
+    const tenant = getTenant(apiKey);
+    tenant.playerQueue = [];
+    tenant.activePlayer = null;
+    addTenantLog(apiKey, '🛑 Emergency Stop: Đã xóa toàn bộ hàng đợi và dừng nhảy!', true);
+    res.json({ success: true, message: 'Đã dừng khẩn cấp!' });
+});
 
 module.exports = router;
