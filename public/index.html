@@ -17,10 +17,10 @@
             --surface-active: #1D2942;
             --border-color: rgba(255,255,255,0.08);
             --border-strong: rgba(255,255,255,0.16);
-            --accent-cyan: #18D7E8;
-            --accent-glow-cyan: rgba(24, 215, 232, 0.25);
-            --accent-pink: #F43F86;
-            --accent-glow-pink: rgba(244, 63, 134, 0.25);
+            --accent-cyan: #00F2FE;
+            --accent-glow-cyan: rgba(0, 242, 254, 0.25);
+            --accent-pink: #FF007F;
+            --accent-glow-pink: rgba(255, 0, 127, 0.25);
             --accent-gold: #FFB800;
             --accent-glow-gold: rgba(255, 184, 0, 0.25);
             --state-success: #22C55E;
@@ -30,7 +30,7 @@
             --text-secondary: #AAB4C5;
             --text-muted: #738097;
             --radius-sm: 6px; --radius-md: 10px; --radius-lg: 14px; --radius-full: 9999px;
-            --shadow-card: 0 4px 20px rgba(0,0,0,0.4);
+            --shadow-card: 0 4px 24px rgba(0,0,0,0.45);
             --sidebar-width: 250px; --header-height: 64px;
             --transition: 0.2s cubic-bezier(0.4,0,0.2,1);
         }
@@ -40,13 +40,13 @@
         /* Sidebar */
         #sidebar { width:var(--sidebar-width); background:var(--surface-sidebar); border-right:1px solid var(--border-color); display:flex; flex-direction:column; position:fixed; top:0; bottom:0; left:0; z-index:50; transition:width var(--transition); }
         .sidebar-brand { height:var(--header-height); display:flex; align-items:center; padding:0 18px; gap:12px; border-bottom:1px solid var(--border-color); }
-        .brand-logo { width:36px; height:36px; background:linear-gradient(135deg,var(--accent-cyan),var(--accent-pink)); border-radius:var(--radius-md); display:grid; place-items:center; font-weight:800; font-size:16px; color:#fff; box-shadow:0 0 15px var(--accent-glow-cyan); }
-        .brand-name { font-family:'Outfit',sans-serif; font-size:15px; font-weight:700; color:#fff; white-space:nowrap; }
-        .sidebar-nav { flex:1; padding:12px 10px; display:flex; flex-direction:column; gap:3px; overflow-y:auto; }
-        .nav-section-title { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); padding:10px 10px 4px; margin-top:6px; }
-        .nav-item { display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:var(--radius-md); color:var(--text-secondary); font-size:13px; font-weight:600; cursor:pointer; text-decoration:none; transition:all var(--transition); }
+        .brand-logo { width:36px; height:36px; background:linear-gradient(135deg,var(--accent-cyan),var(--accent-pink)); border-radius:var(--radius-md); display:grid; place-items:center; font-weight:800; font-size:18px; color:#fff; box-shadow:0 0 15px var(--accent-glow-cyan); }
+        .brand-name { font-family:'Outfit',sans-serif; font-size:16px; font-weight:800; color:#fff; letter-spacing:-0.2px; }
+        .sidebar-nav { flex:1; padding:16px 12px; display:flex; flex-direction:column; gap:4px; overflow-y:auto; }
+        .nav-section-title { font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); padding:12px 10px 4px; margin-top:8px; }
+        .nav-item { display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:var(--radius-md); color:var(--text-secondary); font-size:13px; font-weight:600; cursor:pointer; text-decoration:none; transition:all var(--transition); }
         .nav-item:hover { background:var(--surface-hover); color:var(--text-primary); }
-        .nav-item.active { background:rgba(24,215,232,0.1); color:var(--accent-cyan); border-left:3px solid var(--accent-cyan); }
+        .nav-item.active { background:rgba(0,242,254,0.1); color:var(--accent-cyan); border-left:3px solid var(--accent-cyan); }
         .nav-icon { width:20px; height:20px; display:grid; place-items:center; flex-shrink:0; font-size:16px; }
 
         /* Main Content */
@@ -54,91 +54,79 @@
         header { height:var(--header-height); background:rgba(11,15,24,0.85); backdrop-filter:blur(12px); border-bottom:1px solid var(--border-color); padding:0 24px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:40; }
         
         .topbar-left { display:flex; align-items:center; gap:12px; }
-        .cmd-btn { display:inline-flex; align-items:center; gap:8px; padding:6px 14px; background:var(--surface-card); border:1px solid var(--border-color); border-radius:var(--radius-md); font-size:12px; color:var(--text-muted); cursor:pointer; }
-        .cmd-btn:hover { border-color:var(--accent-cyan); color:var(--text-primary); }
-        .kbd { background:var(--bg-app); border:1px solid var(--border-strong); padding:2px 6px; border-radius:4px; font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--text-secondary); }
-
         .topbar-right { display:flex; align-items:center; gap:14px; }
-        .status-pill { display:inline-flex; align-items:center; gap:8px; padding:5px 12px; border-radius:var(--radius-full); font-size:12px; font-weight:600; border:1px solid var(--border-color); background:var(--surface-card); }
+        .status-pill { display:inline-flex; align-items:center; gap:8px; padding:6px 14px; border-radius:var(--radius-full); font-size:12px; font-weight:700; border:1px solid var(--border-color); background:var(--surface-card); }
         .status-pill.live { border-color:rgba(34,197,94,0.4); background:rgba(34,197,94,0.1); color:var(--state-success); }
         .status-pill.disconnected { border-color:rgba(239,68,68,0.4); background:rgba(239,68,68,0.1); color:var(--state-danger); }
         .status-dot { width:8px; height:8px; border-radius:50%; background:currentColor; box-shadow:0 0 8px currentColor; }
 
-        /* Panels */
+        /* View Panels */
         .view-panel { padding:24px; display:none; flex:1; }
         .view-panel.active { display:block; }
         .grid-3col { display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:20px; }
         .grid-2col { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
-        .page-header { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:20px; }
-        .page-title { font-family:'Outfit',sans-serif; font-size:28px; font-weight:800; color:#fff; }
-        .page-subtitle { font-size:13px; line-height:1.6; color:var(--text-secondary); margin-top:6px; max-width:760px; }
+        
         .section-intro { margin-bottom:20px; }
-        .section-kicker { display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border:1px solid rgba(24,215,232,0.18); border-radius:999px; background:rgba(24,215,232,0.08); color:var(--accent-cyan); font-size:11px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; }
-        .section-title { margin-top:12px; font-family:'Outfit',sans-serif; font-size:22px; font-weight:800; color:#fff; }
-        .section-copy { margin-top:8px; font-size:13px; line-height:1.7; color:var(--text-secondary); max-width:840px; }
-        .feature-note-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px; margin-bottom:20px; }
-        .feature-note { padding:14px 16px; border-radius:var(--radius-md); border:1px solid var(--border-color); background:rgba(255,255,255,0.02); }
-        .feature-note strong { display:block; margin-bottom:6px; color:#fff; font-size:13px; }
-        .feature-note span { color:var(--text-secondary); font-size:12px; line-height:1.6; }
+        .section-kicker { display:inline-flex; align-items:center; gap:8px; padding:6px 12px; border:1px solid rgba(0,242,254,0.2); border-radius:999px; background:rgba(0,242,254,0.08); color:var(--accent-cyan); font-size:11px; font-weight:800; letter-spacing:0.08em; text-transform:uppercase; }
+        .section-title { margin-top:10px; font-family:'Outfit',sans-serif; font-size:24px; font-weight:800; color:#fff; }
+        .section-copy { margin-top:6px; font-size:13px; line-height:1.6; color:var(--text-secondary); max-width:840px; }
 
         /* Stat cards */
-        .stat-card { background:var(--surface-card); border:1px solid var(--border-color); border-radius:var(--radius-lg); padding:16px 20px; display:flex; align-items:center; gap:16px; box-shadow:var(--shadow-card); }
-        .stat-icon-box { width:46px; height:46px; border-radius:var(--radius-md); display:grid; place-items:center; font-size:22px; flex-shrink:0; }
+        .stat-card { background:var(--surface-card); border:1px solid var(--border-color); border-radius:var(--radius-lg); padding:18px 22px; display:flex; align-items:center; gap:16px; box-shadow:var(--shadow-card); }
+        .stat-icon-box { width:48px; height:48px; border-radius:var(--radius-md); display:grid; place-items:center; font-size:24px; flex-shrink:0; }
 
         /* Cards */
-        .card { background:var(--surface-card); border:1px solid var(--border-color); border-radius:var(--radius-lg); padding:20px; box-shadow:var(--shadow-card); }
+        .card { background:var(--surface-card); border:1px solid var(--border-color); border-radius:var(--radius-lg); padding:22px; box-shadow:var(--shadow-card); }
         .card-title-bar { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid var(--border-color); }
-        .card-title-text { font-family:'Outfit',sans-serif; font-size:15px; font-weight:700; color:#fff; display:flex; align-items:center; gap:8px; }
+        .card-title-text { font-family:'Outfit',sans-serif; font-size:16px; font-weight:800; color:#fff; display:flex; align-items:center; gap:8px; }
 
         /* Buttons & Controls */
-        .btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:9px 16px; border-radius:var(--radius-md); font-size:13px; font-weight:600; border:none; cursor:pointer; transition:all var(--transition); text-decoration:none; }
+        .btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:10px 18px; border-radius:var(--radius-md); font-size:13px; font-weight:700; border:none; cursor:pointer; transition:all var(--transition); text-decoration:none; }
         .btn-primary { background:var(--accent-cyan); color:#080B12; }
-        .btn-primary:hover { box-shadow:0 0 15px var(--accent-glow-cyan); transform:translateY(-1px); }
+        .btn-primary:hover { box-shadow:0 0 16px var(--accent-glow-cyan); transform:translateY(-1px); }
         .btn-secondary { background:var(--surface-hover); color:#fff; border:1px solid var(--border-color); }
         .btn-secondary:hover { background:var(--surface-active); border-color:var(--border-strong); }
         .btn-danger { background:var(--state-danger); color:#fff; }
         .btn-warning { background:var(--state-warning); color:#080B12; }
-        .btn-gold { background:var(--accent-gold); color:#080B12; font-weight:700; }
-        .btn-gold:hover { box-shadow:0 0 15px var(--accent-glow-gold); transform:translateY(-1px); }
-        .btn-xs { padding:4px 10px; font-size:11px; border-radius:var(--radius-sm); }
+        .btn-gold { background:var(--accent-gold); color:#080B12; font-weight:800; }
+        .btn-gold:hover { box-shadow:0 0 16px var(--accent-glow-gold); transform:translateY(-1px); }
+        .btn-xs { padding:6px 12px; font-size:12px; border-radius:var(--radius-sm); }
 
         /* Form elements */
-        .form-group { margin-bottom:14px; }
-        .form-label { display:block; font-size:12px; font-weight:600; color:var(--text-secondary); margin-bottom:6px; }
-        .form-input, .form-select { width:100%; background:var(--bg-app); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:10px 14px; color:#fff; font-size:13px; outline:none; transition:border-color var(--transition); }
+        .form-group { margin-bottom:16px; }
+        .form-label { display:block; font-size:12px; font-weight:700; color:var(--text-secondary); margin-bottom:6px; }
+        .form-input, .form-select { width:100%; background:var(--bg-app); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:11px 14px; color:#fff; font-size:13px; outline:none; transition:border-color var(--transition); }
         .form-input:focus, .form-select:focus { border-color:var(--accent-cyan); box-shadow:0 0 0 2px var(--accent-glow-cyan); }
 
-        /* Tables */
+        /* Data Tables */
         .data-table { width:100%; border-collapse:collapse; font-size:13px; }
-        .data-table th { text-align:left; padding:10px 14px; color:var(--text-muted); font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; border-bottom:1px solid var(--border-color); }
-        .data-table td { padding:12px 14px; border-bottom:1px solid var(--border-color); vertical-align:middle; }
+        .data-table th { text-align:left; padding:12px 14px; color:var(--text-muted); font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.5px; border-bottom:1px solid var(--border-color); }
+        .data-table td { padding:14px 14px; border-bottom:1px solid var(--border-color); vertical-align:middle; }
         .data-table tr:hover td { background:rgba(255,255,255,0.02); }
 
-        /* Leaderboard items */
-        .lb-item { display:flex; align-items:center; justify-content:space-between; padding:10px 14px; background:var(--bg-app); border:1px solid var(--border-color); border-radius:var(--radius-md); margin-bottom:8px; }
-        .lb-rank { font-family:'Outfit',sans-serif; font-size:16px; font-weight:800; width:28px; color:var(--accent-cyan); }
-
-        /* Toast */
-        #toast-wrapper { position:fixed; bottom:24px; right:24px; display:flex; flex-direction:column; gap:8px; z-index:1000; }
-        .toast-msg { background:var(--surface-card); border:1px solid var(--border-strong); border-left:4px solid var(--accent-cyan); padding:12px 18px; border-radius:var(--radius-md); font-size:13px; color:#fff; box-shadow:var(--shadow-card); max-width:380px; }
-
-        /* Modal & Overlay */
-        .modal-overlay { position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.75); backdrop-filter:blur(6px); display:none; place-items:center; z-index:200; }
-        .modal-overlay.active { display:grid; }
-        .modal-box { background:var(--surface-card); border:1px solid var(--border-strong); border-radius:var(--radius-lg); width:90%; max-width:620px; padding:24px; box-shadow:0 10px 40px rgba(0,0,0,0.6); max-height:90vh; overflow-y:auto; }
-
         /* Active dancer display */
-        .active-dancer-box { background:linear-gradient(180deg,rgba(24,215,232,0.06) 0%,rgba(16,22,36,0.9) 100%); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:20px; text-align:center; }
+        .active-dancer-box { background:linear-gradient(180deg,rgba(0,242,254,0.08) 0%,rgba(16,22,36,0.95) 100%); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:24px; text-align:center; }
         .progress-bar-fill { height:6px; background:linear-gradient(90deg,var(--accent-cyan),var(--accent-pink)); width:100%; border-radius:var(--radius-full); transition:width 0.2s linear; }
 
-        /* Preset Chips */
-        .preset-chip { background:var(--surface-hover); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:10px 14px; cursor:pointer; font-size:12px; font-weight:600; color:#fff; display:flex; flex-direction:column; gap:4px; transition:all 0.2s; }
-        .preset-chip:hover { border-color:var(--accent-cyan); background:rgba(24,215,232,0.1); transform:translateY(-1px); }
+        /* Toast */
+        #toast-wrapper { position:fixed; bottom:24px; right:24px; display:flex; flex-direction:column; gap:10px; z-index:1000; }
+        .toast-msg { background:var(--surface-card); border:1px solid var(--border-strong); border-left:4px solid var(--accent-cyan); padding:14px 20px; border-radius:var(--radius-md); font-size:13px; color:#fff; box-shadow:var(--shadow-card); max-width:400px; }
+
+        /* Modals */
+        .modal-overlay { position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); backdrop-filter:blur(8px); display:none; place-items:center; z-index:200; }
+        .modal-overlay.active { display:grid; }
+        .modal-box { background:var(--surface-card); border:1px solid var(--border-strong); border-radius:var(--radius-lg); width:90%; max-width:600px; padding:26px; box-shadow:0 12px 48px rgba(0,0,0,0.7); max-height:90vh; overflow-y:auto; }
+
+        /* Badges */
+        .badge { display:inline-flex; align-items:center; padding:3px 8px; border-radius:4px; font-size:10px; font-weight:800; text-transform:uppercase; }
+        .badge-cyan { background:rgba(0,242,254,0.15); color:var(--accent-cyan); border:1px solid rgba(0,242,254,0.3); }
+        .badge-warning { background:rgba(245,158,11,0.15); color:var(--state-warning); border:1px solid rgba(245,158,11,0.3); }
+        .badge-danger { background:rgba(239,68,68,0.15); color:var(--state-danger); border:1px solid rgba(239,68,68,0.3); }
+
         @media (max-width: 920px) {
-            header { padding:0 16px; }
-            .topbar-left { flex-direction:column; align-items:flex-start; }
-            .page-header { flex-direction:column; }
-            .grid-2col { grid-template-columns:1fr; }
+            #main-content { margin-left:0; }
+            #sidebar { display:none; }
+            .grid-2col, .grid-3col { grid-template-columns:1fr; }
         }
     </style>
 </head>
@@ -148,28 +136,19 @@
 <aside id="sidebar">
     <div class="sidebar-brand">
         <div class="brand-logo"><i class="ri-pulse-line"></i></div>
-        <div class="brand-name">Dance Live SaaS</div>
+        <div class="brand-name">Dance Live Control</div>
     </div>
     <nav class="sidebar-nav">
-        <div class="nav-section-title">LIVE</div>
+        <div class="nav-section-title">LIVE OPERATIONS</div>
         <a href="javascript:void(0)" class="nav-item active" onclick="navigate('live-control', this)"><div class="nav-icon"><i class="ri-broadcast-line"></i></div><span>Live Control</span></a>
-        <a href="javascript:void(0)" class="nav-item" onclick="navigate('queue', this)"><div class="nav-icon"><i class="ri-list-ordered"></i></div><span>Dancer Queue</span></a>
-        <a href="javascript:void(0)" class="nav-item" onclick="navigate('events-monitor', this)"><div class="nav-icon"><i class="ri-flashlight-line"></i></div><span>Event Monitor</span></a>
+        <a href="javascript:void(0)" class="nav-item" onclick="navigate('event-mappings', this)"><div class="nav-icon"><i class="ri-git-merge-line"></i></div><span>Events & Rules</span></a>
 
-        <div class="nav-section-title">AUTOMATION</div>
-        <a href="javascript:void(0)" class="nav-item" onclick="navigate('event-mappings', this)"><div class="nav-icon"><i class="ri-git-merge-line"></i></div><span>Events & Actions</span></a>
-        <a href="javascript:void(0)" class="nav-item" onclick="navigate('action-library', this)"><div class="nav-icon"><i class="ri-magic-line"></i></div><span>Action Library</span></a>
-        <a href="javascript:void(0)" class="nav-item" onclick="navigate('gift-catalogue', this)"><div class="nav-icon"><i class="ri-gift-2-line"></i></div><span>Gift Catalogue</span></a>
+        <div class="nav-section-title">CONTENT & AUDIO</div>
+        <a href="javascript:void(0)" class="nav-item" onclick="navigate('music', this)"><div class="nav-icon"><i class="ri-music-2-line"></i></div><span>Nhạc Sân Khấu</span></a>
+        <a href="javascript:void(0)" class="nav-item" onclick="navigate('overlay', this)"><div class="nav-icon"><i class="ri-layout-4-line"></i></div><span>Giao Diện Stream</span></a>
 
-        <div class="nav-section-title">CONTENT</div>
-        <a href="javascript:void(0)" class="nav-item" onclick="navigate('music', this)"><div class="nav-icon"><i class="ri-music-2-line"></i></div><span>Music Library</span></a>
-        <a href="javascript:void(0)" class="nav-item" onclick="navigate('dance', this)"><div class="nav-icon"><i class="ri-user-star-line"></i></div><span>Dance Emotes</span></a>
-        <a href="javascript:void(0)" class="nav-item" onclick="navigate('overlay', this)"><div class="nav-icon"><i class="ri-layout-4-line"></i></div><span>Overlay Studio</span></a>
-
-        <div class="nav-section-title">SYSTEM</div>
-        <a href="javascript:void(0)" class="nav-item" onclick="navigate('roblox', this)"><div class="nav-icon"><i class="ri-gamepad-line"></i></div><span>Roblox Connection</span></a>
-        <a href="javascript:void(0)" class="nav-item" onclick="navigate('analytics', this)"><div class="nav-icon"><i class="ri-bar-chart-box-line"></i></div><span>Analytics & Logs</span></a>
-        <a href="javascript:void(0)" class="nav-item" onclick="navigate('settings', this)"><div class="nav-icon"><i class="ri-settings-4-line"></i></div><span>Settings</span></a>
+        <div class="nav-section-title">SYSTEM BRIDGE</div>
+        <a href="javascript:void(0)" class="nav-item" onclick="navigate('roblox', this)"><div class="nav-icon"><i class="ri-gamepad-line"></i></div><span>Roblox & Logs</span></a>
     </nav>
 </aside>
 
@@ -178,16 +157,13 @@
     <header>
         <div class="topbar-left">
             <div>
-                <div id="topbar-page-title" style="font-family:'Outfit',sans-serif;font-size:18px;font-weight:800;color:#fff;">Live Control</div>
-                <div id="topbar-page-copy" style="font-size:12px;color:var(--text-muted);margin-top:2px;">Theo doi ket noi TikTok, Roblox va luong su kien trong mot man hinh.</div>
+                <div id="topbar-page-title" style="font-family:'Outfit',sans-serif;font-size:18px;font-weight:800;color:#fff;">Live Control Center</div>
+                <div id="topbar-page-copy" style="font-size:12px;color:var(--text-muted);margin-top:2px;">Điều khiển kết nối TikTok LIVE & Sân khấu Roblox trong một màn hình.</div>
             </div>
-            <button class="cmd-btn" onclick="openCommandPalette()">
-                🔍 Tìm kiếm hoặc phím tắt... <span class="kbd">Ctrl+K</span>
-            </button>
         </div>
 
         <div class="topbar-right">
-            <button class="btn btn-primary btn-xs" onclick="runPreflightCheck()"><i class="ri-rocket-2-line"></i> Go Live Setup</button>
+            <button class="btn btn-primary btn-xs" onclick="runPreflightCheck()"><i class="ri-rocket-2-line"></i> Go Live Check</button>
             <div id="roblox-status-pill" class="status-pill disconnected">
                 <span class="status-dot"></span>
                 <span id="roblox-status-text">Roblox Offline</span>
@@ -196,44 +172,60 @@
                 <span class="status-dot"></span>
                 <span id="tiktok-status-text">TikTok Disconnected</span>
             </div>
-            <button class="btn btn-danger btn-xs" onclick="triggerEmergencyStop()" title="Dừng khẩn cấp mọi hiệu ứng và làm sạch hàng chờ"><i class="ri-alarm-warning-line"></i> Emergency Stop</button>
+            <button class="btn btn-danger btn-xs" onclick="triggerEmergencyStop()"><i class="ri-alarm-warning-line"></i> Emergency Stop</button>
         </div>
     </header>
 
-    <!-- ====== VIEW: Live Control Center ====== -->
+    <!-- ====== VIEW 1: Live Control Center ====== -->
     <div id="view-live-control" class="view-panel active">
         <div class="section-intro">
-            <span class="section-kicker">Live Operations</span>
-            <div class="section-title">Live Control Center</div>
-            <div class="section-copy">Man hinh dieu hanh chinh de ket noi TikTok LIVE, theo doi Roblox, test comment hoac gift, va xu ly nhanh khi live dang dien ra.</div>
+            <span class="section-kicker">Live Dashboard</span>
+            <div class="section-title">Live Stream Control Center</div>
+            <div class="section-copy">Kết nối phòng TikTok LIVE, theo dõi nhân vật đang nhảy trên sân khấu Roblox và thử nghiệm sự kiện quà tặng thời gian thực.</div>
         </div>
-        <!-- Live Analytics Quick Stats Grid -->
+
+        <!-- Master Roblox Custom Dance Banner -->
+        <div class="card" style="margin-bottom:20px;background:linear-gradient(135deg,rgba(0,242,254,0.1),rgba(255,0,127,0.08));border:1px solid rgba(0,242,254,0.3);">
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;">
+                <div style="display:flex;align-items:center;gap:16px;">
+                    <div style="width:52px;height:52px;border-radius:var(--radius-md);background:var(--accent-cyan);color:#080B12;display:grid;place-items:center;font-size:28px;"><i class="ri-user-star-line"></i></div>
+                    <div>
+                        <div style="font-size:11px;font-weight:800;color:var(--accent-cyan);text-transform:uppercase;letter-spacing:1px;">Điệu Nhảy Dự Án Roblox Hiện Tại</div>
+                        <div style="font-family:'Outfit',sans-serif;font-size:20px;font-weight:800;color:#fff;margin-top:2px;">🔥 Trend TungTung (Custom Keyframe Sequence)</div>
+                        <div style="font-size:12px;color:var(--text-secondary);margin-top:4px;">Tự động nạp trực tiếp từ <code>ReplicatedStorage.ImportedAnimation</code> cho mọi dancer lên sàn!</div>
+                    </div>
+                </div>
+                <span class="badge badge-cyan" style="padding:8px 14px;font-size:12px;"><i class="ri-checkbox-circle-fill" style="margin-right:4px;"></i> Active in Roblox Studio</span>
+            </div>
+        </div>
+
+        <!-- Live Quick Stats -->
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:20px;">
             <div class="stat-card">
-                <div class="stat-icon-box" style="background:rgba(24,215,232,0.12);color:var(--accent-cyan);"><i class="ri-coin-line"></i></div>
+                <div class="stat-icon-box" style="background:rgba(0,242,254,0.12);color:var(--accent-cyan);"><i class="ri-coin-line"></i></div>
                 <div>
-                    <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;">Tổng Xu Stream</div>
+                    <div style="font-size:11px;font-weight:800;color:var(--text-muted);text-transform:uppercase;">Tổng Xu Stream</div>
                     <div id="stat-total-coins" style="font-size:22px;font-weight:800;color:#fff;font-family:'Outfit',sans-serif;">0 xu</div>
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon-box" style="background:rgba(244,63,134,0.12);color:var(--accent-pink);"><i class="ri-gift-line"></i></div>
+                <div class="stat-icon-box" style="background:rgba(255,0,127,0.12);color:var(--accent-pink);"><i class="ri-gift-line"></i></div>
                 <div>
-                    <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;">Quà Nhận Được</div>
+                    <div style="font-size:11px;font-weight:800;color:var(--text-muted);text-transform:uppercase;">Quà Nhận Được</div>
                     <div id="stat-total-gifts" style="font-size:22px;font-weight:800;color:#fff;font-family:'Outfit',sans-serif;">0 quà</div>
                 </div>
             </div>
             <div class="stat-card">
                 <div class="stat-icon-box" style="background:rgba(34,197,94,0.12);color:var(--state-success);"><i class="ri-user-smile-line"></i></div>
                 <div>
-                    <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;">Vũ Công Đã Lên Sàn</div>
+                    <div style="font-size:11px;font-weight:800;color:var(--text-muted);text-transform:uppercase;">Dancer Trên Sàn</div>
                     <div id="stat-total-dancers" style="font-size:22px;font-weight:800;color:#fff;font-family:'Outfit',sans-serif;">0 lượt</div>
                 </div>
             </div>
             <div class="stat-card">
                 <div class="stat-icon-box" style="background:rgba(255,184,0,0.12);color:var(--accent-gold);"><i class="ri-vip-crown-line"></i></div>
                 <div>
-                    <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;">Top Gifter Hiển Thị</div>
+                    <div style="font-size:11px;font-weight:800;color:var(--text-muted);text-transform:uppercase;">Top Gifter VIP</div>
                     <div id="stat-top-gifter-name" style="font-size:18px;font-weight:800;color:var(--accent-gold);font-family:'Outfit',sans-serif;">Chưa có</div>
                 </div>
             </div>
@@ -244,28 +236,28 @@
             <div class="card">
                 <div class="card-title-bar"><div class="card-title-text">📡 TikTok LIVE Connector</div></div>
                 <div class="form-group">
-                    <label class="form-label">TikTok Username ID</label>
+                    <label class="form-label">TikTok Username ID (@channel)</label>
                     <input type="text" id="input-tiktok-user" class="form-input" value="sandg.music" placeholder="@username">
                 </div>
-                <div style="display:flex;gap:8px;margin-bottom:14px;">
-                    <button class="btn btn-primary" style="flex:1;" onclick="handleConnectTikTok()">Connect</button>
-                    <button class="btn btn-danger" style="flex:1;" onclick="confirmDisconnectTikTok()">Disconnect</button>
+                <div style="display:flex;gap:10px;margin-bottom:14px;">
+                    <button class="btn btn-primary" style="flex:1;" onclick="handleConnectTikTok()"><i class="ri-plug-line"></i> Connect</button>
+                    <button class="btn btn-danger" style="flex:1;" onclick="confirmDisconnectTikTok()"><i class="ri-shut-down-line"></i> Disconnect</button>
                 </div>
-                <button class="btn btn-secondary btn-xs" style="width:100%;margin-bottom:10px;" onclick="runPreflightCheck()">📋 Run Pre-live Checklist</button>
+                <button class="btn btn-secondary btn-xs" style="width:100%;" onclick="runPreflightCheck()">📋 Run Pre-live Checklist</button>
             </div>
 
-            <!-- Currently Dancing -->
+            <!-- Active Dancer On Stage -->
             <div class="card">
                 <div class="card-title-bar">
-                    <div class="card-title-text">🕺 Active Dancer</div>
+                    <div class="card-title-text">🕺 Active Dancer On Stage</div>
                     <button class="btn btn-secondary btn-xs" onclick="handleSkipDancer()">Skip ⏭️</button>
                 </div>
                 <div class="active-dancer-box">
-                    <div style="font-size:32px;margin-bottom:4px;">🕺</div>
+                    <div style="font-size:36px;margin-bottom:6px;">💃</div>
                     <div id="active-roblox-name" style="font-size:18px;font-weight:800;color:#fff;">Waiting...</div>
-                    <div id="active-tiktok-user" style="font-size:12px;color:var(--accent-cyan);margin-top:2px;">Comment !dance Username on TikTok</div>
-                    <div id="active-dance-verification" style="font-size:11px;color:var(--text-muted);margin-top:8px;">Dang cho xac minh nhan vat nhay...</div>
-                    <div style="background:var(--border-color);height:6px;border-radius:var(--radius-full);overflow:hidden;margin-top:14px;">
+                    <div id="active-tiktok-user" style="font-size:12px;color:var(--accent-cyan);margin-top:2px;">Comment tên Roblox trên TikTok để nhảy!</div>
+                    <div id="active-dance-verification" style="font-size:11px;color:var(--text-muted);margin-top:8px;">🔥 Đang dùng điệu nhảy TungTung</div>
+                    <div style="background:var(--border-color);height:6px;border-radius:var(--radius-full);overflow:hidden;margin-top:16px;">
                         <div id="dancer-progress-fill" class="progress-bar-fill"></div>
                     </div>
                 </div>
@@ -273,518 +265,153 @@
 
             <!-- Quick Simulator -->
             <div class="card">
-                <div class="card-title-bar"><div class="card-title-text">🧪 Quick Simulator</div></div>
+                <div class="card-title-bar"><div class="card-title-text">🧪 Quick Stream Simulator</div></div>
                 <div class="form-group">
                     <label class="form-label">Test Roblox Username</label>
                     <input type="text" id="input-test-roblox" class="form-input" value="Builderman">
                 </div>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
                     <button class="btn btn-secondary" style="font-size:12px;" onclick="triggerTestComment(false)">💬 Comment Test</button>
-                    <button class="btn btn-warning" style="font-size:12px;" onclick="triggerTestComment(true)">🎁 VIP Gift Test</button>
+                    <button class="btn btn-warning" style="font-size:12px;" onclick="triggerTestComment(true)">👑 VIP Gift Test</button>
                 </div>
-                <button class="btn btn-primary btn-xs" style="width:100%;margin-bottom:6px;" onclick="testRoseEvent()">🌹 Test Rose → Flower Rain</button>
-                <button class="btn btn-gold btn-xs" style="width:100%;" onclick="testGalaxyEvent()">🌌 Test Galaxy → Cosmic Cutscene</button>
-            </div>
-        </div>
-
-        <!-- Quick Dance Customization Bar -->
-        <div class="card" style="margin-top:20px;">
-            <div class="card-title-bar" style="justify-content:space-between;">
-                <div class="card-title-text"><i class="ri-user-star-line"></i> Tùy Chỉnh Nhanh Điệu Nhảy Sân Khấu (Quick Dance Selector)</div>
-                <button class="btn btn-secondary btn-xs" onclick="navigate('dance')"><i class="ri-settings-line"></i> Quản Lý Thư Viện</button>
-            </div>
-            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;">
-                <button class="btn btn-primary" onclick="quickSelectPresetDance('Phonk Hype Dance', '507771019', 'PHONK')">⚡ Phonk Hype Dance</button>
-                <button class="btn btn-primary" style="background:#ec4899;" onclick="quickSelectPresetDance('Idol Point Routine', '507770453', 'KPOP')">🔥 Idol Point Routine</button>
-                <button class="btn btn-gold" onclick="quickSelectPresetDance('Breakdance B-Boy', '507772104', 'HIPHOP')">🕺 Breakdance B-Boy</button>
-                <button class="btn btn-primary" style="background:#a78bfa;" onclick="quickSelectPresetDance('Chill Wave Motion', '507770238', 'CHILL')">🌸 Chill Wave Motion</button>
-                <button class="btn btn-gold" style="background:#10b981;" onclick="handleSelectRandomDance()">🎲 Nhảy Ngẫu Nhiên (Random)</button>
+                <button class="btn btn-primary btn-xs" style="width:100%;margin-bottom:8px;" onclick="testRoseEvent()">🌹 Test Rose → Flower Rain</button>
+                <button class="btn btn-gold btn-xs" style="width:100%;" onclick="testGalaxyEvent()">🌌 Test Galaxy → Stage Lighting</button>
             </div>
         </div>
     </div>
 
-    <!-- ====== VIEW: Leaderboard ====== -->
-    <div id="view-leaderboard" class="view-panel">
-        <div class="card" style="max-width:700px;margin:0 auto;">
-            <div class="card-title-bar">
-                <div class="card-title-text">🏆 Live Stream Top Gifter Leaderboard</div>
-                <button class="btn btn-secondary btn-xs" onclick="loadLeaderboard()">🔄 Refresh</button>
-            </div>
-            <div id="leaderboard-container">
-                <div style="color:var(--text-muted);text-align:center;padding:30px;">Loading Leaderboard...</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ====== VIEW: Stage Presets (Theme Studio) ====== -->
-    <div id="view-stage-presets" class="view-panel">
-        <div class="card" style="max-width:800px;margin:0 auto;">
-            <div class="card-title-bar"><div class="card-title-text">🪩 Stage Lighting & Atmosphere Presets</div></div>
-            <div style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;">Kích hoạt preset ánh sáng sân khấu ngay lập tức đến Roblox Studio:</div>
-            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;">
-                <div class="preset-chip" onclick="triggerStagePreset('TIKTOK_VN_TREND', '#ff007f')">
-                    <div style="font-size:24px;">🔥</div>
-                    <div style="font-weight:800;color:var(--accent-pink);">TikTok VN Trend</div>
-                    <div style="font-size:11px;color:var(--text-muted);">See Tình, Cắt Đôi Nỗi Sầu (Pink)</div>
-                </div>
-                <div class="preset-chip" onclick="triggerStagePreset('KPOP_VIRAL', '#9400d3')">
-                    <div style="font-size:24px;">✨</div>
-                    <div style="font-weight:800;color:#a78bfa;">K-Pop Viral Hits</div>
-                    <div style="font-size:11px;color:var(--text-muted);">Super Shy, Cupid, Flower (Purple)</div>
-                </div>
-                <div class="preset-chip" onclick="triggerStagePreset('EDM_FESTIVAL', '#00c8ff')">
-                    <div style="font-size:24px;">🎧</div>
-                    <div style="font-weight:800;color:var(--accent-cyan);">EDM Festival Rave</div>
-                    <div style="font-size:11px;color:var(--text-muted);">Ultra Rave Drop & Phonk (Cyan)</div>
-                </div>
-                <div class="preset-chip" onclick="triggerStagePreset('HIPHOP_STREET', '#ffd700')">
-                    <div style="font-size:24px;">🎤</div>
-                    <div style="font-weight:800;color:var(--accent-gold);">Hip-Hop & Street</div>
-                    <div style="font-size:11px;color:var(--text-muted);">Street Trap & Breakdance (Gold)</div>
-                </div>
-                <div class="preset-chip" onclick="triggerStagePreset('LATIN_REGGAETON', '#ff69b4')">
-                    <div style="font-size:24px;">💃</div>
-                    <div style="font-weight:800;color:#ff69b4;">Latin Reggaeton</div>
-                    <div style="font-size:11px;color:var(--text-muted);">Dákiti & Despacito Remix (Hot Pink)</div>
-                </div>
-                <div class="preset-chip" onclick="triggerStagePreset('BRAZIL_FUNK', '#00ff7f')">
-                    <div style="font-size:24px;">🇧🇷</div>
-                    <div style="font-weight:800;color:#00ff7f;">Brazil Funk Rave</div>
-                    <div style="font-size:11px;color:var(--text-muted);">Baile Funk & Montagem (Neon Green)</div>
-                </div>
-                <div class="preset-chip" onclick="triggerStagePreset('JAPAN_JPOP', '#ffb6c1')">
-                    <div style="font-size:24px;">🌸</div>
-                    <div style="font-weight:800;color:#ffb6c1;">Japan J-Pop & City Pop</div>
-                    <div style="font-size:11px;color:var(--text-muted);">YOASOBI Idol & City Pop (Soft Pink)</div>
-                </div>
-                <div class="preset-chip" onclick="triggerStagePreset('AFROBEAT', '#ff8c00')">
-                    <div style="font-size:24px;">🥁</div>
-                    <div style="font-weight:800;color:#ff8c00;">Afrobeats Global</div>
-                    <div style="font-size:11px;color:var(--text-muted);">Calm Down & Water Remix (Orange)</div>
-                </div>
-                <div class="preset-chip" onclick="triggerStagePreset('US_POP_HITS', '#8a2be2')">
-                    <div style="font-size:24px;">🌟</div>
-                    <div style="font-weight:800;color:#8a2be2;">US Pop Trending</div>
-                    <div style="font-size:11px;color:var(--text-muted);">Flowers & Espresso Remix (Violet)</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ====== VIEW: Events & Actions (Rules Manager) ====== -->
+    <!-- ====== VIEW 2: Events & Rules ====== -->
     <div id="view-event-mappings" class="view-panel">
         <div class="section-intro">
             <span class="section-kicker">Automation Core</span>
-            <div class="section-title">Events & Actions</div>
-            <div class="section-copy">Trung tam mapping gift thanh action. Tai day creator dinh nghia trigger, uu tien, cooldown va chuoi action Roblox se chay khi su kien TikTok den.</div>
-        </div>
-        <div class="feature-note-grid">
-            <div class="feature-note"><strong>Trigger</strong><span>Gift picker, min repeat, total coin va dieu kien match chinh xac.</span></div>
-            <div class="feature-note"><strong>Action Flow</strong><span>Mot event co the goi nhieu action theo thu tu, delay va duration rieng.</span></div>
-            <div class="feature-note"><strong>Operational Rules</strong><span>Priority, cooldown va queue mode can duoc quan ly thong nhat tai day.</span></div>
+            <div class="section-title">Event Rules & Actions</div>
+            <div class="section-copy">Cấu hình quy tắc tự động kích hoạt hiệu ứng trên Roblox khi khán giả tặng quà Rose, Hand Heart, Galaxy, Dragon, Lion trên TikTok LIVE.</div>
         </div>
         <div class="card">
             <div class="card-title-bar">
-                <div class="card-title-text">🎯 Event Mappings (Gift → Action Rules)</div>
-                <button class="btn btn-primary btn-xs" onclick="openCreateMappingModal()">+ Create Event Rule</button>
+                <div class="card-title-text">🎯 Event Mappings (TikTok Gift → Roblox Action)</div>
             </div>
             <table class="data-table">
                 <thead>
-                    <tr><th>Active</th><th>Event Name</th><th>Trigger</th><th>Actions</th><th>Priority</th><th>Actions</th></tr>
+                    <tr><th>Active</th><th>Quy Tắc Quà Tặng</th><th>Kích Hoạt (Trigger)</th><th>Hiệu Ứng Roblox (Actions)</th><th>Thao Tác</th></tr>
                 </thead>
-                <tbody id="table-mappings-body">
-                    <tr><td colspan="6" style="text-align:center;color:var(--text-muted);">Loading Event Mappings...</td></tr>
+                <tbody id="table-event-mappings-body">
+                    <tr><td colspan="5" style="text-align:center;color:var(--text-muted);">Đang tải dữ liệu...</td></tr>
                 </tbody>
             </table>
         </div>
     </div>
 
-    <!-- ====== VIEW: Action Library ====== -->
-    <div id="view-action-library" class="view-panel">
-        <div class="section-intro">
-            <span class="section-kicker">Reusable Effects</span>
-            <div class="section-title">Action Library</div>
-            <div class="section-copy">Thu vien action dung lai duoc cho cac event nhu flower rain, stage light, camera shake, music switch va message banner.</div>
-        </div>
-        <div class="card">
-            <div class="card-title-bar">
-                <div class="card-title-text">⚡ Action Library (Reusable Game Effects)</div>
-                <button class="btn btn-primary btn-xs" onclick="openCreateActionModal()">+ Create Action</button>
-            </div>
-            <div id="action-cards-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;">
-                <div style="color:var(--text-muted);grid-column:1/-1;text-align:center;padding:30px;">Loading Action Library...</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ====== VIEW: Gift Catalogue ====== -->
-    <div id="view-gift-catalogue" class="view-panel">
-        <div class="section-intro">
-            <span class="section-kicker">Gift Source</span>
-            <div class="section-title">Gift Catalogue</div>
-            <div class="section-copy">Danh muc qua tu TikTok LIVE de creator tim gift, doi chieu coin, va quyet dinh gift nao dang duoc mapping sang Roblox action.</div>
-        </div>
-        <div class="card">
-            <div class="card-title-bar"><div class="card-title-text">🎁 TikTok LIVE Gift Catalogue</div></div>
-            <div id="gift-catalogue-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;">
-                <!-- Populated dynamically -->
-            </div>
-        </div>
-    </div>
-
-    <!-- ====== VIEW: Dancer Queue ====== -->
-    <div id="view-queue" class="view-panel">
-        <div class="section-intro">
-            <span class="section-kicker">Live Intake</span>
-            <div class="section-title">Dancer Queue</div>
-            <div class="section-copy">Hang cho dancer hien thi thu tu len san, nguon TikTok va loai request de operator co the skip, clear hoac xu ly queue bi ket.</div>
-        </div>
-        <div class="card">
-            <div class="card-title-bar">
-                <div class="card-title-text">📋 Dancer Queue (FIFO)</div>
-                <button class="btn btn-danger btn-xs" onclick="confirmClearQueue()">Clear Queue</button>
-            </div>
-            <table class="data-table">
-                <thead><tr><th>Pos</th><th>Roblox</th><th>TikTok</th><th>Type</th><th>Actions</th></tr></thead>
-                <tbody id="table-queue-body">
-                    <tr><td colspan="5" style="text-align:center;color:var(--text-muted);">Queue is empty</td></tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- ====== VIEW: Event Monitor ====== -->
-    <div id="view-events-monitor" class="view-panel">
-        <div class="section-intro">
-            <span class="section-kicker">Realtime Stream</span>
-            <div class="section-title">Event Monitor</div>
-            <div class="section-copy">Theo doi eventId, sender, status ACK va retry de biet su kien nao dang queue, dang chay hay bi loi trong Roblox bridge.</div>
-        </div>
-        <div class="card">
-            <div class="card-title-bar"><div class="card-title-text">⚡ Realtime Game Event Stream</div></div>
-            <table class="data-table">
-                <thead><tr><th>Event ID</th><th>Rule Name</th><th>Sender / Gift</th><th>Status</th><th>Time</th><th>Actions</th></tr></thead>
-                <tbody id="table-events-monitor-body">
-                    <tr><td colspan="6" style="text-align:center;color:var(--text-muted);">No game events processed yet</td></tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- ====== VIEW: Music Library ====== -->
+    <!-- ====== VIEW 3: Music Library ====== -->
     <div id="view-music" class="view-panel">
         <div class="section-intro">
-            <span class="section-kicker">Content Control</span>
-            <div class="section-title">Music Library</div>
-            <div class="section-copy">Quan ly Roblox Sound Asset, doi nhac truc tiep va giu fallback rules theo coin milestone ma khong tach roi khoi bo nho noi dung.</div>
+            <span class="section-kicker">Audio Control</span>
+            <div class="section-title">Nhạc Sân Khấu & Roblox Sound IDs</div>
+            <div class="section-copy">Thêm và phát các bài nhạc Sound Asset ID trực tiếp trên sân khấu Roblox, cấu hình nhạc theo mốc tặng xu quà tặng.</div>
         </div>
         <div class="grid-2col" style="margin-bottom:20px;">
             <div class="card">
-                <div class="card-title-bar"><div class="card-title-text">🎵 Thêm Bài Nhạc Thư Viện</div></div>
+                <div class="card-title-bar"><div class="card-title-text">🎵 Thêm Bài Nhạc Mới</div></div>
                 <div class="form-group">
                     <label class="form-label">Tên bài nhạc</label>
-                    <input type="text" id="input-music-title" class="form-input" placeholder="Phonk Bass Anthem">
+                    <input type="text" id="input-music-title" class="form-input" placeholder="Phonk Bass High Beat">
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Sound Asset ID</label>
+                    <label class="form-label">Sound Asset ID (Roblox)</label>
                     <input type="text" id="input-music-id" class="form-input" placeholder="1837879082">
                 </div>
-                <div style="display:flex;gap:8px;">
-                    <button class="btn btn-primary" style="flex:1;" onclick="handleAddToLibrary()">📚 Thêm Library</button>
+                <div style="display:flex;gap:10px;">
+                    <button class="btn btn-primary" style="flex:1;" onclick="handleAddToLibrary()">📚 Thêm Thư Viện</button>
                     <button class="btn btn-secondary" onclick="handleAddAndPlayTrack()">▶ Thêm & Phát Ngay</button>
                 </div>
             </div>
 
-            <!-- Tikfanny-style Coin Milestones Card -->
             <div class="card">
                 <div class="card-title-bar"><div class="card-title-text">🪙 Coin Milestones Music Mapper</div></div>
-                <div id="coin-milestones-list" style="display:flex;flex-direction:column;gap:8px;max-height:260px;overflow-y:auto;">
-                    <div style="color:var(--text-muted);font-size:12px;">Đang tải coin milestones...</div>
+                <div id="coin-milestones-list" style="display:flex;flex-direction:column;gap:8px;">
+                    <!-- Populated dynamically -->
                 </div>
             </div>
         </div>
 
         <div class="card">
-            <div class="card-title-bar"><div class="card-title-text">📋 Danh Sách Nhạc Library</div></div>
-            <div id="music-library-container"></div>
-        </div>
-    </div>
-
-    <!-- ====== VIEW: Dance Emotes Manager ====== -->
-    <div id="view-dance" class="view-panel">
-        <div class="section-intro">
-            <span class="section-kicker">Avatar Motion</span>
-            <div class="section-title">Dance Emotes</div>
-            <div class="section-copy">Thu vien animation Roblox de set mac dinh, thu nghiem nhanh va doi phong cach vu dao cho avatar len san.</div>
-        </div>
-        <div class="grid-2col" style="margin-bottom:20px;">
-            <!-- Form: Thêm & Đổi điệu nhảy -->
-            <div class="card">
-                <div class="card-title-bar"><div class="card-title-text"><i class="ri-user-star-line"></i> Tùy Chỉnh Điệu Nhảy Roblox (Animation Asset ID)</div></div>
-                <div class="form-group">
-                    <label class="form-label">Tên điệu nhảy (Dance Name)</label>
-                    <input type="text" id="input-dance-title" class="form-input" placeholder="Phonk Hype Dance">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Roblox Animation Asset ID</label>
-                    <input type="text" id="input-dance-id" class="form-input" placeholder="507771019 hoặc rbxassetid://507771019">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Thể loại / Style</label>
-                    <select id="input-dance-genre" class="form-select">
-                        <option value="PHONK">⚡ Phonk / Hype</option>
-                        <option value="KPOP">🔥 K-Pop Dance</option>
-                        <option value="HIPHOP">🎤 Hip-Hop Breakdance</option>
-                        <option value="CHILL">🌸 Chill Vibing</option>
-                    </select>
-                </div>
-                <div style="display:flex;gap:8px;">
-                    <button class="btn btn-primary" style="flex:1;" onclick="handleAddDanceEmote()"><i class="ri-save-line"></i> Lưu Thư Viện</button>
-                    <button class="btn btn-gold" onclick="handleAddAndSwitchDance()"><i class="ri-play-circle-line"></i> Lưu & Kích Hoạt Ngay</button>
-                </div>
-            </div>
-
-            <!-- Library điệu nhảy mẫu phổ biến (Presets) -->
-            <div class="card">
-                <div class="card-title-bar" style="justify-content:space-between;">
-                    <div class="card-title-text"><i class="ri-magic-line"></i> Thư Viện Điệu Nhảy Mẫu Roblox Studio</div>
-                    <button class="btn btn-gold btn-xs" onclick="handleSelectRandomDance()"><i class="ri-shuffle-line"></i> 🎲 Nhảy Ngẫu Nhiên (Random)</button>
-                </div>
-                <div style="display:flex;flex-direction:column;gap:8px;max-height:280px;overflow-y:auto;">
-                    <div class="preset-chip" onclick="quickSelectPresetDance('Phonk Hype Dance', '507771019', 'PHONK')">
-                        <div style="font-weight:700;color:var(--accent-cyan);">⚡ Phonk Hype Dance</div>
-                        <div style="font-size:11px;color:var(--text-muted);">Asset ID: <code>507771019</code> • Phonk / Hype</div>
-                    </div>
-                    <div class="preset-chip" onclick="quickSelectPresetDance('Idol Point Routine', '507770453', 'KPOP')">
-                        <div style="font-weight:700;color:var(--accent-pink);">🔥 Idol Point Routine</div>
-                        <div style="font-size:11px;color:var(--text-muted);">Asset ID: <code>507770453</code> • K-Pop Dance</div>
-                    </div>
-                    <div class="preset-chip" onclick="quickSelectPresetDance('Hip-Hop Breakdance', '507772104', 'HIPHOP')">
-                        <div style="font-weight:700;color:var(--accent-gold);">🎤 Hip-Hop Breakdance</div>
-                        <div style="font-size:11px;color:var(--text-muted);">Asset ID: <code>507772104</code> • Hip-Hop / Breakdance</div>
-                    </div>
-                    <div class="preset-chip" onclick="quickSelectPresetDance('Vibing Chill Wave', '507770238', 'CHILL')">
-                        <div style="font-weight:700;color:#a78bfa;">🌸 Vibing Chill Wave</div>
-                        <div style="font-size:11px;color:var(--text-muted);">Asset ID: <code>507770238</code> • Chill Wave</div>
-                    </div>
-                    <div class="preset-chip" onclick="quickSelectPresetDance('Hands Up Jump', '507770677', 'PHONK')">
-                        <div style="font-weight:700;color:#10b981;">⚡ Hands Up Jump</div>
-                        <div style="font-size:11px;color:var(--text-muted);">Asset ID: <code>507770677</code> • Trend Hype</div>
-                    </div>
-                    <div class="preset-chip" onclick="quickSelectPresetDance('Stadium Hype', '507771520', 'PHONK')">
-                        <div style="font-weight:700;color:#ec4899;">👑 Stadium Hype</div>
-                        <div style="font-size:11px;color:var(--text-muted);">Asset ID: <code>507771520</code> • Phonk / VIP</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Bảng danh sách điệu nhảy trong thư viện -->
-        <div class="card">
-            <div class="card-title-bar">
-                <div class="card-title-text"><div class="card-title-text"><i class="ri-list-check"></i> Danh Sách Điệu Nhảy Đã Lưu</div></div>
-            </div>
-            <div id="dance-library-container">
-                <div style="color:var(--text-muted);padding:20px;text-align:center;">Đang tải danh sách điệu nhảy...</div>
+            <div class="card-title-bar"><div class="card-title-text">📚 Danh Sách Bài Nhạc Thư Viện</div></div>
+            <div id="music-library-container">
+                <div style="color:var(--text-muted);text-align:center;padding:20px;">Đang tải danh sách nhạc...</div>
             </div>
         </div>
     </div>
 
-    <!-- ====== VIEW: Overlay Studio ====== -->
+    <!-- ====== VIEW 4: Overlay & Stream Visuals ====== -->
     <div id="view-overlay" class="view-panel">
         <div class="section-intro">
-            <span class="section-kicker">Broadcast Layer</span>
-            <div class="section-title">Overlay Studio</div>
-            <div class="section-copy">Chinh title, accent color va preview 16:9 cho banner, queue va gift alert de bo nhan dien len song nhat quan.</div>
+            <span class="section-kicker">Streamer Branding</span>
+            <div class="section-title">Giao Diện & Ánh Sáng Sân Khấu</div>
+            <div class="section-copy">Cấu hình tiêu đề Banner hiển thị phía trên màn hình Roblox và thay đổi màu sắc ánh sáng sân khấu live.</div>
         </div>
         <div class="grid-2col">
             <div class="card">
-                <div class="card-title-bar"><div class="card-title-text">🎨 Stream Overlay Branding</div></div>
+                <div class="card-title-bar"><div class="card-title-text">🎨 Cấu Hình Banner Overlay</div></div>
                 <div class="form-group">
-                    <label class="form-label">Overlay Title Banner</label>
-                    <input type="text" id="input-overlay-title" class="form-input" value="🎵 S&G MUSIC - ROBLOX TIKTOK DANCE LIVE 🎵" oninput="updateOverlayPreview()">
+                    <label class="form-label">Tiêu đề Banner Streamer</label>
+                    <input type="text" id="input-overlay-title" class="form-input" value="🎵 S&G MUSIC - ROBLOX TIKTOK DANCE LIVE 🎵">
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Accent Color (Hex)</label>
-                    <input type="color" id="input-overlay-color-picker" style="height:38px;padding:2px;cursor:pointer;width:100%;border-radius:var(--radius-md);background:none;border:1px solid var(--border-color);" value="#ff007f" oninput="document.getElementById('input-overlay-color').value=this.value;updateOverlayPreview()">
-                    <input type="text" id="input-overlay-color" class="form-input" value="#ff007f" style="margin-top:6px;" oninput="updateOverlayPreview()">
+                    <label class="form-label">Màu sắc viền Banner</label>
+                    <input type="color" id="input-overlay-color" class="form-input" value="#ff007f" style="height:44px;padding:4px;">
                 </div>
-                <div class="form-group">
-                    <label class="form-label">⏱️ Thời gian nhảy tối đa / Dancer (giây)</label>
-                    <input type="number" id="input-dance-duration" class="form-input" value="12" min="5" max="120">
-                </div>
-                <button class="btn btn-warning" onclick="handleSaveOverlayAndTiming()">💾 Lưu & Đồng Bộ</button>
+                <button class="btn btn-primary" style="width:100%;" onclick="handleSaveOverlay()"><i class="ri-save-line"></i> Lưu Giao Diện Overlay</button>
             </div>
 
-            <!-- 16:9 Interactive Live Preview -->
             <div class="card">
-                <div class="card-title-bar"><div class="card-title-text">📺 Interactive 16:9 Live Stream Preview</div></div>
-                <div id="overlay-preview-canvas" style="aspect-ratio:16/9;background:#05070e;border:2px solid var(--border-color);border-radius:var(--radius-md);position:relative;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:12px;overflow:hidden;">
-                    <div id="preview-banner" style="background:rgba(12,14,24,0.9);border:2px solid #ff007f;border-radius:10px;padding:8px 16px;text-align:center;width:90%;box-shadow:0 0 15px rgba(255,0,127,0.3);">
-                        <div id="preview-title" style="font-size:12px;font-weight:800;color:#ffe600;font-family:'Outfit',sans-serif;">🎵 S&G MUSIC - ROBLOX TIKTOK DANCE LIVE 🎵</div>
-                        <div id="preview-subtitle" style="font-size:10px;color:#fff;margin-top:2px;">Comment !dance Username để lên sàn nhảy</div>
-                    </div>
-
-                    <div style="text-align:center;">
-                        <div style="font-size:36px;">💃🕺</div>
-                        <div style="font-size:11px;font-weight:700;color:var(--accent-cyan);background:rgba(0,0,0,0.6);padding:2px 8px;border-radius:4px;">Roblox Live Stage</div>
-                    </div>
-
-                    <div style="background:rgba(12,14,24,0.8);border-radius:6px;padding:4px 10px;font-size:10px;color:var(--accent-cyan);font-weight:700;">
-                        🔥 Comment tên Roblox trên TikTok Live để quẩy ngay!
-                    </div>
+                <div class="card-title-bar"><div class="card-title-text">🪩 Đổi Ánh Sáng Sân Khấu Roblox</div></div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                    <button class="btn btn-secondary" onclick="triggerStagePreset('TIKTOK_VN_TREND', '#ff007f')">🔥 Neon Pink Trend</button>
+                    <button class="btn btn-secondary" onclick="triggerStagePreset('EDM_FESTIVAL', '#00f2fe')">⚡ Cyber Cyan Pulse</button>
+                    <button class="btn btn-secondary" onclick="triggerStagePreset('KPOP_VIRAL', '#a78bfa')">✨ Violet K-Pop</button>
+                    <button class="btn btn-gold" onclick="triggerStagePreset('HIPHOP_STREET', '#ffb800')">👑 Gold Superstar</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- ====== VIEW: Roblox Connection ====== -->
+    <!-- ====== VIEW 5: Roblox System & Logs ====== -->
     <div id="view-roblox" class="view-panel">
         <div class="section-intro">
-            <span class="section-kicker">Diagnostics</span>
-            <div class="section-title">Roblox Connection</div>
-            <div class="section-copy">Khu vuc setup va chan doan de kiem tra API key, heartbeat, kha nang ACK va tinh trang truoc khi bat dau live that.</div>
+            <span class="section-kicker">System Diagnostics</span>
+            <div class="section-title">Kết Nối Roblox & Nhật Ký Hệ Thống</div>
+            <div class="section-copy">Kiểm tra trạng thái Heartbeat giữa Server và Roblox Studio Script, theo dõi luồng dữ liệu truyền qua cổng API.</div>
         </div>
-        <div class="card" style="max-width:760px;">
-            <div class="card-title-bar"><div class="card-title-text">⚙️ Roblox Studio Connection Settings</div></div>
-            <div class="form-group">
-                <label class="form-label">Your Workspace API Key</label>
-                <input type="text" id="display-api-key" class="form-input" value="demo-api-key-sg-music" readonly>
+        <div class="card" style="margin-bottom:20px;">
+            <div class="card-title-bar"><div class="card-title-text">🔌 Trạng Thái Roblox Heartbeat Bridge</div></div>
+            <div id="roblox-hb-detail" style="font-size:13px;color:var(--text-secondary);">
+                Đang kiểm tra tín hiệu từ Roblox Studio...
             </div>
-            <div class="form-group">
-                <label class="form-label">Roblox Heartbeat Status</label>
-                <div id="roblox-hb-detail" style="font-size:13px;color:var(--text-muted);">Chưa nhận heartbeat từ Roblox Lua script.</div>
-            </div>
-            <button class="btn btn-primary" onclick="runPreflightCheck()">📋 Chạy Pre-live Checklist</button>
         </div>
-    </div>
 
-    <!-- ====== VIEW: Analytics & Logs ====== -->
-    <div id="view-analytics" class="view-panel">
-        <div class="section-intro">
-            <span class="section-kicker">Health & Audit</span>
-            <div class="section-title">Analytics & Logs</div>
-            <div class="section-copy">Tong hop KPI van hanh, log he thong va dau vet event de creator va operator tra soat su co nhanh hon.</div>
-        </div>
-        <div class="feature-note-grid">
-            <div class="feature-note"><strong>Volume</strong><span>Total comments, gift va so event da ban sang Roblox.</span></div>
-            <div class="feature-note"><strong>Reliability</strong><span>Theo doi ACK latency, fail rate va tinh trang queue backlog.</span></div>
-            <div class="feature-note"><strong>Audit Trail</strong><span>Log can giu eventId, muc do va bo loc de truy vet nhanh.</span></div>
-        </div>
         <div class="card">
-            <div class="card-title-bar"><div class="card-title-text">📊 Activity Log Console</div></div>
-            <div id="log-console-box" style="background:#050608;border:1px solid var(--border-color);border-radius:10px;padding:12px;font-family:'JetBrains Mono',monospace;font-size:11px;height:400px;overflow-y:auto;color:#d1d5db;display:flex;flex-direction:column;gap:4px;">
-                <div><span style="color:var(--text-muted)">[System]</span> Control Center ready.</div>
+            <div class="card-title-bar"><div class="card-title-text">📜 Real-time System Event Log Console</div></div>
+            <div id="log-console-box" style="background:#04060A;border:1px solid var(--border-color);border-radius:var(--radius-md);padding:14px;height:320px;overflow-y:auto;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-secondary);line-height:1.7;">
+                <div>[System] System log initialized. Waiting for events...</div>
             </div>
-        </div>
-    </div>
-
-    <!-- ====== VIEW: Settings ====== -->
-    <div id="view-settings" class="view-panel">
-        <div class="section-intro">
-            <span class="section-kicker">Workspace Configuration</span>
-            <div class="section-title">Settings</div>
-            <div class="section-copy">Cau hinh workspace, hanh vi luc live, canh bao, thong so developer va cac thao tac nguy hiem can duoc tap trung trong mot noi.</div>
-        </div>
-        <div class="feature-note-grid">
-            <div class="feature-note"><strong>Workspace</strong><span>Ten workspace, locale, timezone va tai khoan TikTok mac dinh.</span></div>
-            <div class="feature-note"><strong>Live Behavior</strong><span>Dance duration, queue limits, cooldown va fallback rules cho live stream.</span></div>
-            <div class="feature-note"><strong>Developer</strong><span>API key, endpoint, poll interval va debug logging can duoc nhom lai ro rang.</span></div>
-        </div>
-        <div class="card" style="max-width:650px;">
-            <div class="card-title-bar"><div class="card-title-text">🛠️ System & Emergency Controls</div></div>
-            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:18px;">
-                <div class="feature-note"><strong>Notifications</strong><span>Canh bao mat ket noi, Roblox offline, queue day va action failure.</span></div>
-                <div class="feature-note"><strong>Developer Tools</strong><span>Export/import config, xem endpoint va quan ly debug an toan.</span></div>
-                <div class="feature-note"><strong>Danger Zone</strong><span>Reset configuration, clear history va xoa workspace phai co confirm ro rang.</span></div>
-            </div>
-            <button class="btn btn-danger" style="width:100%;margin-bottom:12px;" onclick="triggerEmergencyStop()">🚨 Emergency Stop All Automations</button>
         </div>
     </div>
 </div>
 
+<!-- Toast Container -->
 <div id="toast-wrapper"></div>
 
-<!-- Modal: Preflight Checklist -->
+<!-- Preflight Check Modal -->
 <div id="preflight-modal" class="modal-overlay">
     <div class="modal-box">
-        <div class="card-title-bar"><div class="card-title-text">📋 Pre-live Diagnostics Checklist</div></div>
-        <div id="preflight-checks-list" style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;"></div>
-        <button class="btn btn-secondary" style="width:100%;" onclick="closeModal('preflight-modal')">Đóng</button>
-    </div>
-</div>
-
-<!-- Modal: Create Event Rule -->
-<div id="modal-create-rule" class="modal-overlay">
-    <div class="modal-box">
-        <div class="card-title-bar"><div class="card-title-text">🎯 Create Event Rule</div></div>
-        <div class="form-group">
-            <label class="form-label">Tên Quy Tắc (Rule Name)</label>
-            <input type="text" id="rule-name-input" class="form-input" placeholder="🌹 Rose → Mưa hoa hồng">
+        <div class="card-title-bar">
+            <div class="card-title-text">📋 Pre-live Diagnostic Checklist</div>
+            <button class="btn btn-secondary btn-xs" onclick="closePreflightModal()">❌ Thắt</button>
         </div>
-        <div class="grid-2col">
-            <div class="form-group">
-                <label class="form-label">Chọn Gift Trigger</label>
-                <select id="rule-gift-select" class="form-select"></select>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Priority (Độ ưu tiên)</label>
-                <input type="number" id="rule-priority-input" class="form-input" value="10">
-            </div>
+        <div id="preflight-checks-list" style="display:flex;flex-direction:column;gap:10px;margin-bottom:18px;">
+            <!-- Populated dynamically -->
         </div>
-        <div class="form-group">
-            <label class="form-label">Action kích hoạt khi có Gift</label>
-            <select id="rule-action-select" class="form-select"></select>
-        </div>
-        <div style="display:flex;gap:10px;margin-top:20px;">
-            <button class="btn btn-primary" style="flex:1;" onclick="submitCreateRule()">💾 Lưu Quy Tắc</button>
-            <button class="btn btn-secondary" onclick="closeModal('modal-create-rule')">Hủy</button>
-        </div>
-    </div>
-</div>
-
-<!-- Modal: Create Action Definition -->
-<div id="modal-create-action" class="modal-overlay">
-    <div class="modal-box">
-        <div class="card-title-bar"><div class="card-title-text">⚡ Create Action Definition</div></div>
-        <div class="form-group">
-            <label class="form-label">Tên Action</label>
-            <input type="text" id="action-name-input" class="form-input" placeholder="🌸 Mưa Hoa Hồng Special">
-        </div>
-        <div class="form-group">
-            <label class="form-label">Loại Action (Action Type)</label>
-            <select id="action-type-select" class="form-select">
-                <option value="FLOWER_RAIN">🌸 FLOWER_RAIN (Mưa hoa hồng)</option>
-                <option value="HEART_BURST">🫶 HEART_BURST (Trái tim bùng nổ)</option>
-                <option value="CHANGE_STAGE_LIGHT">🌌 CHANGE_STAGE_LIGHT (Đổi đèn vũ trụ)</option>
-                <option value="FIREWORKS">🎆 FIREWORKS (Pháo hoa rực rỡ)</option>
-                <option value="DRAGON_AURA">🐉 DRAGON_AURA (Rồng lượn sân khấu)</option>
-                <option value="LION_KING">🦁 LION_KING (Bạch hổ gầm)</option>
-                <option value="SHOW_MESSAGE">💬 SHOW_MESSAGE (Banner thông báo)</option>
-            </select>
-        </div>
-        <div class="grid-2col">
-            <div class="form-group">
-                <label class="form-label">Duration (ms)</label>
-                <input type="number" id="action-duration-input" class="form-input" value="5000">
-            </div>
-            <div class="form-group">
-                <label class="form-label">Delay (ms)</label>
-                <input type="number" id="action-delay-input" class="form-input" value="0">
-            </div>
-        </div>
-        <div style="display:flex;gap:10px;margin-top:20px;">
-            <button class="btn btn-primary" style="flex:1;" onclick="submitCreateAction()">⚡ Lưu Action</button>
-            <button class="btn btn-secondary" onclick="closeModal('modal-create-action')">Hủy</button>
-        </div>
-    </div>
-</div>
-
-<!-- Modal: Command Palette (Ctrl + K) -->
-<div id="cmd-palette-modal" class="modal-overlay">
-    <div class="modal-box" style="max-width:500px;padding:16px;">
-        <input type="text" id="cmd-search-input" class="form-input" placeholder="🔍 Gõ lệnh hoặc tên trang... (Press ESC to close)" oninput="filterCommandPalette()">
-        <div id="cmd-results-list" style="display:flex;flex-direction:column;gap:6px;margin-top:12px;max-height:300px;overflow-y:auto;"></div>
+        <button class="btn btn-primary" style="width:100%;" onclick="closePreflightModal()">Sẵn Sàng Go Live!</button>
     </div>
 </div>
 
@@ -792,112 +419,55 @@
 const API_BASE = '';
 let musicLibrary = [];
 let currentMusicId = null;
-let eventMappings = [];
-let actionDefs = [];
-let giftCatalogue = [];
-let danceLibrary = [];
-let selectedDanceId = '';
-let selectedDanceStyle = 'bounce';
-let selectedDanceName = 'Bounce Starter';
 
-const DANCE_STYLE_PRESETS = [
-    { name: 'Bounce Starter', danceId: '', genre: 'PHONK', danceStyle: 'bounce' },
-    { name: 'Shuffle Stage', danceId: '', genre: 'PHONK', danceStyle: 'shuffle' },
-    { name: 'Wave Chill', danceId: '', genre: 'CHILL', danceStyle: 'wave' },
-    { name: 'K-Pop Sync', danceId: '', genre: 'KPOP', danceStyle: 'kpop' },
-    { name: 'Hip-Hop Groove', danceId: '', genre: 'HIPHOP', danceStyle: 'hiphop' },
-    { name: 'Boss Hype', danceId: '', genre: 'PHONK', danceStyle: 'hype' },
-    { name: 'Reggaeton Flow', danceId: '', genre: 'LATIN', danceStyle: 'reggaeton' },
-    { name: 'Brazil Funk', danceId: '', genre: 'FUNK', danceStyle: 'funk' },
-    { name: 'Afrobeat Sway', danceId: '', genre: 'AFROBEAT', danceStyle: 'afrobeat' },
-    { name: 'Robot Snap', danceId: '', genre: 'ROBOT', danceStyle: 'robot' },
-];
-
-const PAGE_META = {
-    'live-control': { title: 'Live Control', copy: 'Ket noi TikTok LIVE, giam sat Roblox va dieu phoi van hanh tren mot man hinh.' },
-    'queue': { title: 'Dancer Queue', copy: 'Theo doi hang cho nguoi choi, muc uu tien va tac vu dieu phoI khi live dang dien ra.' },
-    'events-monitor': { title: 'Event Monitor', copy: 'Giam sat eventId, retry va trang thai ACK cua Roblox bridge theo thoi gian thuc.' },
-    'event-mappings': { title: 'Events & Actions', copy: 'Quan ly trigger, action chain, cooldown va priority cho gift automation.' },
-    'action-library': { title: 'Action Library', copy: 'Tap trung cac game effect tai su dung duoc cho nhieu event mapping.' },
-    'gift-catalogue': { title: 'Gift Catalogue', copy: 'Tra cuu gift, coin value va tinh trang dang duoc su dung trong event nao.' },
-    'music': { title: 'Music Library', copy: 'Quan ly Roblox sound asset, live switching va fallback rules cho nhac.' },
-    'dance': { title: 'Dance Emotes', copy: 'Quan ly animation, preset vu dao va cac motion duoc dung tren san khau.' },
-    'overlay': { title: 'Overlay Studio', copy: 'Dong bo title, accent color va preview stream layer cho thuong hieu live.' },
-    'roblox': { title: 'Roblox Connection', copy: 'Chan doan heartbeat, API key va tinh trang san sang truoc khi len song.' },
-    'analytics': { title: 'Analytics & Logs', copy: 'Tong hop KPI, log he thong va dau vet event de audit su co.' },
-    'settings': { title: 'Settings', copy: 'Cau hinh workspace, live behavior, notification va developer options.' }
-};
-
-function notify(msg, type = 'primary') {
+function notify(message, type = 'cyan') {
     const wrapper = document.getElementById('toast-wrapper');
     if (!wrapper) return;
     const toast = document.createElement('div');
     toast.className = 'toast-msg';
-    const colors = { primary: 'var(--accent-cyan)', success: 'var(--state-success)', danger: 'var(--state-danger)', warning: 'var(--state-warning)', gold: 'var(--accent-gold)' };
-    toast.style.borderLeftColor = colors[type] || colors.primary;
-    toast.innerText = msg;
+    if (type === 'danger') toast.style.borderLeftColor = 'var(--state-danger)';
+    if (type === 'warning') toast.style.borderLeftColor = 'var(--state-warning)';
+    if (type === 'gold') toast.style.borderLeftColor = 'var(--accent-gold)';
+    toast.innerText = message;
     wrapper.appendChild(toast);
-    setTimeout(() => toast.remove(), 4000);
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.3s';
+        setTimeout(() => toast.remove(), 300);
+    }, 3500);
 }
 
-function closeModal(modalId) {
-    const modal = document.getElementById(modalId);
-    if (modal) modal.classList.remove('active');
-}
-
-function updateTopbarMeta(viewId) {
-    const meta = PAGE_META[viewId];
-    const titleEl = document.getElementById('topbar-page-title');
-    const copyEl = document.getElementById('topbar-page-copy');
-    if (titleEl && meta) titleEl.innerText = meta.title;
-    if (copyEl && meta) copyEl.innerText = meta.copy;
-}
-
-function navigate(viewId, el) {
-    if (window.event) window.event.preventDefault();
+function navigate(panelId, navEl) {
+    document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-    document.querySelectorAll('.view-panel').forEach(v => v.classList.remove('active'));
-    const targetNav = el || document.querySelector(`.nav-item[onclick*="${viewId}"]`);
-    if (targetNav) targetNav.classList.add('active');
-    const targetView = document.getElementById(`view-${viewId}`);
-    if (targetView) targetView.classList.add('active');
-    updateTopbarMeta(viewId);
-    if (viewId === 'event-mappings') loadEventMappings();
-    if (viewId === 'action-library') loadActionLibrary();
-    if (viewId === 'gift-catalogue') loadGiftCatalogue();
-    if (viewId === 'events-monitor') loadEventsMonitor();
-    if (viewId === 'dance') loadDanceLibrary();
-    if (viewId === 'music') { loadMusicLibrary(); loadCoinMilestones(); }
+    
+    const target = document.getElementById('view-' + panelId);
+    if (target) target.classList.add('active');
+    if (navEl) navEl.classList.add('active');
+
+    if (panelId === 'music') loadMusicLibrary(), loadCoinMilestones();
+    if (panelId === 'event-mappings') loadEventMappings();
 }
 
 function escapeHtml(str) {
-    return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-}
-
-function formatDanceVerification(verification) {
-    if (!verification) return 'Dang cho xac minh nhan vat nhay...';
-    if (verification.success && verification.mode === 'asset') return 'Da xac minh nhay bang asset: ' + (verification.danceId || 'custom');
-    if (verification.success && verification.mode === 'procedural') return 'Asset bi chan, dang nhay bang procedural fallback.';
-    if (verification.mode === 'pending') return verification.message || 'Dang cho Roblox xac nhan nhan vat bat dau nhay.';
-    return verification.message || 'Khong xac minh duoc nhan vat dang nhay.';
+    return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
 // ----------------------------------------------------
-// TikTok Connection & Simulator API Actions
+// TikTok & Simulator Handlers
 // ----------------------------------------------------
 async function handleConnectTikTok() {
-    const userInput = document.getElementById('input-tiktok-user');
-    const user = userInput ? userInput.value.trim() : 'sandg.music';
-    if (!user) return notify('Vui lòng nhập TikTok Username ID!', 'warning');
+    const username = document.getElementById('input-tiktok-user').value.trim();
+    if (!username) return notify('Vui lòng nhập TikTok Username!', 'warning');
     try {
-        const res = await fetch(API_BASE + '/api/v1/dashboard/connect', {
+        const res = await fetch(API_BASE + '/api/v1/dashboard/connect-tiktok', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ tiktokUsername: user })
+            body: JSON.stringify({ tiktokUsername: username })
         });
         const data = await res.json();
-        if (!data.success) throw new Error(data.error || 'Khởi chạy thất bại');
-        notify('📡 ' + (data.message || 'Khởi chạy kết nối tới @' + user), 'success');
+        if (!data.success) throw new Error(data.error || 'Không thể kết nối');
+        notify('📡 Đã phát lệnh kết nối TikTok: @' + username, 'cyan');
         fetchStatus();
     } catch (e) {
         notify(e.message, 'danger');
@@ -905,32 +475,25 @@ async function handleConnectTikTok() {
 }
 
 async function confirmDisconnectTikTok() {
+    if (!confirm('Ngắt kết nối TikTok LIVE?')) return;
     try {
-        const res = await fetch(API_BASE + '/api/v1/dashboard/disconnect', { method: 'POST' });
-        const data = await res.json();
-        notify('🛑 Đã ngắt kết nối TikTok!', 'warning');
+        await fetch(API_BASE + '/api/v1/dashboard/disconnect-tiktok', { method: 'POST' });
+        notify('🔌 Đã ngắt kết nối TikTok LIVE', 'warning');
         fetchStatus();
     } catch (e) {
         notify(e.message, 'danger');
     }
 }
 
-async function triggerTestComment(isVIP = false) {
-    const robloxInput = document.getElementById('input-test-roblox');
-    const robloxUser = robloxInput ? robloxInput.value.trim() : 'Builderman';
+async function triggerTestComment(isVIP) {
+    const robloxUsername = document.getElementById('input-test-roblox').value.trim() || 'Builderman';
     try {
-        const res = await fetch(API_BASE + '/api/mock-comment', {
+        await fetch(API_BASE + '/api/v1/dashboard/simulate-comment', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                tiktokUsername: 'viewer_' + Math.floor(Math.random() * 1000),
-                comment: '!dance ' + robloxUser,
-                isVIP: isVIP
-            })
+            body: JSON.stringify({ tiktokUsername: 'viewer_test', comment: '!dance ' + robloxUsername, isVIP })
         });
-        const data = await res.json();
-        if (!data.success) throw new Error(data.error || 'Lỗi gửi test comment');
-        notify((isVIP ? '🎁 [VIP] ' : '💬 ') + 'Test comment thành công cho @' + robloxUser, 'success');
+        notify('🧪 Đã mô phỏng comment nhảy cho: ' + robloxUsername, 'cyan');
         fetchStatus();
     } catch (e) {
         notify(e.message, 'danger');
@@ -939,18 +502,12 @@ async function triggerTestComment(isVIP = false) {
 
 async function testRoseEvent() {
     try {
-        const robloxInput = document.getElementById('input-test-roblox');
-        const robloxUser = robloxInput ? robloxInput.value.trim() : 'Builderman';
-        const res = await fetch(API_BASE + '/api/v1/dashboard/mock-comment', {
+        await fetch(API_BASE + '/api/v1/dashboard/simulate-gift', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                tiktokUsername: 'rose_fan_' + Math.floor(Math.random() * 100),
-                comment: '!dance ' + robloxUser,
-                isVIP: true
-            })
+            body: JSON.stringify({ tiktokUsername: 'rose_fan', giftName: 'Rose', giftId: 'rose', repeatCount: 1, diamondCount: 1 })
         });
-        notify('🌹 [Test Event] Đã kích hoạt tặng Rose & hiệu ứng sân khấu!', 'gold');
+        notify('🌹 Đã bắn sự kiện Rose → Mưa Hoa Hồng!', 'cyan');
         fetchStatus();
     } catch (e) {
         notify(e.message, 'danger');
@@ -959,18 +516,12 @@ async function testRoseEvent() {
 
 async function testGalaxyEvent() {
     try {
-        const robloxInput = document.getElementById('input-test-roblox');
-        const robloxUser = robloxInput ? robloxInput.value.trim() : 'Roblox';
-        const res = await fetch(API_BASE + '/api/v1/dashboard/mock-comment', {
+        await fetch(API_BASE + '/api/v1/dashboard/simulate-gift', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                tiktokUsername: 'galaxy_vip_' + Math.floor(Math.random() * 100),
-                comment: '!dance ' + robloxUser,
-                isVIP: true
-            })
+            body: JSON.stringify({ tiktokUsername: 'boss_galaxy', giftName: 'Galaxy', giftId: 'galaxy', repeatCount: 1, diamondCount: 1000 })
         });
-        notify('🌌 [Test Event] Đã kích hoạt quà Galaxy VIP & Vũ Trụ Cutscene!', 'gold');
+        notify('🌌 Đã bắn sự kiện Galaxy → Đổi Đèn Vũ Trụ!', 'gold');
         fetchStatus();
     } catch (e) {
         notify(e.message, 'danger');
@@ -979,9 +530,8 @@ async function testGalaxyEvent() {
 
 async function handleSkipDancer() {
     try {
-        const res = await fetch(API_BASE + '/api/v1/dashboard/skip-player', { method: 'POST' });
-        const data = await res.json();
-        notify('⏭️ Đã chuyển sang vũ công tiếp theo!', 'primary');
+        await fetch(API_BASE + '/api/v1/dashboard/skip-dancer', { method: 'POST' });
+        notify('⏭️ Đã chuyển lượt dancer kế tiếp', 'warning');
         fetchStatus();
     } catch (e) {
         notify(e.message, 'danger');
@@ -989,47 +539,10 @@ async function handleSkipDancer() {
 }
 
 async function triggerEmergencyStop() {
-    if (!confirm('Dừng khẩn cấp toàn bộ tự động hóa và xóa hàng chờ?')) return;
+    if (!confirm('Dừng khẩn cấp toàn bộ hiệu ứng và làm sạch hàng chờ?')) return;
     try {
-        const res = await fetch(API_BASE + '/api/v1/dashboard/emergency-stop', { method: 'POST' });
-        const data = await res.json();
-        notify('🚨 Đã kích hoạt DỪNG KHẨN CẤP! Hàng chờ đã được xóa sạch.', 'danger');
-        fetchStatus();
-    } catch (e) {
-        notify(e.message, 'danger');
-    }
-}
-
-async function runPreflightCheck() {
-    try {
-        const res = await fetch(API_BASE + '/api/v1/dashboard/preflight', { method: 'POST' });
-        const data = await res.json();
-        const container = document.getElementById('preflight-checks-list');
-        if (container && data.checks) {
-            container.innerHTML = data.checks.map(c => `
-                <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--surface-card);border:1px solid var(--border-color);border-radius:var(--radius-md);">
-                    <div>
-                        <div style="font-weight:700;font-size:13px;color:#fff;">${c.pass ? '✅' : '❌'} ${escapeHtml(c.name)}</div>
-                        <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">${escapeHtml(c.detail)}</div>
-                    </div>
-                    <span class="badge ${c.pass ? 'badge-cyan' : 'badge-warning'}">${c.pass ? 'PASS' : 'WARN'}</span>
-                </div>
-            `).join('');
-        }
-        document.getElementById('preflight-modal').classList.add('active');
-    } catch (e) {
-        notify('Lỗi kiểm tra preflight: ' + e.message, 'danger');
-    }
-}
-
-async function triggerStagePreset(themeName, accentColor) {
-    try {
-        await fetch(API_BASE + '/api/v1/dashboard/overlay', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ overlayTitle: `🪩 ${themeName} STAGE DANCE LIVE 🪩`, overlayColor: accentColor })
-        });
-        notify(`🪩 Đã kích hoạt Preset ánh sáng sân khấu: ${themeName}`, 'gold');
+        await fetch(API_BASE + '/api/v1/dashboard/emergency-stop', { method: 'POST' });
+        notify('🛑 EMERGENCY STOP ACTIVATED!', 'danger');
         fetchStatus();
     } catch (e) {
         notify(e.message, 'danger');
@@ -1037,200 +550,39 @@ async function triggerStagePreset(themeName, accentColor) {
 }
 
 // ----------------------------------------------------
-// Status Polling & Log Console Updates
+// Event Mappings Rules
 // ----------------------------------------------------
-async function fetchStatus() {
+async function loadEventMappings() {
+    const tbody = document.getElementById('table-event-mappings-body');
+    if (!tbody) return;
     try {
-        const res = await fetch(API_BASE + '/api/v1/dashboard/status');
+        const res = await fetch(API_BASE + '/api/v1/dashboard/event-mappings');
         const data = await res.json();
-        if (!data.success) return;
-        const ts = data.tenantStatus || {};
-
-        // Connection status pill in topbar
-        const statusBox = document.querySelector('.topbar-right');
-        let pill = document.getElementById('status-connection-pill');
-        if (!pill && statusBox) {
-            pill = document.createElement('div');
-            pill.id = 'status-connection-pill';
-            statusBox.prepend(pill);
-        }
-        if (pill) {
-            if (ts.isConnected) {
-                pill.className = 'status-pill live';
-                pill.innerHTML = '<span class="status-dot"></span> LIVE: @' + escapeHtml(ts.tiktokUsername || 'Connected');
-            } else {
-                pill.className = 'status-pill disconnected';
-                pill.innerHTML = '<span class="status-dot"></span> Offline / Disconnected';
-            }
-        }
-
-        // Total dancers stat card
-        const totalDancersEl = document.getElementById('stat-total-dancers');
-        if (totalDancersEl) totalDancersEl.innerText = ((ts.queue ? ts.queue.length : 0) + (ts.activePlayer ? 1 : 0)) + ' lượt';
-
-        // Active Dancer
-        const activeName = document.getElementById('active-roblox-name');
-        const activeTt = document.getElementById('active-tiktok-user');
-        const activeVerify = document.getElementById('active-dance-verification');
-        if (activeName) {
-            if (ts.activePlayer) {
-                activeName.innerText = ts.activePlayer.robloxUsername || 'Dancing...';
-                if (activeTt) activeTt.innerText = '@' + (ts.activePlayer.tiktokUsername || 'unknown') + (ts.activePlayer.isVIP ? ' 👑 [VIP GIFT]' : '');
-                if (activeVerify) activeVerify.innerText = formatDanceVerification(ts.activePlayer.danceVerification || ts.lastDanceVerification);
-            } else {
-                activeName.innerText = 'Waiting...';
-                if (activeTt) activeTt.innerText = 'Comment !dance Username trên TikTok';
-                if (activeVerify) activeVerify.innerText = 'Dang cho xac minh nhan vat nhay...';
-            }
-        }
-
-        // Activity Log Console
-        const logBox = document.getElementById('log-console-box');
-        if (logBox && ts.logs) {
-            logBox.innerHTML = ts.logs.slice(-50).map(l => `<div><span style="color:var(--text-muted)">[${escapeHtml(l.time || 'Log')}]</span> ${escapeHtml(l.message)}</div>`).join('');
-            logBox.scrollTop = logBox.scrollHeight;
-        }
-
-        // Roblox Heartbeat Detail
-        const hbDetail = document.getElementById('roblox-hb-detail');
-        if (hbDetail && ts.robloxHeartbeat) {
-            const hb = ts.robloxHeartbeat;
-            hbDetail.innerHTML = hb.isOnline ? 
-                `<span style="color:var(--state-success);font-weight:700;">🟢 Online (Connected)</span> • Last heartbeat: ${escapeHtml(hb.lastHeartbeat)} (PlaceId: ${escapeHtml(hb.placeId || 'Studio')})` :
-                `<span style="color:var(--state-danger);font-weight:700;">🔴 Offline</span> • Chưa nhận được heartbeat từ Roblox script.`;
-        }
+        const mappings = data.eventMappings || [];
+        tbody.innerHTML = mappings.map((m, idx) => `
+            <tr>
+                <td><span class="badge ${m.enabled ? 'badge-cyan' : 'badge-danger'}">${m.enabled ? 'ACTIVE' : 'OFF'}</span></td>
+                <td><strong>${escapeHtml(m.name)}</strong></td>
+                <td><span class="badge badge-warning">TIKTOK_GIFT</span> <code>${escapeHtml(m.trigger?.giftName || m.trigger?.giftId || 'All Gifts')}</code></td>
+                <td>${(m.actions || []).map(a => `<span class="badge badge-cyan" style="margin:2px;">${escapeHtml(a.actionId)}</span>`).join('')}</td>
+                <td>
+                    <button class="btn btn-secondary btn-xs" onclick="handleTestEventMapping('${m.id}')">🧪 Test</button>
+                </td>
+            </tr>
+        `).join('');
     } catch (e) {
-        console.warn('Fetch status warning:', e.message);
+        tbody.innerHTML = '<tr><td colspan="5" style="color:var(--state-danger);">Lỗi tải Event Mappings</td></tr>';
     }
 }
 
-// ----------------------------------------------------
-// Dance Library Manager
-// ----------------------------------------------------
-async function loadDanceLibrary() {
-    const container = document.getElementById('dance-library-container');
+async function handleTestEventMapping(id) {
     try {
-        const res = await fetch(API_BASE + '/api/v1/dashboard/dance');
+        const res = await fetch(API_BASE + '/api/v1/dashboard/event-mappings/' + id + '/test', { method: 'POST' });
         const data = await res.json();
-        danceLibrary = data.dances || [];
-        selectedDanceId = data.selectedDanceId || '';
-        selectedDanceStyle = (data.selectedDanceStyle || 'bounce').toLowerCase();
-        selectedDanceName = data.selectedDanceName || 'Bounce Starter';
-        renderDanceLibrary();
-    } catch (e) {
-        if (container) container.innerHTML = '<div style="color:var(--state-danger);">Lỗi tải danh sách điệu nhảy: ' + escapeHtml(e.message) + '</div>';
-    }
-}
-
-function renderDanceLibrary() {
-    const container = document.getElementById('dance-library-container');
-    if (!container) return;
-    if (danceLibrary.length === 0) {
-        container.innerHTML = '<div style="color:var(--text-muted);padding:20px;text-align:center;">Chưa có điệu nhảy tùy chỉnh nào được lưu.</div>';
-        return;
-    }
-    const rows = danceLibrary.map((d, i) => {
-        const normalizedId = d.danceId || '';
-        const normalizedStyle = (d.danceStyle || d.genre || 'bounce').toLowerCase();
-        const isCurrent = selectedDanceId === normalizedId && selectedDanceStyle === normalizedStyle;
-        return '<tr>' +
-            '<td>' + (i + 1) + '</td>' +
-            '<td><strong>' + escapeHtml(d.name) + '</strong>' +
-                (isCurrent ? '<span class="badge badge-cyan" style="margin-left:8px;">▶ ĐANG DÙNG</span>' : '') +
-                '<div style="font-size:11px;color:var(--text-muted);margin-top:4px;">Motion style: <code>' + escapeHtml(normalizedStyle) + '</code></div></td>' +
-            '<td><code style="font-size:11px;">' + escapeHtml(normalizedId || 'procedural only') + '</code></td>' +
-            '<td><span class="badge badge-warning">' + escapeHtml(d.genre || 'PHONK') + '</span><div style="font-size:11px;color:var(--text-muted);margin-top:4px;">' + escapeHtml(d.verificationStatus || 'pending') + ' / ' + escapeHtml(d.verificationMode || 'asset') + '</div></td>' +
-            '<td style="display:flex;gap:6px;">' +
-                '<button class="btn btn-primary btn-xs" onclick="handleSwitchDance(' + JSON.stringify(normalizedId) + ', ' + JSON.stringify(d.name) + ', ' + JSON.stringify(normalizedStyle) + ', ' + JSON.stringify(d.genre || 'PHONK') + ')"><i class="ri-play-circle-line"></i> Kích Hoạt</button>' +
-                '<button class="btn btn-danger btn-xs" onclick="handleDeleteDanceEmote(' + JSON.stringify(d.id) + ')"><i class="ri-delete-bin-line"></i></button>' +
-            '</td>' +
-        '</tr>';
-    }).join('');
-    container.innerHTML = '<table class="data-table"><thead><tr><th>#</th><th>Tên Điệu Nhảy</th><th>Animation Asset ID</th><th>Genre & Verify</th><th>Thao tác</th></tr></thead><tbody>' + rows + '</tbody></table>';
-}
-
-function quickSelectPresetDance(name, assetId, genre, danceStyle) {
-    const tInput = document.getElementById('input-dance-title');
-    const idInput = document.getElementById('input-dance-id');
-    const gInput = document.getElementById('input-dance-genre');
-    if (tInput) tInput.value = name;
-    if (idInput) idInput.value = assetId || '';
-    if (gInput) gInput.value = genre;
-    handleSwitchDance(assetId, name, danceStyle || genre, genre);
-}
-
-async function saveDanceConfig(setActiveNow) {
-    const name = document.getElementById('input-dance-title') ? document.getElementById('input-dance-title').value.trim() : '';
-    const danceId = document.getElementById('input-dance-id') ? document.getElementById('input-dance-id').value.trim() : '';
-    const genre = document.getElementById('input-dance-genre') ? document.getElementById('input-dance-genre').value : 'PHONK';
-    const danceStyle = genre.toLowerCase();
-    const res = await fetch(API_BASE + '/api/v1/dashboard/dance', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: name || danceStyle, danceId, genre, danceStyle, setActive: setActiveNow })
-    });
-    const data = await res.json();
-    if (!data.success) throw new Error(data.error || 'Không thể lưu điệu nhảy');
-    selectedDanceId = data.selectedDanceId || '';
-    selectedDanceStyle = (data.selectedDanceStyle || danceStyle).toLowerCase();
-    selectedDanceName = data.selectedDanceName || (name || danceStyle);
-    danceLibrary = data.dances || danceLibrary;
-    renderDanceLibrary();
-    return data;
-}
-
-async function handleAddDanceEmote() {
-    try {
-        await saveDanceConfig(false);
-        notify('Đã lưu điệu nhảy vào thư viện', 'success');
+        notify('🧪 ' + (data.message || 'Thử nghiệm thành công!'), 'cyan');
     } catch (e) {
         notify(e.message, 'danger');
     }
-}
-
-async function handleAddAndSwitchDance() {
-    try {
-        await saveDanceConfig(true);
-        notify('Đã lưu và kích hoạt điệu nhảy mới!', 'success');
-    } catch (e) {
-        notify(e.message, 'danger');
-    }
-}
-
-async function handleSwitchDance(danceId, name, danceStyle, genre) {
-    try {
-        const res = await fetch(API_BASE + '/api/v1/dashboard/dance', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, danceId, danceStyle, genre, setActive: true })
-        });
-        const data = await res.json();
-        if (!data.success) throw new Error(data.error || 'Cannot activate dance');
-        selectedDanceId = data.selectedDanceId || '';
-        selectedDanceStyle = (data.selectedDanceStyle || danceStyle || 'bounce').toLowerCase();
-        selectedDanceName = data.selectedDanceName || name || danceStyle || 'Custom Dance';
-        danceLibrary = data.dances || danceLibrary;
-        renderDanceLibrary();
-        notify('💃 Đã kích hoạt điệu nhảy: ' + selectedDanceName, 'success');
-    } catch (e) {
-        notify(e.message, 'danger');
-    }
-}
-
-async function handleDeleteDanceEmote(id) {
-    if (!confirm('Xóa điệu nhảy này khỏi thư viện?')) return;
-    try {
-        await fetch(API_BASE + '/api/v1/dashboard/dance/' + id, { method: 'DELETE' });
-        loadDanceLibrary();
-        notify('🗑️ Đã xóa điệu nhảy khỏi thư viện', 'warning');
-    } catch (e) {
-        notify(e.message, 'danger');
-    }
-}
-
-async function handleSelectRandomDance() {
-    const picked = DANCE_STYLE_PRESETS[Math.floor(Math.random() * DANCE_STYLE_PRESETS.length)];
-    handleSwitchDance(picked.danceId, picked.name, picked.danceStyle, picked.genre);
 }
 
 // ----------------------------------------------------
@@ -1253,7 +605,7 @@ function renderMusicLibrary() {
     const container = document.getElementById('music-library-container');
     if (!container) return;
     if (musicLibrary.length === 0) {
-        container.innerHTML = '<div style="color:var(--text-muted);padding:20px;text-align:center;">Chưa có bài nhạc tùy chỉnh nào được lưu trong thư viện.</div>';
+        container.innerHTML = '<div style="color:var(--text-muted);padding:20px;text-align:center;">Chưa có bài nhạc nào trong thư viện.</div>';
         return;
     }
     const rows = musicLibrary.map((t, i) => {
@@ -1283,7 +635,7 @@ async function handleAddToLibrary() {
         });
         const data = await res.json();
         if (!data.success) throw new Error(data.error || 'Không thể thêm bài nhạc');
-        notify('📚 Đã thêm bài nhạc "' + name + '" vào thư viện!', 'success');
+        notify('📚 Đã thêm bài nhạc: "' + name + '"', 'cyan');
         loadMusicLibrary();
     } catch (e) {
         notify(e.message, 'danger');
@@ -1300,7 +652,7 @@ async function handleAddAndPlayTrack() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ name: name || musicId, musicId })
         });
-        notify('▶ Đã phát bài nhạc: ' + (name || musicId), 'success');
+        notify('▶ Đã phát bài nhạc: ' + (name || musicId), 'cyan');
         loadMusicLibrary();
     } catch (e) {
         notify(e.message, 'danger');
@@ -1314,7 +666,7 @@ async function handlePlayMusicTrack(trackId, name, musicId) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ name, musicId })
         });
-        notify('▶ Đã chuyển nhạc sân khấu sang: ' + name, 'success');
+        notify('▶ Đã chuyển nhạc sân khấu sang: ' + name, 'cyan');
         loadMusicLibrary();
     } catch (e) {
         notify(e.message, 'danger');
@@ -1340,12 +692,12 @@ async function loadCoinMilestones() {
         const milestones = data.milestones || [];
         if (!container) return;
         container.innerHTML = milestones.map(m => `
-            <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--bg-app);border:1px solid var(--border-color);border-radius:var(--radius-md);font-size:12px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bg-app);border:1px solid var(--border-color);border-radius:var(--radius-md);font-size:12px;">
                 <div>
                     <strong>${escapeHtml(m.label)}</strong> (${m.minCoins}–${m.maxCoins === null || m.maxCoins === Infinity ? '∞' : m.maxCoins} 🪙)
-                    <div style="font-size:10px;color:var(--text-muted);">${escapeHtml(m.musicName || m.musicId)}</div>
+                    <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">${escapeHtml(m.musicName || m.musicId)}</div>
                 </div>
-                <button class="btn btn-secondary btn-xs" onclick="handleEditCoinMilestone('${m.id}')">Sửa ID</button>
+                <button class="btn btn-secondary btn-xs" onclick="handleEditCoinMilestone('${m.id}')">Sửa Sound ID</button>
             </div>
         `).join('');
     } catch (e) {
@@ -1354,327 +706,151 @@ async function loadCoinMilestones() {
 }
 
 function handleEditCoinMilestone(milestoneId) {
-    const newSoundId = prompt('Nhập Roblox Sound Asset ID cho milestone này:');
+    const newSoundId = prompt('Nhập Roblox Sound Asset ID cho mốc quà này:');
     if (!newSoundId) return;
     fetch(API_BASE + '/api/v1/dashboard/coin-milestones', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ milestoneId, musicId: newSoundId, musicName: 'Custom Sound ' + newSoundId })
     }).then(() => {
-        notify('🪙 Đã cập nhật Sound ID cho Coin Milestone!', 'success');
+        notify('🪙 Đã cập nhật Sound ID cho Coin Milestone!', 'cyan');
         loadCoinMilestones();
     });
 }
 
 // ----------------------------------------------------
-// Event Mappings & Action Library
+// Overlay & Presets
 // ----------------------------------------------------
-async function loadEventMappings() {
-    const tbody = document.getElementById('table-event-mappings-body');
-    if (!tbody) return;
+async function handleSaveOverlay() {
+    const title = document.getElementById('input-overlay-title').value.trim();
+    const color = document.getElementById('input-overlay-color').value;
     try {
-        const res = await fetch(API_BASE + '/api/v1/dashboard/event-mappings');
-        const data = await res.json();
-        eventMappings = data.eventMappings || [];
-        tbody.innerHTML = eventMappings.map((m, idx) => `
-            <tr>
-                <td>${idx + 1}</td>
-                <td><strong>${escapeHtml(m.name)}</strong></td>
-                <td><span class="badge badge-warning">TIKTOK_GIFT</span> <code>${escapeHtml(m.trigger?.giftName || m.trigger?.giftId || 'All Gifts')}</code></td>
-                <td><span class="badge ${m.enabled ? 'badge-cyan' : 'badge-danger'}">${m.enabled ? 'ENABLED' : 'DISABLED'}</span></td>
-                <td>
-                    <button class="btn btn-secondary btn-xs" onclick="handleTestEventMapping('${m.id}')">🧪 Test</button>
-                    <button class="btn btn-danger btn-xs" onclick="handleDeleteEventMapping('${m.id}')">🗑️</button>
-                </td>
-            </tr>
-        `).join('');
-    } catch (e) {
-        tbody.innerHTML = '<tr><td colspan="5" style="color:var(--state-danger);">Lỗi tải Event Mappings</td></tr>';
-    }
-}
-
-async function handleTestEventMapping(id) {
-    try {
-        const res = await fetch(API_BASE + '/api/v1/dashboard/event-mappings/' + id + '/test', { method: 'POST' });
-        const data = await res.json();
-        notify('🧪 ' + (data.message || 'Thử nghiệm thành công!'), 'success');
-        fetchStatus();
-    } catch (e) {
-        notify(e.message, 'danger');
-    }
-}
-
-async function handleDeleteEventMapping(id) {
-    if (!confirm('Xóa quy tắc sự kiện này?')) return;
-    try {
-        await fetch(API_BASE + '/api/v1/dashboard/event-mappings/' + id, { method: 'DELETE' });
-        notify('🗑️ Đã xóa quy tắc sự kiện', 'warning');
-        loadEventMappings();
-    } catch (e) {
-        notify(e.message, 'danger');
-    }
-}
-
-function openCreateMappingModal() {
-    document.getElementById('modal-create-rule').classList.add('active');
-}
-
-async function submitCreateRule() {
-    const name = document.getElementById('rule-name-input').value.trim();
-    if (!name) return notify('Vui lòng nhập Tên Quy Tắc!', 'warning');
-    try {
-        await fetch(API_BASE + '/api/v1/dashboard/event-mappings', {
+        await fetch(API_BASE + '/api/v1/dashboard/overlay', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                name,
-                trigger: { type: 'TIKTOK_GIFT', giftId: 'rose', giftName: 'Rose', minRepeatCount: 1, minTotalCoins: 1 },
-                priority: parseInt(document.getElementById('rule-priority-input').value || 10),
-                enabled: true
-            })
+            body: JSON.stringify({ overlayTitle: title, overlayColor: color })
         });
-        closeModal('modal-create-rule');
-        notify('💾 Đã lưu Event Rule thành công!', 'success');
-        loadEventMappings();
+        notify('🎨 Đã lưu và phát Banner Overlay tới Roblox!', 'cyan');
     } catch (e) {
         notify(e.message, 'danger');
     }
 }
 
-async function loadActionLibrary() {
-    const tbody = document.getElementById('table-action-library-body');
-    if (!tbody) return;
+async function triggerStagePreset(themeName, accentColor) {
     try {
-        const res = await fetch(API_BASE + '/api/v1/dashboard/actions');
-        const data = await res.json();
-        actionDefs = data.actionDefs || [];
-        tbody.innerHTML = actionDefs.map((a, idx) => `
-            <tr>
-                <td>${idx + 1}</td>
-                <td><strong>${escapeHtml(a.name)}</strong></td>
-                <td><span class="badge badge-cyan">${escapeHtml(a.type)}</span></td>
-                <td>${a.defaultDurationMs}ms</td>
-                <td><button class="btn btn-danger btn-xs" onclick="handleDeleteActionDef('${a.id}')">🗑️ Xóa</button></td>
-            </tr>
-        `).join('');
-    } catch (e) {
-        tbody.innerHTML = '<tr><td colspan="5" style="color:var(--state-danger);">Lỗi tải Action Library</td></tr>';
-    }
-}
-
-function openCreateActionModal() {
-    document.getElementById('modal-create-action').classList.add('active');
-}
-
-async function submitCreateAction() {
-    const name = document.getElementById('action-name-input').value.trim();
-    const type = document.getElementById('action-type-select').value;
-    if (!name) return notify('Vui lòng nhập Tên Action!', 'warning');
-    try {
-        await fetch(API_BASE + '/api/v1/dashboard/actions', {
+        await fetch(API_BASE + '/api/v1/dashboard/overlay', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                name,
-                type,
-                defaultDurationMs: parseInt(document.getElementById('action-duration-input').value || 5000),
-                defaultDelayMs: parseInt(document.getElementById('action-delay-input').value || 0),
-                enabled: true
-            })
+            body: JSON.stringify({ overlayTitle: `🪩 ${themeName} DANCE LIVE 🪩`, overlayColor: accentColor })
         });
-        closeModal('modal-create-action');
-        notify('⚡ Đã lưu Action Definition mới!', 'success');
-        loadActionLibrary();
+        notify(`🪩 Đã kích hoạt Preset ánh sáng: ${themeName}`, 'gold');
     } catch (e) {
         notify(e.message, 'danger');
     }
 }
 
-async function handleDeleteActionDef(id) {
-    if (!confirm('Xóa action này khỏi thư viện?')) return;
+async function runPreflightCheck() {
     try {
-        const res = await fetch(API_BASE + '/api/v1/dashboard/actions/' + id, { method: 'DELETE' });
+        const res = await fetch(API_BASE + '/api/v1/dashboard/preflight', { method: 'POST' });
         const data = await res.json();
-        if (!data.success) throw new Error(data.error || 'Không thể xóa action');
-        notify('🗑️ Đã xóa Action khỏi thư viện', 'warning');
-        loadActionLibrary();
-    } catch (e) {
-        notify(e.message, 'danger');
-    }
-}
-
-async function loadGiftCatalogue() {
-    const tbody = document.getElementById('table-gift-catalogue-body');
-    if (!tbody) return;
-    try {
-        const res = await fetch(API_BASE + '/api/v1/gifts');
-        const data = await res.json();
-        const gifts = data.gifts || [];
-        tbody.innerHTML = gifts.map((g, idx) => `
-            <tr>
-                <td>${idx + 1}</td>
-                <td>${escapeHtml(g.emoji || '🎁')} <strong>${escapeHtml(g.name)}</strong></td>
-                <td><code>${escapeHtml(g.id)}</code></td>
-                <td><span class="badge badge-gold">${g.coins} 🪙</span></td>
-            </tr>
-        `).join('');
-    } catch (e) {
-        tbody.innerHTML = '<tr><td colspan="4" style="color:var(--state-danger);">Lỗi tải Gift Catalogue</td></tr>';
-    }
-}
-
-async function loadEventsMonitor() {
-    const tbody = document.getElementById('table-events-monitor-body');
-    if (!tbody) return;
-    try {
-        const res = await fetch(API_BASE + '/api/v1/dashboard/events');
-        const data = await res.json();
-        const events = [...(data.queued || []), ...(data.history || [])];
-        if (events.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);">No game events processed yet</td></tr>';
-            return;
+        const container = document.getElementById('preflight-checks-list');
+        if (container && data.checks) {
+            container.innerHTML = data.checks.map(c => `
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--bg-app);border:1px solid var(--border-color);border-radius:var(--radius-md);">
+                    <div>
+                        <div style="font-weight:700;font-size:13px;color:#fff;">${c.pass ? '✅' : '⚠️'} ${escapeHtml(c.name)}</div>
+                        <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">${escapeHtml(c.detail)}</div>
+                    </div>
+                    <span class="badge ${c.pass ? 'badge-cyan' : 'badge-warning'}">${c.pass ? 'PASS' : 'WARN'}</span>
+                </div>
+            `).join('');
         }
-        tbody.innerHTML = events.slice(0, 30).map((e, idx) => `
-            <tr>
-                <td><code>${escapeHtml(e.eventId)}</code></td>
-                <td>${escapeHtml(e.eventType || 'gift_effect')}</td>
-                <td>${escapeHtml(e.context?.tiktokUsername || 'Viewer')}</td>
-                <td><span class="badge ${e.status === 'ACKED' ? 'badge-cyan' : 'badge-warning'}">${escapeHtml(e.status)}</span></td>
-                <td>${new Date(e.createdAt || Date.now()).toLocaleTimeString()}</td>
-                <td><button class="btn btn-secondary btn-xs" onclick="handleRetryEvent('${e.eventId}')">🔄 Replay</button></td>
-            </tr>
-        `).join('');
-    } catch (err) {
-        tbody.innerHTML = '<tr><td colspan="6" style="color:var(--state-danger);">Lỗi tải Event Monitor</td></tr>';
+        document.getElementById('preflight-modal').classList.add('active');
+    } catch (e) {
+        notify('Lỗi kiểm tra preflight: ' + e.message, 'danger');
     }
 }
 
-async function handleRetryEvent(eventId) {
+function closePreflightModal() {
+    document.getElementById('preflight-modal').classList.remove('active');
+}
+
+// ----------------------------------------------------
+// Status Polling
+// ----------------------------------------------------
+async function fetchStatus() {
     try {
-        const res = await fetch(API_BASE + '/api/v1/dashboard/events/' + eventId + '/retry', { method: 'POST' });
+        const res = await fetch(API_BASE + '/api/v1/dashboard/status');
         const data = await res.json();
-        notify('🔄 ' + (data.message || 'Đã replay event!'), 'success');
-        loadEventsMonitor();
+        if (!data.success) return;
+        const ts = data.tenantStatus || {};
+
+        // Topbar Pills
+        const rbPill = document.getElementById('roblox-status-pill');
+        const rbText = document.getElementById('roblox-status-text');
+        if (rbPill && rbText) {
+            const hb = ts.robloxHeartbeat || {};
+            if (hb.isOnline) {
+                rbPill.className = 'status-pill live';
+                rbText.innerText = 'Roblox Online';
+            } else {
+                rbPill.className = 'status-pill disconnected';
+                rbText.innerText = 'Roblox Offline';
+            }
+        }
+
+        const ttPill = document.getElementById('tiktok-status-pill');
+        const ttText = document.getElementById('tiktok-status-text');
+        if (ttPill && ttText) {
+            if (ts.isConnected) {
+                ttPill.className = 'status-pill live';
+                ttText.innerText = '@' + (ts.tiktokUsername || 'Connected');
+            } else {
+                ttPill.className = 'status-pill disconnected';
+                ttText.innerText = 'TikTok Disconnected';
+            }
+        }
+
+        // Active Dancer
+        const activeName = document.getElementById('active-roblox-name');
+        const activeTt = document.getElementById('active-tiktok-user');
+        if (activeName) {
+            if (ts.activePlayer) {
+                activeName.innerText = ts.activePlayer.robloxUsername || 'Dancing...';
+                if (activeTt) activeTt.innerText = '@' + (ts.activePlayer.tiktokUsername || 'unknown') + (ts.activePlayer.isVIP ? ' 👑 [VIP GIFTER]' : '');
+            } else {
+                activeName.innerText = 'Waiting...';
+                if (activeTt) activeTt.innerText = 'Comment tên Roblox trên TikTok để nhảy!';
+            }
+        }
+
+        // Total Dancers Stat
+        const totalDancersEl = document.getElementById('stat-total-dancers');
+        if (totalDancersEl) totalDancersEl.innerText = ((ts.queue ? ts.queue.length : 0) + (ts.activePlayer ? 1 : 0)) + ' lượt';
+
+        // Logs
+        const logBox = document.getElementById('log-console-box');
+        if (logBox && ts.logs) {
+            logBox.innerHTML = ts.logs.slice(-50).map(l => `<div><span style="color:var(--text-muted)">[${escapeHtml(l.time || 'Log')}]</span> ${escapeHtml(l.message)}</div>`).join('');
+            logBox.scrollTop = logBox.scrollHeight;
+        }
+
+        // Heartbeat Detail
+        const hbDetail = document.getElementById('roblox-hb-detail');
+        if (hbDetail && ts.robloxHeartbeat) {
+            const hb = ts.robloxHeartbeat;
+            hbDetail.innerHTML = hb.isOnline ? 
+                `<span style="color:var(--state-success);font-weight:700;">🟢 Roblox Studio Script Online (Connected)</span> • Last ping: ${escapeHtml(hb.lastHeartbeat)} (PlaceID: ${escapeHtml(hb.placeId || 'Studio')})` :
+                `<span style="color:var(--state-danger);font-weight:700;">🔴 Offline</span> • Chưa nhận được tín hiệu Heartbeat từ Roblox Script. Hãy nhấn Play trong Roblox Studio!`;
+        }
     } catch (e) {
-        notify(e.message, 'danger');
+        console.warn('Fetch status error:', e.message);
     }
 }
 
-async function loadLeaderboard() {
-    const container = document.getElementById('leaderboard-container');
-    if (!container) return;
-    container.innerHTML = `
-        <table class="data-table">
-            <thead><tr><th>#</th><th>TikTok Gifter</th><th>Hạng VIP</th><th>Tổng Quà Tặng</th></tr></thead>
-            <tbody>
-                <tr><td>🥇 1</td><td><strong>@vip_dancer_king</strong></td><td><span class="badge badge-gold">👑 VIP #1</span></td><td>1,500 🪙</td></tr>
-                <tr><td>🥈 2</td><td><strong>@phonk_master</strong></td><td><span class="badge badge-cyan">VIP #2</span></td><td>850 🪙</td></tr>
-                <tr><td>🥉 3</td><td><strong>@kpop_lover</strong></td><td><span class="badge badge-warning">VIP #3</span></td><td>500 🪙</td></tr>
-            </tbody>
-        </table>
-    `;
-}
-
-async function confirmClearQueue() { try { await fetch(API_BASE + "/api/v1/dashboard/clear-queue", { method: "POST" }); notify("Done", "warning"); fetchStatus(); } catch(e){} }
-
-function updateOverlayPreview() {
-    const title = document.getElementById('input-overlay-title') ? document.getElementById('input-overlay-title').value : '';
-    const color = document.getElementById('input-overlay-color') ? document.getElementById('input-overlay-color').value : '#ff007f';
-    const prevTitle = document.getElementById('preview-title');
-    const prevBanner = document.getElementById('preview-banner');
-    if (prevTitle) prevTitle.innerText = title || '🎵 S&G MUSIC DANCE LIVE 🎵';
-    if (prevBanner) {
-        prevBanner.style.borderColor = color || '#ff007f';
-        prevBanner.style.boxShadow = `0 0 15px ${color || '#ff007f'}`;
-    }
-}
-
-async function handleSaveOverlayAndTiming() {
-    const overlayTitle = document.getElementById('input-overlay-title') ? document.getElementById('input-overlay-title').value : '';
-    const overlayColor = document.getElementById('input-overlay-color') ? document.getElementById('input-overlay-color').value : '#ff007f';
-    const danceDuration = document.getElementById('input-dance-duration') ? document.getElementById('input-dance-duration').value : 12;
-    try {
-        await fetch(API_BASE + '/api/v1/dashboard/overlay', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({overlayTitle, overlayColor}) });
-        await fetch(API_BASE + '/api/v1/dashboard/settings', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({danceDuration: parseInt(danceDuration)}) });
-        notify('🎨 Overlay & Timer saved!', 'success');
-    } catch (e) {
-        notify(e.message, 'danger');
-    }
-}
-
-function openCommandPalette() {
-    const modal = document.getElementById('cmd-palette-modal');
-    if (!modal) return;
-    modal.classList.add('active');
-    const input = document.getElementById('cmd-search-input');
-    if (input) {
-        input.value = '';
-        input.focus();
-        filterCommandPalette();
-    }
-}
-
-const CMD_ITEMS = [
-    { title: 'Live Control', action: () => navigate('live-control') },
-    { title: 'Dancer Queue', action: () => navigate('queue') },
-    { title: 'Event Monitor', action: () => navigate('events-monitor') },
-    { title: 'Events & Actions', action: () => navigate('event-mappings') },
-    { title: 'Action Library', action: () => navigate('action-library') },
-    { title: 'Gift Catalogue', action: () => navigate('gift-catalogue') },
-    { title: 'Music Library', action: () => navigate('music') },
-    { title: 'Dance Emotes', action: () => navigate('dance') },
-    { title: 'Overlay Studio', action: () => navigate('overlay') },
-    { title: 'Roblox Connection', action: () => navigate('roblox') },
-    { title: 'Analytics & Logs', action: () => navigate('analytics') },
-    { title: 'Settings', action: () => navigate('settings') },
-    { title: 'Test Rose to Flower Rain', action: () => testRoseEvent() },
-    { title: 'Test Galaxy to Cosmic Cutscene', action: () => testGalaxyEvent() },
-    { title: 'Run Pre-live Checklist', action: () => runPreflightCheck() },
-    { title: 'Emergency Stop All Automations', action: () => triggerEmergencyStop() }
-];
-
-function filterCommandPalette() {
-    const input = document.getElementById('cmd-search-input');
-    const list = document.getElementById('cmd-results-list');
-    if (!input || !list) return;
-    const query = input.value.toLowerCase().trim();
-    const filtered = CMD_ITEMS.filter(c => c.title.toLowerCase().includes(query));
-
-    list.innerHTML = filtered.map((c, idx) => `
-    <div onclick="executeCommand(${CMD_ITEMS.indexOf(c)})" style="padding:10px 14px;background:var(--bg-app);border:1px solid var(--border-color);border-radius:var(--radius-md);cursor:pointer;font-size:13px;font-weight:600;color:#fff;display:flex;align-items:center;justify-content:space-between;">
-        <span>${escapeHtml(c.title)}</span>
-        <span class="kbd">Select</span>
-    </div>`).join('');
-}
-
-function executeCommand(idx) {
-    closeModal('cmd-palette-modal');
-    if (CMD_ITEMS[idx]) CMD_ITEMS[idx].action();
-}
-
-document.addEventListener('keydown', (e) => {
-    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-        e.preventDefault();
-        openCommandPalette();
-    }
-    if (e.key === 'Escape') {
-        document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
-    }
-});
-
-function handleHashChange() {
-    const hash = window.location.hash.replace('#', '');
-    if (hash) {
-        navigate(hash);
-    }
-}
-
-window.addEventListener('hashchange', handleHashChange);
-
-// Init
-handleHashChange();
-setInterval(fetchStatus, 3000);
+// Initial Loop
 fetchStatus();
+setInterval(fetchStatus, 2500);
 </script>
 </body>
 </html>
