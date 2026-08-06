@@ -34,8 +34,9 @@ end
 -- ====================================
 
 local API_KEY = script:GetAttribute("API_KEY") or "demo-api-key-sg-music"
-local PUBLIC_URL = "https://tame-maps-prove.loca.lt"
+local PUBLIC_URL = "https://dance-live.onrender.com"
 local LOCAL_URL = "http://127.0.0.1:3001"
+
 
 
 -- Automatically detect environment: Use localhost/127.0.0.1 in Studio, Use Public URL on Roblox App
