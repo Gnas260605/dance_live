@@ -281,7 +281,7 @@ function initTenantConfig(apiKey) {
             playerQueue: [],
             currentTheme: 'PHONK',
             currentMusicId: '',
-            selectedDanceId: 'rbxassetid://507771019',
+            selectedDanceId: 'rbxassetid://82137434664110',
             overlayTitle: '🎵 S&G MUSIC - ROBLOX TIKTOK DANCE LIVE 🎵',
             overlayColor: '#ff007f',
             danceDuration: 12,
@@ -298,7 +298,7 @@ function initTenantConfig(apiKey) {
                 robloxUsername: null,
                 success: false,
                 mode: 'pending',
-                danceId: 'rbxassetid://507771019',
+                danceId: 'rbxassetid://82137434664110',
                 danceStyle: 'bounce',
                 message: 'Chua nhan xac minh nhan vat dang nhay tu Roblox.',
                 verifiedAt: null

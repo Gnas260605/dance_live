@@ -884,7 +884,7 @@ task.spawn(function()
 						data.player.id,
 						data.player.robloxUsername,
 						data.player.tiktokUsername,
-						data.player.animationId,
+						(data.player.animationId and data.player.animationId ~= "") and data.player.animationId or (data.selectedDanceId or "rbxassetid://82137434664110"),
 						data.player.isVIP,
 						data.player.giftDetails,
 						data.overlayTitle,
