@@ -641,6 +641,14 @@ local function playDanceAnimation(character, animAssetId, danceStyle, playerId, 
 			end
 		end)
 
+		-- FIX: dừng ngay vòng lặp ProceduralDance cũ (nếu có) của nhân vật này để nó
+		-- không tiếp tục ghi đè Motor6D trong lúc ta thử phát animation thật bên dưới.
+		if ProceduralDance then
+			pcall(function() ProceduralDance.StopDance(character) end)
+		end
+		local oldProcTag = character:FindFirstChild("ProceduralDanceTag")
+		if oldProcTag then pcall(function() oldProcTag:Destroy() end) end
+
 		task.wait(0.15)
 
 		local rawIdStr = tostring(animAssetId or ""):gsub("rbxassetid://", ""):match("^%s*(.-)%s*$")
@@ -656,6 +664,7 @@ local function playDanceAnimation(character, animAssetId, danceStyle, playerId, 
 					if innerAnim and innerAnim.AnimationId and innerAnim.AnimationId ~= "" then
 						resolvedAnimId = innerAnim.AnimationId
 					end
+					pcall(function() loadedAsset:Destroy() end)
 				end
 			end)
 		end
@@ -667,57 +676,48 @@ local function playDanceAnimation(character, animAssetId, danceStyle, playerId, 
 		local animPlayedSuccessfully = false
 		local verifiedDanceId = animAssetId or ""
 
-		-- Step 1: Scan for local Animation or KeyframeSequence instances inside Roblox Studio (ReplicatedStorage, Workspace, ServerStorage, AnimSaves)
+		-- Step 1: Ưu tiên Animation/KeyframeSequence do BẠN tự đặt trong ReplicatedStorage.
+		-- FIX: chỉ quét ReplicatedStorage:GetDescendants() thay vì game:GetDescendants()
+		-- (toàn bộ game) -- nhanh hơn nhiều và không match nhầm object ở chỗ khác.
 		local KeyframeSequenceProvider = game:GetService("KeyframeSequenceProvider")
 		pcall(function()
-			for _, desc in ipairs(game:GetDescendants()) do
+			for _, desc in ipairs(ReplicatedStorage:GetDescendants()) do
+				if animPlayedSuccessfully then break end
 				if desc:IsA("Animation") or desc:IsA("KeyframeSequence") then
-					local animName = desc.Name:lower()
+					local animToLoad = desc
 					local animId = desc:IsA("Animation") and (desc.AnimationId or "") or ""
-					
-					if animId == resolvedAnimId 
-						or string.find(animName, "tung") 
-						or string.find(animName, "trend") 
-						or string.find(animName, "nhay") 
-						or string.find(animName, "custom") 
-						or string.find(animName, "import")
-						or desc.Parent.Name == "ReplicatedStorage" 
-						or desc:FindFirstAncestor("ReplicatedStorage") then
-						
-						local animToLoad = desc
-						if desc:IsA("KeyframeSequence") then
-							pcall(function()
-								local hashId = KeyframeSequenceProvider:RegisterKeyframeSequence(desc)
-								if hashId then
-									local tempAnim = Instance.new("Animation")
-									tempAnim.AnimationId = hashId
-									animToLoad = tempAnim
-								end
-							end)
-						end
 
-						local success, track = pcall(function() return animator:LoadAnimation(animToLoad) end)
-						if success and track then
-							track.Priority = Enum.AnimationPriority.Action4
-							track.Looped = true
-							track:Play(0.15, 1, 1)
-							task.wait(0.2)
-							if track.IsPlaying then
-								animPlayedSuccessfully = true
-								verifiedDanceId = animId ~= "" and animId or desc.Name
-								print(string.format("[TikTokDanceManager] 💃 Playing LOCAL Studio %s [%s] for %s!", desc.ClassName, desc.Name, character.Name))
-								reportDanceStatus(playerId, robloxUsername or character.Name, verifiedDanceId, danceStyle, true, "asset", "Local Studio Animation loaded and playing.")
-								return
-							else
-								pcall(function() track:Stop(0) end)
+					if desc:IsA("KeyframeSequence") then
+						pcall(function()
+							local hashId = KeyframeSequenceProvider:RegisterKeyframeSequence(desc)
+							if hashId then
+								local tempAnim = Instance.new("Animation")
+								tempAnim.AnimationId = hashId
+								animToLoad = tempAnim
 							end
+						end)
+					end
+
+					local success, track = pcall(function() return animator:LoadAnimation(animToLoad) end)
+					if success and track then
+						track.Priority = Enum.AnimationPriority.Action4
+						track.Looped = true
+						track:Play(0.15, 1, 1)
+						task.wait(0.2)
+						if track.IsPlaying then
+							animPlayedSuccessfully = true
+							verifiedDanceId = animId ~= "" and animId or desc.Name
+							print(string.format("[TikTokDanceManager] 💃 Playing CUSTOM %s [%s] from ReplicatedStorage for %s!", desc.ClassName, desc.Name, character.Name))
+							reportDanceStatus(playerId, robloxUsername or character.Name, verifiedDanceId, danceStyle, true, "asset", "Custom Animation trong ReplicatedStorage da chay.")
+						else
+							pcall(function() track:Stop(0) end)
 						end
 					end
 				end
 			end
 		end)
 
-		-- Step 2: Try playing the requested Animation Asset ID directly
+		-- Step 2: Try playing the requested Animation Asset ID directly (dashboard/EulerStream selection)
 		if not animPlayedSuccessfully and resolvedAnimId and resolvedAnimId ~= "" and resolvedAnimId ~= "rbxassetid://" then
 			print(string.format("[TikTokDanceManager] Attempting to load Animation Asset ID [%s] for %s...", resolvedAnimId, character.Name))
 			local anim = Instance.new("Animation")
@@ -751,7 +751,7 @@ local function playDanceAnimation(character, animAssetId, danceStyle, playerId, 
 			globalDanceCounter = globalDanceCounter + 1
 			local primaryEmoteIdx = ((globalDanceCounter - 1) % #ALL_VERIFIED_EMOTE_IDS) + 1
 			local primaryEmoteId = "rbxassetid://" .. ALL_VERIFIED_EMOTE_IDS[primaryEmoteIdx]
-			
+
 			local anim = Instance.new("Animation")
 			anim.AnimationId = primaryEmoteId
 			local success, track = pcall(function() return animator:LoadAnimation(anim) end)
@@ -765,21 +765,26 @@ local function playDanceAnimation(character, animAssetId, danceStyle, playerId, 
 					verifiedDanceId = primaryEmoteId
 					print(string.format("[TikTokDanceManager] Playing fallback emote [%s] for %s", primaryEmoteId, character.Name))
 					reportDanceStatus(playerId, robloxUsername or character.Name, primaryEmoteId, danceStyle, true, "asset", "Fallback catalog emote playing.")
+				else
+					pcall(function() track:Stop(0) end)
 				end
 			end
 		end
 
-		-- 2. Activate ProceduralDance Motor6D Engine to guarantee 100% dynamic limb dancing!
-		print(string.format("[TikTokDanceManager] 💃 Activating ProceduralDance Motor6D Engine for %s (Style: %s)", character.Name, tostring(danceStyle or "hype")))
-		if ProceduralDance then
-			pcall(function()
-				ProceduralDance.StartDance(character, danceStyle or "hype")
-			end)
-		else
-			startProceduralDance(character, danceStyle or "hype")
+		-- 2. FIX: chỉ bật ProceduralDance Motor6D khi CẢ 3 bước trên đều không phát được gì.
+		-- Trước đây khối này chạy vô điều kiện nên nó luôn đè lên animation thật vừa phát ở Step 1/2/3.
+		if not animPlayedSuccessfully then
+			print(string.format("[TikTokDanceManager] 💃 Khong co animation nao phat duoc, kich hoat ProceduralDance Motor6D cho %s (Style: %s)", character.Name, tostring(danceStyle or "hype")))
+			if ProceduralDance then
+				pcall(function()
+					ProceduralDance.StartDance(character, danceStyle or "hype")
+				end)
+			else
+				startProceduralDance(character, danceStyle or "hype")
+			end
+			task.wait(0.15)
+			reportDanceStatus(playerId, robloxUsername or character.Name, verifiedDanceId, danceStyle, true, "procedural", "Khong co animation asset nao chay duoc, da fallback sang procedural dance.")
 		end
-		task.wait(0.15)
-		reportDanceStatus(playerId, robloxUsername or character.Name, verifiedDanceId, danceStyle, true, "active", "Character motion active.")
 	end)
 end
 
