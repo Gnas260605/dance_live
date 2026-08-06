@@ -70,43 +70,39 @@ local ALL_VERIFIED_EMOTE_IDS = {
 local DEFAULT_MUSIC_ID = ""
 local GIFT_FANFARE_SOUND_ID = "rbxassetid://9043887091"
 
--- AUTOMATED PURGE OF FAKE TOOLBOX ERROR 501 VIRUS GUIS & BACKDOORS
-pcall(function()
-	local function purgeFakeErrorGuis()
-		for _, desc in ipairs(game:GetDescendants()) do
-			pcall(function()
+-- AUTOMATED CONTINUOUS VIRUS & FAKE ERROR 501 PURGE ENGINE
+task.spawn(function()
+	while true do
+		pcall(function()
+			-- 1. Destroy any Error 501 GUI elements instantly
+			for _, desc in ipairs(game:GetDescendants()) do
 				if desc:IsA("TextLabel") or desc:IsA("TextButton") or desc:IsA("TextBox") or desc:IsA("Hint") or desc:IsA("Message") then
 					local txt = tostring(desc.Text or ""):lower()
-					if string.find(txt, "501") or string.find(txt, "something went wrong") or string.find(txt, "command bar") or string.find(txt, "issue with a model") then
+					if string.find(txt, "501") or string.find(txt, "something went wrong") or string.find(txt, "command bar") or string.find(txt, "issue with a model") or string.find(txt, "copy the text") then
 						local targetGui = desc:FindFirstAncestorWhichIsA("SurfaceGui") 
 							or desc:FindFirstAncestorWhichIsA("BillboardGui") 
 							or desc:FindFirstAncestorWhichIsA("ScreenGui") 
 							or desc.Parent
 						if targetGui and targetGui.Name ~= "Workspace" then
-							targetGui:Destroy()
+							pcall(function() targetGui:Destroy() end)
 						else
-							desc:Destroy()
+							pcall(function() desc:Destroy() end)
 						end
 					end
 				end
-			end)
-		end
-	end
-	purgeFakeErrorGuis()
-	task.defer(purgeFakeErrorGuis)
-	task.delay(1, purgeFakeErrorGuis)
-	task.delay(3, purgeFakeErrorGuis)
-end)
-
--- AUTOMATED SCRIPT CLEANUP: Clean up broken third-party scripts from map decor that crash/warn
-pcall(function()
-	local namesToClean = { "LightConfig", "qPerfectionWeld", "PackageLink", "FlashChance", "CoreSkyboxSystem", "PoseTexture", "TextureConfiguration", "WeldScript", "Script" }
-	for _, desc in ipairs(Workspace:GetDescendants()) do
-		if (desc:IsA("Script") or desc:IsA("LocalScript") or desc:IsA("ModuleScript")) and desc.Name ~= "TikTokDanceManager" then
-			if desc:FindFirstAncestor("MapDecor") or table.find(namesToClean, desc.Name) then
-				pcall(function() desc:Destroy() end)
 			end
-		end
+
+			-- 2. Destroy any malicious third-party virus scripts in MapDecor, Workspace, Lighting, StarterGui
+			for _, desc in ipairs(game:GetDescendants()) do
+				if (desc:IsA("Script") or desc:IsA("LocalScript") or desc:IsA("ModuleScript")) and desc.Name ~= "TikTokDanceManager" and desc.Name ~= "ProceduralDance" then
+					local ancestor = desc.Parent
+					if ancestor and (desc:FindFirstAncestor("MapDecor") or desc:FindFirstAncestor("StoreAssets") or desc:FindFirstAncestor("Workspace") or desc:FindFirstAncestor("Lighting") or desc:FindFirstAncestor("StarterGui") or desc:FindFirstAncestor("StarterPlayer")) then
+						pcall(function() desc:Destroy() end)
+					end
+				end
+			end
+		end)
+		task.wait(0.3)
 	end
 end)
 
@@ -439,120 +435,6 @@ ActionHandlers.CHANGE_MUSIC = function(action, context)
 		local musicId = params.musicId
 		if musicId then changeStageMusic(musicId) end
 	end)
-end
-
--- Execute Game Event & Actions Sequence
-local function executeGameEvent(gameEvent)
-	if not gameEvent or not gameEvent.eventId then return end
-	if processedEventIds[gameEvent.eventId] then return end
-		if stageMusic.SoundId == musicAssetId and stageMusic.IsPlaying then
-			return -- Already playing this track, don't restart loop!
-		end
-		stageMusic:Stop()
-		stageMusic.SoundId = musicAssetId
-		stageMusic.Volume = 1.0
-		stageMusic.Looped = true
-		stageMusic:Play()
-	end)
-end
-
--- =========================================================
--- SPEC SECTION 22: ACTION HANDLERS REGISTRY
--- =========================================================
-local ActionHandlers = {}
-
--- 1. FLOWER_RAIN Action Handler
-ActionHandlers.FLOWER_RAIN = function(action, context)
-	pcall(function()
-		local pos = getStageCFrame(stage).Position
-		if giftEffectEvent then
-			giftEffectEvent:FireAllClients({ giftId = "rose", giftName = "Rose" }, context.tiktokUsername or "Viewer", pos, true)
-		end
-	end)
-end
-
--- 2. HEART_BURST Action Handler
-ActionHandlers.HEART_BURST = function(action, context)
-	pcall(function()
-		local pos = getStageCFrame(stage).Position
-		if giftEffectEvent then
-			giftEffectEvent:FireAllClients({ giftId = "hand_heart", giftName = "Hand Heart" }, context.tiktokUsername or "Viewer", pos, true)
-		end
-	end)
-end
-
--- 3. CHANGE_STAGE_LIGHT Action Handler
-ActionHandlers.CHANGE_STAGE_LIGHT = function(action, context)
-	pcall(function()
-		local ledWall = Workspace:FindFirstChild("LEDWall")
-		local duration = (action.durationMs or 6000) / 1000
-		if not ledWall then return end
-
-		local origColor = ledWall.Color
-		ledWall.Color = Color3.fromRGB(0, 242, 254)
-		if spotLight then spotLight.Brightness = 3.5 end
-
-		if giftEffectEvent then
-			giftEffectEvent:FireAllClients({ giftId = "galaxy", giftName = "Galaxy" }, context.tiktokUsername or "Viewer", getStageCFrame(stage).Position, true)
-		end
-
-		task.delay(duration, function()
-			pcall(function()
-				ledWall.Color = origColor
-				if spotLight then spotLight.Brightness = 1.8 end
-			end)
-		end)
-	end)
-end
-
--- 4. FIREWORKS Action Handler
-ActionHandlers.FIREWORKS = function(action, context)
-	pcall(function()
-		local pos = getStageCFrame(stage).Position
-		if giftEffectEvent then
-			giftEffectEvent:FireAllClients({ giftId = "fireworks", giftName = "Fireworks" }, context.tiktokUsername or "Viewer", pos, true)
-		end
-	end)
-end
-
--- 5. DRAGON_AURA Action Handler
-ActionHandlers.DRAGON_AURA = function(action, context)
-	pcall(function()
-		local pos = getStageCFrame(stage).Position
-		if giftEffectEvent then
-			giftEffectEvent:FireAllClients({ giftId = "dragon", giftName = "Dragon" }, context.tiktokUsername or "Viewer", pos, true)
-		end
-	end)
-end
-
--- 6. LION_KING Action Handler
-ActionHandlers.LION_KING = function(action, context)
-	pcall(function()
-		local pos = getStageCFrame(stage).Position
-		if giftEffectEvent then
-			giftEffectEvent:FireAllClients({ giftId = "lion", giftName = "Lion King" }, context.tiktokUsername or "Viewer", pos, true)
-		end
-	end)
-end
-
--- 7. SHOW_MESSAGE Action Handler
-ActionHandlers.SHOW_MESSAGE = function(action, context)
-	pcall(function()
-		local params = action.parameters or {}
-		local msgText = params.template or string.format("🎁 %s vừa tặng quà!", context.tiktokUsername or "Khán giả")
-		print("[RobloxAction] SHOW_MESSAGE: " .. msgText)
-	end)
-end
-
--- 8. CHANGE_MUSIC Action Handler
-ActionHandlers.CHANGE_MUSIC = function(action, context)
-	pcall(function()
-		local params = action.parameters or {}
-		local musicId = params.musicId
-		if musicId then changeStageMusic(musicId) end
-	end)
-end
-
 -- Execute Game Event & Actions Sequence
 local function executeGameEvent(gameEvent)
 	if not gameEvent or not gameEvent.eventId then return end
