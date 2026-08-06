@@ -445,6 +445,118 @@ end
 local function executeGameEvent(gameEvent)
 	if not gameEvent or not gameEvent.eventId then return end
 	if processedEventIds[gameEvent.eventId] then return end
+		if stageMusic.SoundId == musicAssetId and stageMusic.IsPlaying then
+			return -- Already playing this track, don't restart loop!
+		end
+		stageMusic:Stop()
+		stageMusic.SoundId = musicAssetId
+		stageMusic.Volume = 1.0
+		stageMusic.Looped = true
+		stageMusic:Play()
+	end)
+end
+
+-- =========================================================
+-- SPEC SECTION 22: ACTION HANDLERS REGISTRY
+-- =========================================================
+local ActionHandlers = {}
+
+-- 1. FLOWER_RAIN Action Handler
+ActionHandlers.FLOWER_RAIN = function(action, context)
+	pcall(function()
+		local pos = getStageCFrame(stage).Position
+		if giftEffectEvent then
+			giftEffectEvent:FireAllClients({ giftId = "rose", giftName = "Rose" }, context.tiktokUsername or "Viewer", pos, true)
+		end
+	end)
+end
+
+-- 2. HEART_BURST Action Handler
+ActionHandlers.HEART_BURST = function(action, context)
+	pcall(function()
+		local pos = getStageCFrame(stage).Position
+		if giftEffectEvent then
+			giftEffectEvent:FireAllClients({ giftId = "hand_heart", giftName = "Hand Heart" }, context.tiktokUsername or "Viewer", pos, true)
+		end
+	end)
+end
+
+-- 3. CHANGE_STAGE_LIGHT Action Handler
+ActionHandlers.CHANGE_STAGE_LIGHT = function(action, context)
+	pcall(function()
+		local ledWall = Workspace:FindFirstChild("LEDWall")
+		local duration = (action.durationMs or 6000) / 1000
+		if not ledWall then return end
+
+		local origColor = ledWall.Color
+		ledWall.Color = Color3.fromRGB(0, 242, 254)
+		if spotLight then spotLight.Brightness = 3.5 end
+
+		if giftEffectEvent then
+			giftEffectEvent:FireAllClients({ giftId = "galaxy", giftName = "Galaxy" }, context.tiktokUsername or "Viewer", getStageCFrame(stage).Position, true)
+		end
+
+		task.delay(duration, function()
+			pcall(function()
+				ledWall.Color = origColor
+				if spotLight then spotLight.Brightness = 1.8 end
+			end)
+		end)
+	end)
+end
+
+-- 4. FIREWORKS Action Handler
+ActionHandlers.FIREWORKS = function(action, context)
+	pcall(function()
+		local pos = getStageCFrame(stage).Position
+		if giftEffectEvent then
+			giftEffectEvent:FireAllClients({ giftId = "fireworks", giftName = "Fireworks" }, context.tiktokUsername or "Viewer", pos, true)
+		end
+	end)
+end
+
+-- 5. DRAGON_AURA Action Handler
+ActionHandlers.DRAGON_AURA = function(action, context)
+	pcall(function()
+		local pos = getStageCFrame(stage).Position
+		if giftEffectEvent then
+			giftEffectEvent:FireAllClients({ giftId = "dragon", giftName = "Dragon" }, context.tiktokUsername or "Viewer", pos, true)
+		end
+	end)
+end
+
+-- 6. LION_KING Action Handler
+ActionHandlers.LION_KING = function(action, context)
+	pcall(function()
+		local pos = getStageCFrame(stage).Position
+		if giftEffectEvent then
+			giftEffectEvent:FireAllClients({ giftId = "lion", giftName = "Lion King" }, context.tiktokUsername or "Viewer", pos, true)
+		end
+	end)
+end
+
+-- 7. SHOW_MESSAGE Action Handler
+ActionHandlers.SHOW_MESSAGE = function(action, context)
+	pcall(function()
+		local params = action.parameters or {}
+		local msgText = params.template or string.format("🎁 %s vừa tặng quà!", context.tiktokUsername or "Khán giả")
+		print("[RobloxAction] SHOW_MESSAGE: " .. msgText)
+	end)
+end
+
+-- 8. CHANGE_MUSIC Action Handler
+ActionHandlers.CHANGE_MUSIC = function(action, context)
+	pcall(function()
+		local params = action.parameters or {}
+		local musicId = params.musicId
+		if musicId then changeStageMusic(musicId) end
+	end)
+end
+
+-- Execute Game Event & Actions Sequence
+local function executeGameEvent(gameEvent)
+	if not gameEvent or not gameEvent.eventId then return end
+	if processedEventIds[gameEvent.eventId] then return end
 	processedEventIds[gameEvent.eventId] = true
 
 	print(string.format("[TikTokDanceManager] Executing GameEvent [%s] (%s actions)", gameEvent.eventId, tostring(#(gameEvent.actions or {}))))
@@ -509,8 +621,10 @@ local function createNametag(character, tiktokUsername, robloxUsername, isVIP)
 		label.Size = UDim2.new(1, -8, 1, -2)
 		label.Position = UDim2.new(0, 4, 0, 1)
 		label.BackgroundTransparency = 1
-		local displayName = isVIP and ("👑 GIFT VIP: @" .. tiktokUsername) or ("@" .. tiktokUsername)
-		label.Text = displayName .. "\n(" .. robloxUsername .. ")"
+		local ttUser = (tiktokUsername and tostring(tiktokUsername) ~= "") and tostring(tiktokUsername) or tostring(robloxUsername or "Viewer")
+		local rbxUser = (robloxUsername and tostring(robloxUsername) ~= "") and tostring(robloxUsername) or ttUser
+		local displayName = isVIP and ("👑 GIFT VIP: @" .. ttUser) or ("@" .. ttUser)
+		label.Text = displayName .. "\n(" .. rbxUser .. ")"
 		label.TextColor3 = isVIP and Color3.fromRGB(255, 215, 0) or Color3.fromRGB(255, 255, 255)
 		label.TextScaled = true
 		label.Font = Enum.Font.GothamBold
@@ -710,11 +824,11 @@ local function spawnDancer(playerId, robloxUsername, tiktokUsername, animationId
 	print(string.format("[TikTokDanceManager] Spawning avatar for TikTok: @%s (Roblox: %s)", tostring(tiktokUsername), tostring(robloxUsername)))
 
 	local getUserIdSuccess, userId = pcall(function() return Players:GetUserIdFromNameAsync(robloxUsername) end)
-	if not getUserIdSuccess or not userId then userId = 1 end
+	if not getUserIdSuccess or not userId or userId <= 0 then userId = 1 end
 
 	local characterModel = nil
 	local humDescSuccess, humDesc = pcall(function()
-		return Players:GetHumanoidDescriptionFromUserId(userId)
+		return Players:GetHumanoidDescriptionFromUserIdAsync(userId)
 	end)
 
 	if humDescSuccess and humDesc then
