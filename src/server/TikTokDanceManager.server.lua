@@ -435,6 +435,7 @@ ActionHandlers.CHANGE_MUSIC = function(action, context)
 		local musicId = params.musicId
 		if musicId then changeStageMusic(musicId) end
 	end)
+end
 -- Execute Game Event & Actions Sequence
 local function executeGameEvent(gameEvent)
 	if not gameEvent or not gameEvent.eventId then return end
