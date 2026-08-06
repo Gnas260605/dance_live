@@ -316,7 +316,7 @@ end
 -- State Tracking
 local lastProcessedPlayerId = ""
 local currentMusicId = DEFAULT_MUSIC_ID
-local currentSelectedDanceId = "rbxassetid://82137434664110"
+local currentSelectedDanceId = "rbxassetid://86539981118136" -- Dance Brazil (main dance)
 local activeDancersList = {}
 local nextSlotIndex = 1
 local processedEventIds = {}
@@ -965,7 +965,7 @@ task.spawn(function()
 						data.player.id,
 						data.player.robloxUsername,
 						data.player.tiktokUsername,
-						(data.player.animationId and data.player.animationId ~= "") and data.player.animationId or (data.selectedDanceId or "rbxassetid://82137434664110"),
+						(data.player.animationId and data.player.animationId ~= "") and data.player.animationId or (data.selectedDanceId or "rbxassetid://86539981118136"),
 						data.player.isVIP,
 						data.player.giftDetails,
 						data.overlayTitle,

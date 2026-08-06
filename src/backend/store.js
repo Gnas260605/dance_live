@@ -29,7 +29,7 @@ const DEFAULT_THEMES = {
 };
 
 const DEFAULT_DANCE_LIBRARY = [
-    { id: 'dance_nhay_trend_tungtung', name: '🔥 Nhảy Trend TungTung', danceId: 'rbxassetid://82137434664110', genre: 'HYPE', danceStyle: 'bounce', addedAt: '2026-08-06T00:00:00.000Z' },
+    { id: 'dance_nhay_trend_tungtung', name: '🔥 Nhảy Trend TungTung', danceId: 'rbxassetid://86539981118136', genre: 'HYPE', danceStyle: 'bounce', addedAt: '2026-08-06T00:00:00.000Z' },
     { id: 'dance_endless_aura', name: '✨ Endless Aura Floating', danceId: 'rbxassetid://106708015414624', genre: 'PHONK', danceStyle: 'hype', addedAt: '2026-08-05T00:00:00.000Z' },
     { id: 'dance_aura_farming', name: '🌾 Aura Farming', danceId: 'rbxassetid://133113167814737', genre: 'CHILL', danceStyle: 'bounce', addedAt: '2026-08-05T00:00:00.000Z' },
     { id: 'dance_kawaii_anime', name: '🌸 Kawaii Anime Dance', danceId: 'rbxassetid://91147141356012', genre: 'KPOP', danceStyle: 'kpop', addedAt: '2026-08-05T00:00:00.000Z' },
@@ -39,7 +39,7 @@ const DEFAULT_DANCE_LIBRARY = [
 ];
 
 const VERIFIED_DANCE_LIBRARY = [
-    { id: 'dance_nhay_trend_tungtung', name: '🔥 Nhảy Trend TungTung', danceId: 'rbxassetid://82137434664110', genre: 'HYPE', danceStyle: 'bounce', verificationStatus: 'verified', verificationMode: 'asset', addedAt: '2026-08-06T00:00:00.000Z' },
+    { id: 'dance_nhay_trend_tungtung', name: '🔥 Nhảy Trend TungTung', danceId: 'rbxassetid://86539981118136', genre: 'HYPE', danceStyle: 'bounce', verificationStatus: 'verified', verificationMode: 'asset', addedAt: '2026-08-06T00:00:00.000Z' },
     { id: 'dance_phonk_hype', name: 'Phonk Hype Dance', danceId: 'rbxassetid://507771019', genre: 'PHONK', danceStyle: 'bounce', verificationStatus: 'verified', verificationMode: 'asset', addedAt: '2026-08-05T00:00:00.000Z' },
     { id: 'dance_breakdance_bboy', name: 'Breakdance B-Boy', danceId: 'rbxassetid://507772104', genre: 'HIPHOP', danceStyle: 'hiphop', verificationStatus: 'verified', verificationMode: 'asset', addedAt: '2026-08-05T00:00:00.000Z' },
     { id: 'dance_chill_wave', name: 'Chill Wave Motion', danceId: 'rbxassetid://507770238', genre: 'CHILL', danceStyle: 'wave', verificationStatus: 'verified', verificationMode: 'asset', addedAt: '2026-08-05T00:00:00.000Z' },
@@ -281,7 +281,7 @@ function initTenantConfig(apiKey) {
             playerQueue: [],
             currentTheme: 'PHONK',
             currentMusicId: '',
-            selectedDanceId: 'rbxassetid://82137434664110',
+            selectedDanceId: 'rbxassetid://86539981118136',
             overlayTitle: '🎵 S&G MUSIC - ROBLOX TIKTOK DANCE LIVE 🎵',
             overlayColor: '#ff007f',
             danceDuration: 12,
@@ -298,7 +298,7 @@ function initTenantConfig(apiKey) {
                 robloxUsername: null,
                 success: false,
                 mode: 'pending',
-                danceId: 'rbxassetid://82137434664110',
+                danceId: 'rbxassetid://86539981118136',
                 danceStyle: 'bounce',
                 message: 'Chua nhan xac minh nhan vat dang nhay tu Roblox.',
                 verifiedAt: null
