@@ -859,19 +859,11 @@ local function spawnDancer(playerId, robloxUsername, tiktokUsername, animationId
 	local targetCFrame = stageCF * CFrame.new(offset) * CFrame.Angles(0, math.rad(180), 0)
 	characterModel:PivotTo(targetCFrame)
 
-	-- UNANCHOR ALL LIMBS SO MOTOR6D ANIMATIONS CAN ROTATE THEM (FIX T-POSE LOCK)
-	pcall(function()
-		for _, part in ipairs(characterModel:GetDescendants()) do
-			if part:IsA("BasePart") then
-				if part.Name == "HumanoidRootPart" then
-					part.Anchored = true -- Keep RootPart stable on stage floor
-				else
-					part.Anchored = false -- Unanchor limbs so animation rotates arms/legs!
-					part.CanCollide = false
-				end
-			end
-		end
-	end)
+	-- Anchor HumanoidRootPart to keep character standing firmly on stage floor
+	local hrp = characterModel:FindFirstChild("HumanoidRootPart") or characterModel.PrimaryPart
+	if hrp then
+		hrp.Anchored = true
+	end
 
 	-- Disable default Roblox idle Animate script to prevent animation overrides
 	pcall(function()
