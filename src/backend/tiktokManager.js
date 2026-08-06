@@ -4,7 +4,8 @@ const { getTenant, addTenantLog, TIKTOK_GIFTS } = require('./store');
 
 const activeConnections = new Map();
 const userCooldowns = new Map();
-const COOLDOWN_MS = 30000;
+const COOLDOWN_MS = 2000;
+
 
 function extractRobloxUsername(text) {
     if (!text || typeof text !== 'string') return null;
