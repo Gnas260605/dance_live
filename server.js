@@ -6,7 +6,8 @@ const { getTenant } = require('./src/backend/store');
 const { processNewCommentForTenant } = require('./src/backend/tiktokManager');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
+
 
 app.set('trust proxy', 1);
 app.use(cors());
