@@ -15,6 +15,9 @@ COPY prisma ./prisma/
 # Install dependencies for all workspaces
 RUN npm ci
 
+# Set placeholder DATABASE_URL for build-time schema validation
+ENV DATABASE_URL="postgresql://localhost:5432/placeholder"
+
 # Generate Prisma Client
 RUN npx prisma generate
 
