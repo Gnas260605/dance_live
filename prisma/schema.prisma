@@ -48,7 +48,7 @@ model StreamConfig {
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   tiktokUsername  String   @default("sandg.music")
   activeTheme     String   @default("PHONK")
-  currentMusicId  String   @default("rbxassetid://1847648398")
+  currentMusicId  String   @default("")
   selectedDanceId String   @default("rbxassetid://507771019")
   overlayTitle    String   @default("🎵 S&G MUSIC - ROBLOX TIKTOK DANCE LIVE 🎵")
   overlayColor    String   @default("#ff007f")

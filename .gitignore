@@ -25,3 +25,7 @@ Thumbs.db
 
 # Binaries
 rojo.exe
+
+# Temporary files
+.tmp*
+

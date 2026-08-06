@@ -18,15 +18,41 @@ let tenantConfigs = {};
 const DEFAULT_THEMES = {
     PHONK: {
         name: "⚡ Phonk",
-        music: ["rbxassetid://1847648398"],
+        music: ["rbxassetid://1837879082"],
         dances: ["rbxassetid://507771019"]
     },
     KPOP: {
         name: "🔥 K-Pop",
         music: ["rbxassetid://1837879082"],
-        dances: ["rbxassetid://507771959"]
+        dances: ["rbxassetid://507770453"]
     }
 };
+
+const DEFAULT_DANCE_LIBRARY = [
+    { id: 'dance_endless_aura', name: '✨ Endless Aura Floating', danceId: 'rbxassetid://106708015414624', genre: 'PHONK', danceStyle: 'hype', addedAt: '2026-08-05T00:00:00.000Z' },
+    { id: 'dance_aura_farming', name: '🌾 Aura Farming', danceId: 'rbxassetid://133113167814737', genre: 'CHILL', danceStyle: 'bounce', addedAt: '2026-08-05T00:00:00.000Z' },
+    { id: 'dance_kawaii_anime', name: '🌸 Kawaii Anime Dance', danceId: 'rbxassetid://91147141356012', genre: 'KPOP', danceStyle: 'kpop', addedAt: '2026-08-05T00:00:00.000Z' },
+    { id: 'dance_jamal_brazil', name: '🇧🇷 Jamal Brazil Groove', danceId: 'rbxassetid://104131847054135', genre: 'FUNK', danceStyle: 'funk', addedAt: '2026-08-05T00:00:00.000Z' },
+    { id: 'dance_phonk_hype', name: '⚡ Phonk Hype Dance', danceId: 'rbxassetid://507771019', genre: 'PHONK', danceStyle: 'bounce', addedAt: '2026-08-05T00:00:00.000Z' },
+    { id: 'dance_kpop_sync', name: '🔥 K-Pop Sync Routine', danceId: 'rbxassetid://507771959', genre: 'KPOP', danceStyle: 'kpop', addedAt: '2026-08-05T00:00:00.000Z' }
+];
+
+const VERIFIED_DANCE_LIBRARY = [
+    { id: 'dance_phonk_hype', name: 'Phonk Hype Dance', danceId: 'rbxassetid://507771019', genre: 'PHONK', danceStyle: 'bounce', verificationStatus: 'verified', verificationMode: 'asset', addedAt: '2026-08-05T00:00:00.000Z' },
+    { id: 'dance_breakdance_bboy', name: 'Breakdance B-Boy', danceId: 'rbxassetid://507772104', genre: 'HIPHOP', danceStyle: 'hiphop', verificationStatus: 'verified', verificationMode: 'asset', addedAt: '2026-08-05T00:00:00.000Z' },
+    { id: 'dance_chill_wave', name: 'Chill Wave Motion', danceId: 'rbxassetid://507770238', genre: 'CHILL', danceStyle: 'wave', verificationStatus: 'verified', verificationMode: 'asset', addedAt: '2026-08-05T00:00:00.000Z' },
+    { id: 'dance_idol_point', name: 'Idol Point Routine', danceId: 'rbxassetid://507770453', genre: 'KPOP', danceStyle: 'kpop', verificationStatus: 'verified', verificationMode: 'asset', addedAt: '2026-08-05T00:00:00.000Z' },
+    { id: 'dance_stadium_hype', name: 'Stadium Hype', danceId: 'rbxassetid://507771520', genre: 'PHONK', danceStyle: 'hype', verificationStatus: 'verified', verificationMode: 'asset', addedAt: '2026-08-05T00:00:00.000Z' },
+    { id: 'dance_hands_up_jump', name: 'Hands Up Jump', danceId: 'rbxassetid://507770677', genre: 'PHONK', danceStyle: 'shuffle', verificationStatus: 'verified', verificationMode: 'asset', addedAt: '2026-08-05T00:00:00.000Z' },
+    { id: 'dance_sway_groove', name: 'Sway Groove', danceId: 'rbxassetid://507770897', genre: 'CHILL', danceStyle: 'wave', verificationStatus: 'verified', verificationMode: 'asset', addedAt: '2026-08-05T00:00:00.000Z' },
+    { id: 'dance_proc_bounce', name: 'Procedural Bounce', danceId: '', genre: 'PHONK', danceStyle: 'bounce', verificationStatus: 'verified', verificationMode: 'procedural', addedAt: '2026-08-05T00:00:00.000Z' }
+];
+
+const VERIFIED_DANCE_IDS = new Set(
+    VERIFIED_DANCE_LIBRARY
+        .map((dance) => dance.danceId)
+        .filter(Boolean)
+);
 
 // Official TikTok Live Gift Catalogue with exact Coin values
 const TIKTOK_GIFTS = [
@@ -252,7 +278,7 @@ function initTenantConfig(apiKey) {
             activePlayer: null,
             playerQueue: [],
             currentTheme: 'PHONK',
-            currentMusicId: 'rbxassetid://1847648398',
+            currentMusicId: '',
             selectedDanceId: 'rbxassetid://507771019',
             overlayTitle: '🎵 S&G MUSIC - ROBLOX TIKTOK DANCE LIVE 🎵',
             overlayColor: '#ff007f',
@@ -264,7 +290,17 @@ function initTenantConfig(apiKey) {
             gameEventsHistory: [],
             robloxHeartbeat: { lastHeartbeat: null, isOnline: false, placeId: null, jobId: null },
             customMusic: [],
-            customDances: [],
+            customDances: JSON.parse(JSON.stringify(VERIFIED_DANCE_LIBRARY)),
+            lastDanceVerification: {
+                playerId: null,
+                robloxUsername: null,
+                success: false,
+                mode: 'pending',
+                danceId: 'rbxassetid://507771019',
+                danceStyle: 'bounce',
+                message: 'Chua nhan xac minh nhan vat dang nhay tu Roblox.',
+                verifiedAt: null
+            },
             logs: [{ timestamp: new Date().toLocaleTimeString(), message: 'Tenant workspace & Event Engine initialized.', isImportant: true }]
         };
     }
@@ -303,7 +339,7 @@ loadStore();
 
 module.exports = {
     DEFAULT_THEMES, TIKTOK_GIFTS, DEFAULT_COIN_MILESTONES,
-    DEFAULT_ACTION_DEFS, DEFAULT_EVENT_MAPPINGS,
+    DEFAULT_ACTION_DEFS, DEFAULT_EVENT_MAPPINGS, VERIFIED_DANCE_LIBRARY, VERIFIED_DANCE_IDS,
     users, findUserByEmail, findUserByApiKey, findUserById,
     createUser, getTenant, addTenantLog, saveStore
 };

@@ -7,6 +7,8 @@ const {
     DEFAULT_COIN_MILESTONES,
     DEFAULT_ACTION_DEFS,
     DEFAULT_EVENT_MAPPINGS,
+    VERIFIED_DANCE_LIBRARY,
+    VERIFIED_DANCE_IDS,
     createUser, 
     findUserByEmail, 
     getTenant, 
@@ -53,6 +55,13 @@ function optionalAuth(req, res, next) {
         }
         next();
     });
+}
+
+function normalizeDanceId(danceId) {
+    if (!danceId || !danceId.trim()) return '';
+    let formattedId = danceId.trim();
+    if (!formattedId.startsWith('rbxassetid://')) formattedId = 'rbxassetid://' + formattedId;
+    return formattedId;
 }
 
 // Auth Endpoints
@@ -141,6 +150,9 @@ router.get('/v1/streamer/:apiKey/current-player', (req, res) => {
         queueLength: tenant.playerQueue.length,
         currentMusicId: tenant.currentMusicId,
         selectedDanceId: tenant.selectedDanceId,
+        selectedDanceStyle: tenant.selectedDanceStyle || 'bounce',
+        selectedDanceName: tenant.selectedDanceName || 'Bounce Starter',
+        lastDanceVerification: tenant.lastDanceVerification || null,
         overlayTitle: tenant.overlayTitle || "🎵 S&G MUSIC - ROBLOX TIKTOK DANCE LIVE 🎵",
         overlayColor: tenant.overlayColor || "#ff007f",
         danceDuration: tenant.danceDuration || 12,
@@ -157,6 +169,9 @@ router.get('/current-player', (req, res) => {
         queueLength: tenant.playerQueue.length,
         currentMusicId: tenant.currentMusicId,
         selectedDanceId: tenant.selectedDanceId,
+        selectedDanceStyle: tenant.selectedDanceStyle || 'bounce',
+        selectedDanceName: tenant.selectedDanceName || 'Bounce Starter',
+        lastDanceVerification: tenant.lastDanceVerification || null,
         overlayTitle: tenant.overlayTitle || "🎵 S&G MUSIC - ROBLOX TIKTOK DANCE LIVE 🎵",
         overlayColor: tenant.overlayColor || "#ff007f",
         danceDuration: tenant.danceDuration || 12,
@@ -225,6 +240,45 @@ router.post('/v1/streamer/:apiKey/heartbeat', (req, res) => {
     res.json({ success: true, isOnline: true, timestamp: Date.now() });
 });
 
+router.post('/v1/streamer/:apiKey/dance-status', (req, res) => {
+    const apiKey = req.params.apiKey || 'demo-api-key-sg-music';
+    const tenant = getTenant(apiKey);
+    const {
+        playerId = null,
+        robloxUsername = null,
+        danceId = '',
+        danceStyle = 'bounce',
+        success = false,
+        mode = 'pending',
+        message = ''
+    } = req.body || {};
+
+    const verification = {
+        playerId,
+        robloxUsername,
+        success: !!success,
+        mode,
+        danceId: danceId || '',
+        danceStyle: danceStyle || 'bounce',
+        message: message || (success ? 'Nhan vat da bat dau nhay.' : 'Khong xac nhan duoc nhan vat dang nhay.'),
+        verifiedAt: new Date().toISOString()
+    };
+
+    tenant.lastDanceVerification = verification;
+
+    if (tenant.activePlayer && (!playerId || tenant.activePlayer.id === playerId || tenant.activePlayer.robloxUsername === robloxUsername)) {
+        tenant.activePlayer.danceVerification = verification;
+    }
+
+    addTenantLog(
+        apiKey,
+        `${verification.success ? '💃' : '⚠️'} Dance verification: ${verification.robloxUsername || 'Unknown'} -> ${verification.mode} (${verification.message})`,
+        true
+    );
+
+    res.json({ success: true, verification });
+});
+
 // =========================================================
 // Streamer Dashboard API Endpoints
 // =========================================================
@@ -257,6 +311,9 @@ router.get('/v1/dashboard/status', optionalAuth, (req, res) => {
             currentTheme: tenant.currentTheme,
             currentMusicId: tenant.currentMusicId,
             selectedDanceId: tenant.selectedDanceId,
+            selectedDanceStyle: tenant.selectedDanceStyle || 'bounce',
+            selectedDanceName: tenant.selectedDanceName || 'Bounce Starter',
+            lastDanceVerification: tenant.lastDanceVerification || null,
             overlayTitle: tenant.overlayTitle || "🎵 S&G MUSIC - ROBLOX TIKTOK DANCE LIVE 🎵",
             overlayColor: tenant.overlayColor || "#ff007f",
             danceDuration: tenant.danceDuration || 12,
@@ -560,25 +617,82 @@ router.get('/v1/dashboard/dance', optionalAuth, (req, res) => {
     res.json({
         success: true,
         selectedDanceId: tenant.selectedDanceId,
-        dances: tenant.customDances || []
+        selectedDanceStyle: tenant.selectedDanceStyle || 'bounce',
+        selectedDanceName: tenant.selectedDanceName || 'Bounce Starter',
+        lastDanceVerification: tenant.lastDanceVerification || null,
+        dances: tenant.customDances || [],
+        verifiedDances: VERIFIED_DANCE_LIBRARY
     });
 });
 
 router.post('/v1/dashboard/dance', optionalAuth, (req, res) => {
     const apiKey = getApiKeyFromReq(req);
-    const { name, danceId, genre } = req.body;
-    if (!danceId) return res.status(400).json({ error: 'danceId is required' });
-
-    let formattedId = danceId.trim();
-    if (!formattedId.startsWith('rbxassetid://')) formattedId = 'rbxassetid://' + formattedId;
+    const { name, danceId, genre, danceStyle, setActive = true } = req.body;
+    const normalizedStyle = (danceStyle || genre || 'bounce').toString().trim().toLowerCase();
+    const formattedId = normalizeDanceId(danceId);
+    const verificationStatus = formattedId ? (VERIFIED_DANCE_IDS.has(formattedId) ? 'verified' : 'pending') : 'verified';
+    const verificationMode = formattedId ? 'asset' : 'procedural';
 
     const tenant = getTenant(apiKey);
-    tenant.selectedDanceId = formattedId;
     if (!tenant.customDances) tenant.customDances = [];
-    tenant.customDances.unshift({ id: Date.now().toString(), name: name || formattedId, danceId: formattedId, genre: genre || 'PHONK' });
-    addTenantLog(apiKey, `💃 Đã thêm & chuyển điệu nhảy mới: ${name || formattedId}`, true);
 
-    res.json({ success: true, selectedDanceId: formattedId, dances: tenant.customDances });
+    let savedDance = tenant.customDances.find(d => formattedId && d.danceId === formattedId);
+    if (!savedDance) {
+        savedDance = tenant.customDances.find(d => !formattedId && d.danceStyle === normalizedStyle && d.name === ((name && name.trim()) || d.name));
+    }
+
+    if (!savedDance) {
+        savedDance = {
+            id: Date.now().toString(),
+            name: (name && name.trim()) || normalizedStyle,
+            danceId: formattedId,
+            genre: genre || normalizedStyle.toUpperCase(),
+            danceStyle: normalizedStyle,
+            verificationStatus,
+            verificationMode
+        };
+        tenant.customDances.unshift(savedDance);
+    } else {
+        savedDance.name = (name && name.trim()) || savedDance.name;
+        savedDance.danceId = formattedId;
+        savedDance.genre = genre || savedDance.genre;
+        savedDance.danceStyle = normalizedStyle;
+        savedDance.verificationStatus = verificationStatus;
+        savedDance.verificationMode = verificationMode;
+    }
+
+    if (setActive !== false) {
+        if (formattedId && verificationStatus !== 'verified') {
+            return res.status(400).json({
+                error: 'Dance asset nay chua nam trong danh sach emote da xac minh. Hay verify trong Roblox truoc khi kich hoat.'
+            });
+        }
+        tenant.selectedDanceId = formattedId;
+        tenant.selectedDanceStyle = normalizedStyle;
+        tenant.selectedDanceName = savedDance.name;
+        tenant.lastDanceVerification = {
+            playerId: tenant.activePlayer ? tenant.activePlayer.id : null,
+            robloxUsername: tenant.activePlayer ? tenant.activePlayer.robloxUsername : null,
+            success: false,
+            mode: 'pending',
+            danceId: formattedId,
+            danceStyle: normalizedStyle,
+            message: 'Dang cho Roblox xac nhan nhan vat bat dau nhay.',
+            verifiedAt: new Date().toISOString()
+        };
+    }
+
+    addTenantLog(apiKey, `???? ???? c??i ??i???u nh???y: ${savedDance.name}${formattedId ? ' ??? ' + formattedId : ' ??? procedural only'}`, true);
+
+    res.json({
+        success: true,
+        selectedDanceId: tenant.selectedDanceId,
+        selectedDanceStyle: tenant.selectedDanceStyle || normalizedStyle,
+        selectedDanceName: tenant.selectedDanceName || savedDance.name,
+        lastDanceVerification: tenant.lastDanceVerification || null,
+        dance: savedDance,
+        dances: tenant.customDances
+    });
 });
 
 router.delete('/v1/dashboard/dance/:id', optionalAuth, (req, res) => {

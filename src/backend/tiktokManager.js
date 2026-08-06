@@ -191,16 +191,26 @@ async function processNewCommentForTenant(apiKey, tiktokUsername, commentText, i
     if (isCurrentlyActive || isAlreadyQueued) {
         // If testing via web simulator, replace active player ID to re-trigger spawn
         if (tiktokUsername.startsWith('viewer_')) {
-            const freshPlayerData = {
-                id: Date.now().toString() + '_' + Math.random().toString(36).substring(2, 5),
-                robloxUsername: verifiedUsername,
-                tiktokUsername: tiktokUsername,
-                commentText: commentText,
-                animationId: tenant.selectedDanceId || 'rbxassetid://507771019',
-                isVIP: isVIP,
-                giftDetails: giftDetails,
-                timestamp: now
-            };
+        const freshPlayerData = {
+            id: Date.now().toString() + '_' + Math.random().toString(36).substring(2, 5),
+            robloxUsername: verifiedUsername,
+            tiktokUsername: tiktokUsername,
+            commentText: commentText,
+            animationId: tenant.selectedDanceId || 'rbxassetid://507771019',
+            danceStyle: tenant.selectedDanceStyle || 'bounce',
+            danceName: tenant.selectedDanceName || 'Bounce Starter',
+            danceVerification: {
+                success: false,
+                mode: 'pending',
+                danceId: tenant.selectedDanceId || 'rbxassetid://507771019',
+                danceStyle: tenant.selectedDanceStyle || 'bounce',
+                message: 'Dang cho Roblox xac nhan nhan vat bat dau nhay.',
+                verifiedAt: null
+            },
+            isVIP: isVIP,
+            giftDetails: giftDetails,
+            timestamp: now
+        };
             tenant.activePlayer = freshPlayerData;
             addTenantLog(apiKey, `💬 Test Comment: "${commentText}" → Roblox Avatar Test: "${verifiedUsername}"`);
             return { success: true, playerData: freshPlayerData };
@@ -222,6 +232,16 @@ async function processNewCommentForTenant(apiKey, tiktokUsername, commentText, i
         tiktokUsername: tiktokUsername,
         commentText: commentText,
         animationId: tenant.selectedDanceId || 'rbxassetid://507771019',
+        danceStyle: tenant.selectedDanceStyle || 'bounce',
+        danceName: tenant.selectedDanceName || 'Bounce Starter',
+        danceVerification: {
+            success: false,
+            mode: 'pending',
+            danceId: tenant.selectedDanceId || 'rbxassetid://507771019',
+            danceStyle: tenant.selectedDanceStyle || 'bounce',
+            message: 'Dang cho Roblox xac nhan nhan vat bat dau nhay.',
+            verifiedAt: null
+        },
         isVIP: isVIP,
         giftDetails: giftDetails,
         timestamp: now
@@ -236,6 +256,16 @@ async function processNewCommentForTenant(apiKey, tiktokUsername, commentText, i
     }
 
     tenant.activePlayer = playerData;
+    tenant.lastDanceVerification = {
+        playerId: playerData.id,
+        robloxUsername: playerData.robloxUsername,
+        success: false,
+        mode: 'pending',
+        danceId: playerData.animationId,
+        danceStyle: playerData.danceStyle,
+        message: 'Dang cho Roblox xac nhan nhan vat bat dau nhay.',
+        verifiedAt: null
+    };
     if (tenant.playerQueue.length > 50) tenant.playerQueue.shift();
 
     return { success: true, playerData };
@@ -252,10 +282,17 @@ function connectTikTokForTenant(apiKey, uniqueId) {
     const tiktokConnectorModule = require('tiktok-live-connector');
     const ConnectionClass = tiktokConnectorModule.TikTokLiveConnection || tiktokConnectorModule.WebcastPushConnection;
 
-    const connection = new ConnectionClass(cleanUniqueId, {
+    const signerApiKey = process.env.EULERSTREAM_API_KEY || tenant.eulerApiKey || '';
+    if (tiktokConnectorModule.SignConfig && signerApiKey) {
+        tiktokConnectorModule.SignConfig.apiKey = signerApiKey;
+    }
+    const connectionOptions = {
         processInitialData: false,
-        enableExtendedGiftInfo: true
-    });
+        enableExtendedGiftInfo: true,
+        signApiKey: signerApiKey
+    };
+
+    const connection = new ConnectionClass(cleanUniqueId, connectionOptions);
     activeConnections.set(apiKey, connection);
 
     connection.connect().then(state => {
@@ -264,8 +301,10 @@ function connectTikTokForTenant(apiKey, uniqueId) {
     }).catch(err => {
         tenant.isConnected = false;
         const msg = err && err.message ? err.message : String(err);
-        if (msg.includes("isn't online") || msg.includes("offline")) {
-            addTenantLog(apiKey, `❌ Lỗi kết nối @${cleanUniqueId}: Kênh TikTok này hiện đang OFF Live (chưa bật nút Phát Live)`, true);
+        if (msg.includes("Business plan") || msg.includes("fetchWebcastSignatureFromEulerRoute") || msg.includes("Eulerstream") || msg.includes("requires a Business plan")) {
+            addTenantLog(apiKey, `⚠️ TikTok yêu cầu EulerStream API Key để ký chữ ký Live. Bạn tạo 1 API Key MIỄN PHÍ tại https://www.eulerstream.com (Gói Community Free), dán vào .env (EULERSTREAM_API_KEY) để mở khóa Live 24/7! Hoặc dùng Web Simulator để test ngay lập tức.`, true);
+        } else if (msg.includes("isn't online") || msg.includes("offline")) {
+            addTenantLog(apiKey, `❌ Lỗi kết nối @${cleanUniqueId}: Kênh TikTok này hiện đang OFF Live (chưa bật nút Phát Live trên ứng dụng TikTok)`, true);
         } else {
             addTenantLog(apiKey, `❌ Lỗi kết nối @${cleanUniqueId}: ${msg}`, true);
         }
@@ -325,12 +364,106 @@ function disconnectTikTokForTenant(apiKey) {
     }
     const tenant = getTenant(apiKey);
     tenant.isConnected = false;
-    addTenantLog(apiKey, `Đã ngắt kết nối TikTok.`);
+    addTenantLog(apiKey, `Đang ngắt kết nối TikTok.`);
 }
+
+// TikFinity Desktop App Auto-Connector (ws://localhost:21213/)
+let tikFinityWsInstance = null;
+let tikFinityRetryTimer = null;
+
+function initTikFinityDesktopConnector(apiKey = 'demo-api-key-sg-music') {
+    if (tikFinityWsInstance) {
+        try { tikFinityWsInstance.close(); } catch (e) {}
+        tikFinityWsInstance = null;
+    }
+    if (tikFinityRetryTimer) {
+        clearTimeout(tikFinityRetryTimer);
+        tikFinityRetryTimer = null;
+    }
+
+    try {
+        const WsClass = globalThis.WebSocket || require('ws');
+        const ws = new WsClass('ws://localhost:21213/');
+        tikFinityWsInstance = ws;
+
+        ws.onopen = () => {
+            console.log('[TikFinityWS] Connected to TikFinity Desktop App at ws://localhost:21213/');
+            const tenant = getTenant(apiKey);
+            tenant.isConnected = true;
+            addTenantLog(apiKey, `🟢 Đã kết nối tự động tới TikFinity Desktop App (ws://localhost:21213/)! Đang nhận 100% Comment & Quà TikTok Live!`, true);
+        };
+
+        ws.onmessage = (event) => {
+            try {
+                const msgStr = typeof event.data === 'string' ? event.data : event.data.toString();
+                const payload = JSON.parse(msgStr);
+                const { event: eventName, data } = payload;
+                if (!data) return;
+
+                if (eventName === 'chat') {
+                    const tiktokUsername = data.uniqueId || data.nickname || 'Viewer';
+                    const commentText = data.comment || '';
+                    processNewCommentForTenant(apiKey, tiktokUsername, commentText);
+                } else if (eventName === 'gift') {
+                    if (data.giftType === 1 && data.repeatEnd === false) return;
+                    const tiktokUsername = data.uniqueId || 'Viewer';
+                    const giftName = data.giftName || 'TikTok Gift';
+                    const giftId = (data.giftId || giftName).toString().toLowerCase().replace(/[^a-z0-9_]/g, '_');
+                    const giftCount = data.repeatCount || 1;
+                    let singleCoinValue = data.diamondCount || data.coins || 0;
+
+                    if (!singleCoinValue && giftName) {
+                        const catalogueEntry = TIKTOK_GIFTS.find(g =>
+                            g.name.toLowerCase() === giftName.toLowerCase() ||
+                            g.id === giftId
+                        );
+                        if (catalogueEntry) singleCoinValue = catalogueEntry.coins;
+                    }
+                    const totalCoins = (singleCoinValue || 1) * giftCount;
+
+                    addTenantLog(apiKey, `🎁 [TikFinity Live] @${tiktokUsername} tặng ${giftCount}x ${giftName} (${totalCoins}🪙)!`, true);
+
+                    processGiftEventForTenant(apiKey, {
+                        giftId,
+                        giftName,
+                        repeatCount: giftCount,
+                        singleCoinValue: singleCoinValue || 1,
+                        totalCoins,
+                        tiktokUsername,
+                        nickname: data.nickname || tiktokUsername
+                    });
+                }
+            } catch (err) {
+                console.error('[TikFinityWS] Message Parse Error:', err.message);
+            }
+        };
+
+        ws.onerror = () => {
+            // Silently handle when TikFinity app is not open
+        };
+
+        ws.onclose = () => {
+            tikFinityWsInstance = null;
+            tikFinityRetryTimer = setTimeout(() => {
+                initTikFinityDesktopConnector(apiKey);
+            }, 6000);
+        };
+    } catch (err) {
+        tikFinityRetryTimer = setTimeout(() => {
+            initTikFinityDesktopConnector(apiKey);
+        }, 6000);
+    }
+}
+
+// Auto-start TikFinity Desktop App connector on module load
+setTimeout(() => {
+    initTikFinityDesktopConnector();
+}, 2000);
 
 module.exports = {
     connectTikTokForTenant,
     disconnectTikTokForTenant,
     processNewCommentForTenant,
-    processGiftEventForTenant
+    processGiftEventForTenant,
+    initTikFinityDesktopConnector
 };

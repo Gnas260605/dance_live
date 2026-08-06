@@ -31,7 +31,7 @@ AnimationConfig.Themes = {
 		laserColor = Color3.fromRGB(148, 0, 211),
 		lightingColor = Color3.fromRGB(148, 0, 211),
 		music = {
-			{ id = "rbxassetid://1847648398", name = "Super Shy (Dance Beat)" },
+			{ id = "rbxassetid://1837879082", name = "Super Shy (Dance Beat)" },
 			{ id = "rbxassetid://1837871234", name = "Cupid (Twin Ver. Remix)" },
 			{ id = "rbxassetid://1845678901", name = "Flower (TikTok Challenge)" },
 		},
@@ -77,7 +77,7 @@ AnimationConfig.Themes = {
 		laserColor = Color3.fromRGB(0, 255, 127),
 		lightingColor = Color3.fromRGB(0, 255, 127),
 		music = {
-			{ id = "rbxassetid://1847648398", name = "Baile Funk (TikTok Edit)" },
+			{ id = "rbxassetid://1837879082", name = "Baile Funk (TikTok Edit)" },
 			{ id = "rbxassetid://1837871234", name = "Montagem (Funk Beat)" },
 			{ id = "rbxassetid://1845678901", name = "Pop Hold It (Remix)" },
 		},

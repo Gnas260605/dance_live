@@ -14,7 +14,7 @@ local Camera = Workspace.CurrentCamera
 -- List of verified open Roblox official audio IDs
 local AUDIO_FALLBACKS = {
 	"rbxassetid://1837879082",
-	"rbxassetid://1847648398",
+	"rbxassetid://1837879082",
 	"rbxassetid://9043887091",
 	"rbxassetid://1837871234"
 }
@@ -79,6 +79,8 @@ end
 local currentTargetModel = nil
 local focusTimer = 0
 local swayTimer = 0
+local lastFocusTarget = nil
+local lastFocusAt = 0
 
 local function startDynamicTrackingCamera()
 	RunService.RenderStepped:Connect(function(dt)
@@ -124,7 +126,8 @@ local function startDynamicTrackingCamera()
 			end
 
 			local targetCFrame = CFrame.new(cameraPos, targetFocus)
-			Camera.CFrame = Camera.CFrame:Lerp(targetCFrame, math.clamp(dt * 2.8, 0, 1))
+			-- Smooth lerp camera without stuttering or lag
+			Camera.CFrame = Camera.CFrame:Lerp(targetCFrame, math.clamp(dt * 4.5, 0.05, 0.35))
 		end)
 	end)
 end
@@ -213,6 +216,12 @@ if focusEvent then
 	focusEvent.OnClientEvent:Connect(function(targetModel, tiktokUsername, robloxUsername, dancerIndex, isVIP, customTitle, customColor)
 		pcall(function()
 			if targetModel then
+				local now = tick()
+				if targetModel == lastFocusTarget and (now - lastFocusAt) < 1.2 then
+					return
+				end
+				lastFocusTarget = targetModel
+				lastFocusAt = now
 				currentTargetModel = targetModel
 				focusTimer = 0
 			end

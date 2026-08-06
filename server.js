@@ -8,8 +8,17 @@ const { processNewCommentForTenant } = require('./src/backend/tiktokManager');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+app.set('trust proxy', 1);
 app.use(cors());
 app.use(express.json());
+
+// Graceful JSON error handling middleware
+app.use((err, req, res, next) => {
+    if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
+        return res.status(400).json({ error: 'Invalid JSON payload in request body' });
+    }
+    next();
+});
 
 // Mount Backend API Routes
 app.use('/api', apiRoutes);

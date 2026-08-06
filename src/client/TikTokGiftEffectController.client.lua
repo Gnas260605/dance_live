@@ -246,6 +246,126 @@ local function getGiftConfig(giftDetails)
 	return DEFAULT_EFFECT, giftName
 end
 
+local function sanitizeVipTemplate(template)
+	if not template then
+		return false
+	end
+
+	for _, descendant in ipairs(template:GetDescendants()) do
+		if descendant:IsA("Script") or descendant:IsA("LocalScript") or descendant:IsA("ModuleScript") then
+			descendant:Destroy()
+		elseif descendant:IsA("LayerCollector") or descendant:IsA("GuiObject") then
+			descendant:Destroy()
+		elseif descendant:IsA("PostEffect") then
+			descendant.Enabled = false
+		elseif descendant:IsA("Sound") then
+			descendant:Stop()
+			descendant.SoundId = ""
+		elseif descendant:IsA("BasePart") then
+			descendant.Anchored = true
+			descendant.CanCollide = false
+			descendant.CanTouch = false
+			descendant.CanQuery = false
+		end
+	end
+
+	if template:IsA("BasePart") then
+		template.Anchored = true
+		template.CanCollide = false
+		template.CanTouch = false
+		template.CanQuery = false
+		template.Transparency = 1
+	end
+
+	return true
+end
+
+local function sanitizeWorkspaceVipTemplate()
+	local vfxRoot = Workspace:FindFirstChild("vfx")
+	if not vfxRoot then
+		return
+	end
+
+	local template = vfxRoot:FindFirstChild("Explosion effect")
+	if not template then
+		template = vfxRoot:FindFirstChildWhichIsA("BasePart")
+	end
+	if template then
+		sanitizeVipTemplate(template)
+	end
+end
+
+local function playVipTemplateEffect(centerPos, duration)
+	local vfxRoot = Workspace:FindFirstChild("vfx")
+	if not vfxRoot then
+		return false
+	end
+
+	local template = vfxRoot:FindFirstChild("Explosion effect")
+	if not template then
+		template = vfxRoot:FindFirstChildWhichIsA("BasePart")
+	end
+	if not template or not template:IsA("BasePart") then
+		return false
+	end
+
+	local holder = Instance.new("Part")
+	holder.Name = "VipExplosionEffect"
+	holder.Anchored = true
+	holder.CanCollide = false
+	holder.CanTouch = false
+	holder.CanQuery = false
+	holder.Transparency = 1
+	holder.Size = Vector3.new(1, 1, 1)
+	holder.CFrame = CFrame.new(centerPos + Vector3.new(0, 3, 0))
+	holder.Parent = Workspace
+
+	local attachment = Instance.new("Attachment")
+	attachment.Name = "VipExplosionAttachment"
+	attachment.Parent = holder
+
+	local emitterCount = 0
+	for _, descendant in ipairs(template:GetDescendants()) do
+		if descendant:IsA("ParticleEmitter") and (descendant.Texture ~= "" or descendant.Rate > 0) then
+			local emitterClone = descendant:Clone()
+			emitterClone.Parent = attachment
+			emitterClone.Enabled = false
+			emitterCount = emitterCount + 1
+
+			local emitCount = emitterClone:GetAttribute("EmitCount")
+			if typeof(emitCount) ~= "number" or emitCount <= 0 then
+				emitCount = math.max(18, math.floor(emitterClone.Rate * 1.5))
+			end
+			emitterClone:Emit(emitCount)
+			emitterClone.Enabled = true
+		end
+	end
+
+	if emitterCount == 0 then
+		holder:Destroy()
+		return false
+	end
+
+	task.delay(duration or 5, function()
+		if holder and holder.Parent then
+			for _, descendant in ipairs(holder:GetDescendants()) do
+				if descendant:IsA("ParticleEmitter") then
+					descendant.Enabled = false
+				end
+			end
+			task.delay(1, function()
+				if holder and holder.Parent then
+					holder:Destroy()
+				end
+			end)
+		end
+	end)
+
+	return true
+end
+
+sanitizeWorkspaceVipTemplate()
+
 -- ====================================
 -- GIFT HUD (ScreenGui for banners and flashes)
 -- ====================================
@@ -538,6 +658,78 @@ local function spawnStageBeamAndAura(centerPos, color, duration)
 		task.wait(duration)
 		if beamPart and beamPart.Parent then beamPart:Destroy() end
 		if auraPart and auraPart.Parent then auraPart:Destroy() end
+	end)
+end
+
+local function spawnVipRoyalAura(centerPos, accentColor)
+	local primaryColor = accentColor or Color3.fromRGB(255, 215, 0)
+	local secondaryColor = Color3.fromRGB(255, 245, 180)
+
+	for index = 1, 3 do
+		task.spawn(function()
+			task.wait((index - 1) * 0.18)
+
+			local ring = Instance.new("Part")
+			ring.Shape = Enum.PartType.Cylinder
+			ring.Size = Vector3.new(0.35, 8, 8)
+			ring.Material = Enum.Material.Neon
+			ring.Color = index % 2 == 0 and secondaryColor or primaryColor
+			ring.Transparency = 0.2
+			ring.Anchored = true
+			ring.CanCollide = false
+			ring.CFrame = CFrame.new(centerPos + Vector3.new(0, 1.2 + index * 0.25, 0))
+				* CFrame.Angles(0, 0, math.rad(90))
+			ring.Parent = Workspace
+
+			local ringTween = TweenService:Create(ring, TweenInfo.new(1.35, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+				Size = Vector3.new(0.35, 28 + index * 8, 28 + index * 8),
+				Transparency = 1,
+				CFrame = ring.CFrame + Vector3.new(0, 1.8, 0),
+			})
+			ringTween:Play()
+			ringTween.Completed:Wait()
+			if ring and ring.Parent then
+				ring:Destroy()
+			end
+		end)
+	end
+
+	task.spawn(function()
+		local attachment = Instance.new("Attachment")
+		attachment.Position = centerPos + Vector3.new(0, 7, 0)
+		attachment.Parent = Workspace.Terrain
+
+		local emitter = Instance.new("ParticleEmitter")
+		emitter.Texture = "rbxassetid://243098098"
+		emitter.Color = ColorSequence.new({
+			ColorSequenceKeypoint.new(0, secondaryColor),
+			ColorSequenceKeypoint.new(0.5, primaryColor),
+			ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255)),
+		})
+		emitter.Size = NumberSequence.new({
+			NumberSequenceKeypoint.new(0, 1.2),
+			NumberSequenceKeypoint.new(0.6, 0.8),
+			NumberSequenceKeypoint.new(1, 0),
+		})
+		emitter.Transparency = NumberSequence.new({
+			NumberSequenceKeypoint.new(0, 0.05),
+			NumberSequenceKeypoint.new(0.75, 0.2),
+			NumberSequenceKeypoint.new(1, 1),
+		})
+		emitter.Speed = NumberRange.new(3, 8)
+		emitter.Lifetime = NumberRange.new(1.6, 2.4)
+		emitter.Rate = 0
+		emitter.Rotation = NumberRange.new(0, 360)
+		emitter.RotSpeed = NumberRange.new(90, 180)
+		emitter.SpreadAngle = Vector2.new(360, 360)
+		emitter.Acceleration = Vector3.new(0, 5, 0)
+		emitter.Parent = attachment
+
+		emitter:Emit(80)
+		task.wait(2.8)
+		if attachment and attachment.Parent then
+			attachment:Destroy()
+		end
 	end)
 end
 
@@ -926,10 +1118,11 @@ end
 local function showGiftBanner(emoji, giftName, senderName, isVIP, color)
 	local screenGui = ensureGiftHUD()
 	if not screenGui then return end
+	local accentColor = color or Color3.fromRGB(0, 242, 254)
 
 	local banner = Instance.new("Frame")
-	banner.Size = UDim2.new(0, 380, 0, 64)
-	banner.Position = UDim2.new(1, 0, 0.22, 0)
+	banner.Size = isVIP and UDim2.new(0, 410, 0, 78) or UDim2.new(0, 380, 0, 64)
+	banner.Position = UDim2.new(1, 0, isVIP and 0.2 or 0.22, 0)
 	banner.BackgroundColor3 = isVIP and Color3.fromRGB(24, 18, 5) or Color3.fromRGB(15, 18, 30)
 	banner.BackgroundTransparency = 0.15
 	banner.BorderSizePixel = 0
@@ -939,17 +1132,42 @@ local function showGiftBanner(emoji, giftName, senderName, isVIP, color)
 	corner.CornerRadius = UDim.new(0, 16)
 	corner.Parent = banner
 
+	local glow = Instance.new("UIGradient")
+	glow.Color = isVIP and ColorSequence.new({
+		ColorSequenceKeypoint.new(0, Color3.fromRGB(56, 33, 8)),
+		ColorSequenceKeypoint.new(0.55, Color3.fromRGB(118, 77, 18)),
+		ColorSequenceKeypoint.new(1, Color3.fromRGB(35, 22, 6)),
+	}) or ColorSequence.new({
+		ColorSequenceKeypoint.new(0, Color3.fromRGB(15, 18, 30)),
+		ColorSequenceKeypoint.new(1, Color3.fromRGB(28, 34, 52)),
+	})
+	glow.Parent = banner
+
 	local stroke = Instance.new("UIStroke")
-	stroke.Color = isVIP and Color3.fromRGB(255, 215, 0) or (color or Color3.fromRGB(0, 242, 254))
+	stroke.Color = isVIP and Color3.fromRGB(255, 215, 0) or accentColor
 	stroke.Thickness = isVIP and 2.5 or 1.8
 	stroke.Transparency = 0.1
 	stroke.Parent = banner
 
+	if isVIP then
+		local highlight = Instance.new("Frame")
+		highlight.Size = UDim2.new(1, -18, 0, 18)
+		highlight.Position = UDim2.new(0, 9, 0, 8)
+		highlight.BackgroundColor3 = Color3.fromRGB(255, 240, 185)
+		highlight.BackgroundTransparency = 0.78
+		highlight.BorderSizePixel = 0
+		highlight.Parent = banner
+
+		local highlightCorner = Instance.new("UICorner")
+		highlightCorner.CornerRadius = UDim.new(0, 10)
+		highlightCorner.Parent = highlight
+	end
+
 	-- Emoji / Icon Circle Container
 	local iconCircle = Instance.new("Frame")
-	iconCircle.Size = UDim2.new(0, 48, 0, 48)
-	iconCircle.Position = UDim2.new(0, 8, 0.5, -24)
-	iconCircle.BackgroundColor3 = isVIP and Color3.fromRGB(255, 215, 0) or color
+	iconCircle.Size = isVIP and UDim2.new(0, 58, 0, 58) or UDim2.new(0, 48, 0, 48)
+	iconCircle.Position = isVIP and UDim2.new(0, 10, 0.5, -29) or UDim2.new(0, 8, 0.5, -24)
+	iconCircle.BackgroundColor3 = isVIP and Color3.fromRGB(255, 215, 0) or accentColor
 	iconCircle.BackgroundTransparency = 0.8
 	iconCircle.BorderSizePixel = 0
 	iconCircle.Parent = banner
@@ -969,8 +1187,8 @@ local function showGiftBanner(emoji, giftName, senderName, isVIP, color)
 
 	-- Gift Title Label
 	local nameLabel = Instance.new("TextLabel")
-	nameLabel.Size = UDim2.new(1, -70, 0, 28)
-	nameLabel.Position = UDim2.new(0, 64, 0.1, 0)
+	nameLabel.Size = isVIP and UDim2.new(1, -86, 0, 32) or UDim2.new(1, -70, 0, 28)
+	nameLabel.Position = isVIP and UDim2.new(0, 78, 0.08, 0) or UDim2.new(0, 64, 0.1, 0)
 	nameLabel.BackgroundTransparency = 1
 	nameLabel.Text = isVIP and ("👑 " .. giftName:upper()) or giftName
 	nameLabel.TextColor3 = isVIP and Color3.fromRGB(255, 215, 0) or Color3.fromRGB(255, 255, 255)
@@ -981,20 +1199,43 @@ local function showGiftBanner(emoji, giftName, senderName, isVIP, color)
 
 	-- Sender Label
 	local senderLabel = Instance.new("TextLabel")
-	senderLabel.Size = UDim2.new(1, -70, 0, 20)
-	senderLabel.Position = UDim2.new(0, 64, 0.54, 0)
+	senderLabel.Size = isVIP and UDim2.new(1, -86, 0, 22) or UDim2.new(1, -70, 0, 20)
+	senderLabel.Position = isVIP and UDim2.new(0, 78, 0.56, 0) or UDim2.new(0, 64, 0.54, 0)
 	senderLabel.BackgroundTransparency = 1
 	senderLabel.Text = "🎁 từ @" .. (senderName or "Khán giả")
-	senderLabel.TextColor3 = Color3.fromRGB(0, 242, 254)
+	senderLabel.TextColor3 = isVIP and Color3.fromRGB(255, 239, 170) or Color3.fromRGB(0, 242, 254)
 	senderLabel.TextScaled = true
 	senderLabel.Font = Enum.Font.GothamMedium
 	senderLabel.TextXAlignment = Enum.TextXAlignment.Left
 	senderLabel.Parent = banner
 
+	if isVIP then
+		local vipTag = Instance.new("TextLabel")
+		vipTag.Size = UDim2.new(0, 86, 0, 20)
+		vipTag.Position = UDim2.new(1, -98, 0, 10)
+		vipTag.BackgroundColor3 = Color3.fromRGB(255, 225, 120)
+		vipTag.BackgroundTransparency = 0.08
+		vipTag.BorderSizePixel = 0
+		vipTag.Text = "VIP SPOTLIGHT"
+		vipTag.TextColor3 = Color3.fromRGB(50, 34, 0)
+		vipTag.TextScaled = true
+		vipTag.Font = Enum.Font.GothamBold
+		vipTag.Parent = banner
+
+		local vipTagCorner = Instance.new("UICorner")
+		vipTagCorner.CornerRadius = UDim.new(1, 0)
+		vipTagCorner.Parent = vipTag
+
+		TweenService:Create(iconCircle, TweenInfo.new(0.7, Enum.EasingStyle.Sine, Enum.EasingDirection.Out, -1, true), {
+			BackgroundTransparency = 0.45,
+			Size = UDim2.new(0, 62, 0, 62),
+		}):Play()
+	end
+
 	-- Smooth Spring Slide in from right
 	local slideIn = TweenService:Create(banner,
 		TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
-		{ Position = UDim2.new(1, -400, 0.22, 0) }
+		{ Position = isVIP and UDim2.new(1, -430, 0.2, 0) or UDim2.new(1, -400, 0.22, 0) }
 	)
 	slideIn:Play()
 
@@ -1003,7 +1244,7 @@ local function showGiftBanner(emoji, giftName, senderName, isVIP, color)
 		if banner and banner.Parent then
 			local slideOut = TweenService:Create(banner,
 				TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
-				{ Position = UDim2.new(1, 20, 0.22, 0) }
+				{ Position = UDim2.new(1, 20, isVIP and 0.2 or 0.22, 0) }
 			)
 			slideOut:Play()
 			slideOut.Completed:Wait()
@@ -1032,13 +1273,19 @@ local function triggerGiftEffect(giftDetails, senderName, stagePos, isVIP)
 	-- Always show notification banner
 	showGiftBanner(config.emoji, displayName, senderName, isVIP, config.color)
 
-	-- Always flash stage lights and spawn 3D Spotlight Beam + Floor Aura Ring
-	flashStageLights(config.color, 3)
-	spawnStageBeamAndAura(centerPos, config.color, 4)
+	-- VIP uses a cleaner entrance: no spotlight pillar or spinning floor ring.
+	if not isVIP then
+		flashStageLights(config.color, 3)
+		spawnStageBeamAndAura(centerPos, config.color, 4)
+	end
 
-	-- Apply Cinematic Cutscenes & Screen Shake for all gifts
-	playCinematicCameraCutscene(centerPos, 3.5)
-	applyScreenShake(0.8, 1.5)
+	-- VIP already gets a dedicated focus camera from the main camera controller.
+	if isVIP then
+		applyScreenShake(0.32, 0.7)
+	else
+		playCinematicCameraCutscene(centerPos, 3.5)
+		applyScreenShake(0.8, 1.5)
+	end
 
 	-- Trigger specific effect
 	if effectType == "floatUp" then
@@ -1071,12 +1318,10 @@ local function triggerGiftEffect(giftDetails, senderName, stagePos, isVIP)
 		spawnRainbowEffect(config.emoji, config.count, centerPos)
 
 	elseif effectType == "vip" then
-		-- VIP: Everything at once!
-		spawnFireworks(centerPos, 14)
-		spawnConfettiRain(centerPos, 6)
-		spawnFloatingEmojis(config.emoji, config.count, centerPos, true)
-		spawnFloatingEmojis("\u{2728}", 25, centerPos, true)
-		task.spawn(function() flashScreen(config.color) end)
+		-- VIP: use the imported Roblox effect for 5 seconds, fallback to fireworks if unavailable.
+		if not playVipTemplateEffect(centerPos, 5) then
+			spawnFireworks(centerPos, 16)
+		end
 	end
 end
 
