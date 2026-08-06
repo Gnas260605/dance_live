@@ -6,6 +6,11 @@ const activeConnections = new Map();
 const userCooldowns = new Map();
 const COOLDOWN_MS = 2000;
 
+function markTikTokState(tenant, state, extra = {}) {
+    tenant.tiktokConnectionState = state;
+    Object.assign(tenant, extra);
+}
+
 
 function extractRobloxUsername(text) {
     if (!text || typeof text !== 'string') return null;
@@ -206,18 +211,22 @@ async function processNewCommentForTenant(apiKey, tiktokUsername, commentText, i
     const isAlreadyQueued = tenant.playerQueue.some(p => p.robloxUsername.toLowerCase() === verifiedUsername.toLowerCase());
 
     if (isCurrentlyActive || isAlreadyQueued) {
-        // Generate fresh player ID to re-trigger spawn immediately
-        const freshPlayerData = {
-            id: Date.now().toString() + '_' + Math.random().toString(36).substring(2, 5),
+        // FIXED: Reuse the SAME player ID to avoid triggering duplicate avatar spawns in Roblox.
+        // Only update comment text and timestamp so the dashboard stays fresh.
+        const existingId = (tenant.activePlayer && tenant.activePlayer.robloxUsername.toLowerCase() === verifiedUsername.toLowerCase())
+            ? tenant.activePlayer.id
+            : (tenant.playerQueue.find(p => p.robloxUsername.toLowerCase() === verifiedUsername.toLowerCase()) || {}).id;
+
+        const updatedPlayerData = {
+            id: existingId || (Date.now().toString() + '_' + Math.random().toString(36).substring(2, 5)),
             robloxUsername: verifiedUsername,
             tiktokUsername: tiktokUsername,
             commentText: commentText,
             animationId: tenant.selectedDanceId || 'rbxassetid://507771019',
             danceStyle: tenant.selectedDanceStyle || 'bounce',
             danceName: tenant.selectedDanceName || 'Bounce Starter',
-            danceVerification: {
-                success: false,
-                mode: 'pending',
+            danceVerification: tenant.activePlayer ? tenant.activePlayer.danceVerification : {
+                success: false, mode: 'pending',
                 danceId: tenant.selectedDanceId || 'rbxassetid://507771019',
                 danceStyle: tenant.selectedDanceStyle || 'bounce',
                 message: 'Dang cho Roblox xac nhan nhan vat bat dau nhay.',
@@ -227,9 +236,9 @@ async function processNewCommentForTenant(apiKey, tiktokUsername, commentText, i
             giftDetails: giftDetails,
             timestamp: now
         };
-        tenant.activePlayer = freshPlayerData;
-        addTenantLog(apiKey, `💬 Comment: "${commentText}" → Spawn Avatar: "${verifiedUsername}" (@${tiktokUsername})`);
-        return { success: true, playerData: freshPlayerData };
+        tenant.activePlayer = updatedPlayerData;
+        addTenantLog(apiKey, `💬 Re-comment: "${commentText}" → ${verifiedUsername} đang nhảy rồi, giữ nguyên slot (@${tiktokUsername})`);
+        return { success: true, playerData: updatedPlayerData };
     }
 
     userCooldowns.set(cooldownKey, now);
@@ -285,6 +294,11 @@ function connectTikTokForTenant(apiKey, uniqueId) {
     disconnectTikTokForTenant(apiKey);
     const tenant = getTenant(apiKey);
     tenant.tiktokUsername = cleanUniqueId;
+    markTikTokState(tenant, 'connecting', {
+        lastTikTokError: null,
+        lastTikTokErrorAt: null,
+        lastTikTokConnectAttemptAt: new Date().toISOString()
+    });
     addTenantLog(apiKey, `Đang kết nối tới TikTok Live: @${cleanUniqueId}...`, true);
 
     const tiktokConnectorModule = require('tiktok-live-connector');
@@ -312,10 +326,20 @@ function connectTikTokForTenant(apiKey, uniqueId) {
 
     connection.connect().then(state => {
         tenant.isConnected = true;
+        markTikTokState(tenant, 'connected', {
+            lastTikTokError: null,
+            lastTikTokErrorAt: null,
+            lastTikTokConnectedAt: new Date().toISOString(),
+            lastTikTokRoomId: state ? (state.roomId || state.roomInfo?.roomId || null) : null
+        });
         addTenantLog(apiKey, `🟢 Kết nối thành công tới TikTok Live ID: ${state ? (state.roomId || state.roomInfo?.roomId || 'LiveActive') : 'LiveActive'}`, true);
     }).catch(err => {
         tenant.isConnected = false;
         const msg = err && err.message ? err.message : String(err);
+        markTikTokState(tenant, 'error', {
+            lastTikTokError: msg,
+            lastTikTokErrorAt: new Date().toISOString()
+        });
         if (!signerApiKey && (msg.includes("Business plan") || msg.includes("fetchWebcastSignatureFromEulerRoute") || msg.includes("Eulerstream") || msg.includes("requires a Business plan"))) {
             addTenantLog(apiKey, `⚠️ TikTok yêu cầu EulerStream API Key để ký chữ ký Live. Bạn tạo 1 API Key MIỄN PHÍ tại https://www.eulerstream.com (Gói Community Free), dán vào Render (EULERSTREAM_API_KEY) để mở khóa Live 24/7!`, true);
         } else if (msg.includes("isn't online") || msg.includes("offline") || msg.includes("User is offline")) {
@@ -326,10 +350,12 @@ function connectTikTokForTenant(apiKey, uniqueId) {
     });
 
     connection.on('chat', data => {
+        tenant.lastTikTokEventAt = new Date().toISOString();
         processNewCommentForTenant(apiKey, data.uniqueId, data.comment);
     });
 
     connection.on('gift', data => {
+        tenant.lastTikTokEventAt = new Date().toISOString();
         if (data.giftType === 1 && data.repeatEnd === false) return; // Streak packet intermediate skip
         const giftName = data.giftName || 'TikTok Gift';
         const giftId = (data.giftId || giftName).toString().toLowerCase().replace(/[^a-z0-9_]/g, '_');
@@ -362,11 +388,13 @@ function connectTikTokForTenant(apiKey, uniqueId) {
 
     connection.on('streamEnd', () => {
         tenant.isConnected = false;
+        markTikTokState(tenant, 'ended');
         addTenantLog(apiKey, `Stream TikTok Live đã kết thúc.`, true);
     });
 
     connection.on('disconnected', () => {
         tenant.isConnected = false;
+        markTikTokState(tenant, 'disconnected');
         addTenantLog(apiKey, `Đã ngắt kết nối khỏi TikTok Live.`, true);
     });
 }
@@ -379,6 +407,7 @@ function disconnectTikTokForTenant(apiKey) {
     }
     const tenant = getTenant(apiKey);
     tenant.isConnected = false;
+    markTikTokState(tenant, 'disconnected');
     addTenantLog(apiKey, `Đang ngắt kết nối TikTok.`);
 }
 

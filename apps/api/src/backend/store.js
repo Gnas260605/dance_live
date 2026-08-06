@@ -5,7 +5,7 @@ const path = require('path');
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 
-const DATA_FILE = path.join(__dirname, '../../data/store.json');
+const DATA_FILE = path.join(__dirname, '../../../../data/store.json');
 
 const dataDir = path.dirname(DATA_FILE);
 if (!fs.existsSync(dataDir)) {

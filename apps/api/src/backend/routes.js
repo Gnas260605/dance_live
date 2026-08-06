@@ -64,6 +64,64 @@ function normalizeDanceId(danceId) {
     return formattedId;
 }
 
+function getExpectedRobloxBaseUrl(req, apiKey) {
+    return `${req.protocol}://${req.get('host')}/api/v1/streamer/${apiKey}`;
+}
+
+function buildDiagnostics(req, apiKey, tenant) {
+    const hb = tenant.robloxHeartbeat || {};
+    const heartbeatAgeMs = hb.lastHeartbeat ? (Date.now() - new Date(hb.lastHeartbeat).getTime()) : null;
+    const lastImportantLog = [...(tenant.logs || [])].reverse().find((entry) => entry.isImportant) || null;
+
+    return {
+        apiKey,
+        expectedRobloxBaseUrl: getExpectedRobloxBaseUrl(req, apiKey),
+        tiktokConnectionState: tenant.tiktokConnectionState || (tenant.isConnected ? 'connected' : 'disconnected'),
+        lastTikTokError: tenant.lastTikTokError || null,
+        lastTikTokErrorAt: tenant.lastTikTokErrorAt || null,
+        lastTikTokConnectAttemptAt: tenant.lastTikTokConnectAttemptAt || null,
+        lastTikTokConnectedAt: tenant.lastTikTokConnectedAt || null,
+        lastTikTokEventAt: tenant.lastTikTokEventAt || null,
+        lastTikTokRoomId: tenant.lastTikTokRoomId || null,
+        hasEulerStreamKey: !!(process.env.EULERSTREAM_API_KEY || tenant.eulerApiKey),
+        heartbeatAgeMs,
+        lastImportantLog
+    };
+}
+
+function sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+// Health Check Endpoints
+router.get('/v1/health/live', (req, res) => {
+    res.json({ status: 'UP', timestamp: new Date().toISOString() });
+});
+
+router.get('/v1/health/ready', async (req, res) => {
+    const prisma = require('./db');
+    let dbStatus = 'UNKNOWN';
+    try {
+        if (prisma) {
+            await prisma.$queryRaw`SELECT 1`;
+            dbStatus = 'CONNECTED';
+        } else {
+            dbStatus = 'NOT_INITIALIZED';
+        }
+    } catch (err) {
+        dbStatus = `ERROR: ${err.message}`;
+    }
+
+    const status = dbStatus === 'CONNECTED' ? 'UP' : 'DEGRADED';
+    res.status(status === 'UP' ? 200 : 503).json({
+        status,
+        timestamp: new Date().toISOString(),
+        checks: {
+            database: dbStatus
+        }
+    });
+});
+
 // Auth Endpoints
 router.post('/auth/register', authLimiter, async (req, res) => {
     try {
@@ -289,6 +347,7 @@ router.get('/v1/dashboard/status', optionalAuth, (req, res) => {
     // Check heartbeat freshness (online if heartbeat received in last 25s)
     const hb = tenant.robloxHeartbeat || {};
     const isRobloxOnline = hb.lastHeartbeat && (Date.now() - new Date(hb.lastHeartbeat).getTime() < 25000);
+    const diagnostics = buildDiagnostics(req, apiKey, tenant);
 
     res.json({
         success: true,
@@ -324,7 +383,8 @@ router.get('/v1/dashboard/status', optionalAuth, (req, res) => {
             eventMappingsCount: (tenant.eventMappings || []).length,
             actionDefsCount: (tenant.actionDefs || []).length,
             pendingGameEventsCount: (tenant.gameEventQueue || []).length,
-            logs: tenant.logs
+            logs: tenant.logs,
+            diagnostics
         }
     });
 });
@@ -522,17 +582,20 @@ router.post('/v1/dashboard/preflight', optionalAuth, (req, res) => {
 
     const hb = tenant.robloxHeartbeat || {};
     const isRobloxOnline = hb.lastHeartbeat && (Date.now() - new Date(hb.lastHeartbeat).getTime() < 25000);
+    const diagnostics = buildDiagnostics(req, apiKey, tenant);
+    const tiktokReady = tenant.isConnected === true;
 
     const checks = [
         { name: 'Backend API Service', pass: true, detail: 'Server Express đang lắng nghe và phản hồi mượt mà.' },
-        { name: 'TikTok Live Connector', pass: tenant.isConnected, detail: tenant.isConnected ? `Đã kết nối kênh @${tenant.tiktokUsername}` : 'Chưa kết nối TikTok Live (Bấm Connect)' },
+        { name: 'TikTok Live Connector', pass: tiktokReady, detail: tiktokReady ? `Đã kết nối kênh @${tenant.tiktokUsername}` : (diagnostics.lastTikTokError || 'Chưa kết nối TikTok Live (Bấm Connect)') },
         { name: 'Roblox Heartbeat', pass: isRobloxOnline, detail: isRobloxOnline ? `Roblox Online (PlaceId: ${hb.placeId || 'N/A'})` : 'Roblox chưa gửi heartbeat (Hãy chạy Lua script trong Roblox Studio)' },
+        { name: 'Roblox Bridge Endpoint', pass: true, detail: diagnostics.expectedRobloxBaseUrl },
         { name: 'Event Mappings Engine', pass: (tenant.eventMappings || []).length > 0, detail: `Đã thiết lập ${(tenant.eventMappings || []).length} quy tắc sự kiện` },
         { name: 'Music & Sound Engine', pass: !!tenant.currentMusicId, detail: `Current Music SoundID: ${tenant.currentMusicId}` }
     ];
 
     const allPassed = checks.every(c => c.pass);
-    res.json({ success: true, allPassed, checks });
+    res.json({ success: true, allPassed, checks, diagnostics });
 });
 
 // Emergency Stop
@@ -956,37 +1019,29 @@ router.post('/v1/dashboard/coin-milestones', optionalAuth, (req, res) => {
 
     res.json({ success: true, milestones: tenant.coinMilestones });
 });
-// TikTok Live Connection (UI state only - actual TikTok connection is handled by the TikTok service)
-router.post('/v1/dashboard/connect-tiktok', optionalAuth, (req, res) => {
+// TikTok Live Connection – calls the real TikTok Live connector
+router.post('/v1/dashboard/connect-tiktok', optionalAuth, async (req, res) => {
     const apiKey = getApiKeyFromReq(req);
-    const tenant = getTenant(apiKey);
     const { tiktokUsername } = req.body;
     if (!tiktokUsername) return res.status(400).json({ error: 'tiktokUsername required' });
 
-    tenant.tiktokUsername = tiktokUsername.replace('@', '').trim();
-    tenant.isConnected = true;  // matches /status endpoint field
-    tenant.tiktokConnectedAt = new Date().toISOString();
-    addTenantLog(apiKey, `📡 Dashboard: Yêu cầu kết nối TikTok LIVE @${tenant.tiktokUsername}`, true);
-    res.json({ success: true, tiktokUsername: tenant.tiktokUsername, isConnected: true, message: '📡 Đã kết nối TikTok LIVE @' + tenant.tiktokUsername });
+    const cleanUsername = tiktokUsername.replace('@', '').trim();
+    // Delegate to the real TikTok connector (same as /v1/dashboard/connect)
+    connectTikTokForTenant(apiKey, cleanUsername);
+
+    const tenant = getTenant(apiKey);
+    addTenantLog(apiKey, `📡 Dashboard: Yêu cầu kết nối TikTok LIVE @${cleanUsername}`, true);
+    res.json({ success: true, tiktokUsername: cleanUsername, isConnected: tenant.isConnected, message: `📡 Đang kết nối TikTok LIVE @${cleanUsername}...` });
 });
 
 router.post('/v1/dashboard/disconnect-tiktok', optionalAuth, (req, res) => {
     const apiKey = getApiKeyFromReq(req);
-    const tenant = getTenant(apiKey);
-    tenant.isConnected = false;  // matches /status endpoint field
-    tenant.tiktokUsername = null;
+    // Delegate to the real disconnect function (same as /v1/dashboard/disconnect)
+    disconnectTikTokForTenant(apiKey);
     addTenantLog(apiKey, '🔌 Dashboard: Đã ngắt kết nối TikTok LIVE', true);
     res.json({ success: true, isConnected: false, message: '🔌 Đã ngắt kết nối TikTok LIVE' });
 });
 
-// Emergency Stop - clear queue and remove active player
-router.post('/v1/dashboard/emergency-stop', optionalAuth, (req, res) => {
-    const apiKey = getApiKeyFromReq(req);
-    const tenant = getTenant(apiKey);
-    tenant.playerQueue = [];
-    tenant.activePlayer = null;
-    addTenantLog(apiKey, '🛑 Emergency Stop: Đã xóa toàn bộ hàng đợi và dừng nhảy!', true);
-    res.json({ success: true, message: 'Đã dừng khẩn cấp!' });
-});
+// (Duplicate emergency-stop route removed - handled above at line ~539)
 
 module.exports = router;
