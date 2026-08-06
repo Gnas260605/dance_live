@@ -39,10 +39,11 @@ local LOCAL_URL = "http://127.0.0.1:3001"
 
 
 
--- Automatically detect environment: Use localhost/127.0.0.1 in Studio, Use Public URL on Roblox App
+-- Automatically detect environment: Default to Render Public URL so Studio and Web Dashboard sync seamlessly
 local DOMAIN_URL = script:GetAttribute("DOMAIN_URL")
 if not DOMAIN_URL or DOMAIN_URL == "" then
-	if RunService:IsStudio() then
+	local useLocal = script:GetAttribute("USE_LOCAL")
+	if useLocal == true then
 		DOMAIN_URL = LOCAL_URL
 	else
 		DOMAIN_URL = PUBLIC_URL
