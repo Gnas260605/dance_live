@@ -296,10 +296,25 @@ else
 	pcall(function() stageMusic:Stop() end)
 end
 
+-- RemoteEvents for Client Panels & VFX
+local giftEffectEvent = ReplicatedStorage:FindFirstChild("TikTokGiftEffectRemote") or ReplicatedStorage:FindFirstChild("GiftEffectEvent")
+if not giftEffectEvent then
+	giftEffectEvent = Instance.new("RemoteEvent")
+	giftEffectEvent.Name = "TikTokGiftEffectRemote"
+	giftEffectEvent.Parent = ReplicatedStorage
+end
+
+local liveAnimEvent = ReplicatedStorage:FindFirstChild("LiveAnimationControl")
+if not liveAnimEvent then
+	liveAnimEvent = Instance.new("RemoteEvent")
+	liveAnimEvent.Name = "LiveAnimationControl"
+	liveAnimEvent.Parent = ReplicatedStorage
+end
+
 -- State Tracking
 local lastProcessedPlayerId = ""
 local currentMusicId = DEFAULT_MUSIC_ID
-local currentSelectedDanceId = "rbxassetid://507771019"
+local currentSelectedDanceId = "rbxassetid://82137434664110"
 local activeDancersList = {}
 local nextSlotIndex = 1
 local processedEventIds = {}
