@@ -29,6 +29,7 @@ const DEFAULT_THEMES = {
 };
 
 const DEFAULT_DANCE_LIBRARY = [
+    { id: 'dance_nhay_trend_tungtung', name: '🔥 Nhảy Trend TungTung', danceId: 'rbxassetid://103102799768392', genre: 'HYPE', danceStyle: 'bounce', addedAt: '2026-08-06T00:00:00.000Z' },
     { id: 'dance_endless_aura', name: '✨ Endless Aura Floating', danceId: 'rbxassetid://106708015414624', genre: 'PHONK', danceStyle: 'hype', addedAt: '2026-08-05T00:00:00.000Z' },
     { id: 'dance_aura_farming', name: '🌾 Aura Farming', danceId: 'rbxassetid://133113167814737', genre: 'CHILL', danceStyle: 'bounce', addedAt: '2026-08-05T00:00:00.000Z' },
     { id: 'dance_kawaii_anime', name: '🌸 Kawaii Anime Dance', danceId: 'rbxassetid://91147141356012', genre: 'KPOP', danceStyle: 'kpop', addedAt: '2026-08-05T00:00:00.000Z' },
