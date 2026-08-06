@@ -852,7 +852,8 @@ router.post('/v1/dashboard/settings', optionalAuth, (req, res) => {
     res.json({ success: true, danceDuration: tenant.danceDuration });
 });
 
-router.post('/v1/dashboard/mock-comment', optionalAuth, async (req, res) => {
+// Comment Simulation (alias for simulate-comment & mock-comment)
+const handleSimulateComment = async (req, res) => {
     const apiKey = getApiKeyFromReq(req);
     const { tiktokUsername, comment, isVIP } = req.body;
     if (!comment) return res.status(400).json({ error: 'comment is required' });
@@ -872,7 +873,34 @@ router.post('/v1/dashboard/mock-comment', optionalAuth, async (req, res) => {
     }
 
     res.json({ success: true, playerData: result.playerData });
-});
+};
+
+router.post('/v1/dashboard/mock-comment', optionalAuth, handleSimulateComment);
+router.post('/v1/dashboard/simulate-comment', optionalAuth, handleSimulateComment);
+
+// Gift Simulation (alias for simulate-gift & mock-gift)
+const handleSimulateGift = async (req, res) => {
+    const apiKey = getApiKeyFromReq(req);
+    const { tiktokUsername, giftName, giftId, repeatCount, diamondCount } = req.body;
+    
+    const giftData = {
+        giftId: giftId || 'rose',
+        giftName: giftName || 'Rose',
+        repeatCount: repeatCount || 1,
+        diamondCount: diamondCount || 1
+    };
+
+    const result = await processGiftEventForTenant(
+        apiKey,
+        tiktokUsername || 'gifter_' + Math.floor(Math.random() * 100),
+        giftData
+    );
+
+    res.json({ success: true, message: 'Đã bắn sự kiện quà tặng thử nghiệm!', result });
+};
+
+router.post('/v1/dashboard/mock-gift', optionalAuth, handleSimulateGift);
+router.post('/v1/dashboard/simulate-gift', optionalAuth, handleSimulateGift);
 
 router.post('/v1/dashboard/clear-queue', optionalAuth, (req, res) => {
     const apiKey = getApiKeyFromReq(req);
@@ -882,7 +910,8 @@ router.post('/v1/dashboard/clear-queue', optionalAuth, (req, res) => {
     res.json({ success: true, message: 'Đã xóa hàng đợi' });
 });
 
-router.post('/v1/dashboard/skip-player', optionalAuth, (req, res) => {
+// Skip Dancer (alias for skip-dancer & skip-player)
+const handleSkipDancer = (req, res) => {
     const apiKey = getApiKeyFromReq(req);
     const tenant = getTenant(apiKey);
     if (tenant.playerQueue.length > 0) {
@@ -891,7 +920,10 @@ router.post('/v1/dashboard/skip-player', optionalAuth, (req, res) => {
         tenant.activePlayer = null;
     }
     res.json({ success: true, activePlayer: tenant.activePlayer });
-});
+};
+
+router.post('/v1/dashboard/skip-player', optionalAuth, handleSkipDancer);
+router.post('/v1/dashboard/skip-dancer', optionalAuth, handleSkipDancer);
 
 router.get('/v1/gifts', (req, res) => {
     res.json({ success: true, gifts: TIKTOK_GIFTS });
