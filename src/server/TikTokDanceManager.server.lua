@@ -69,6 +69,26 @@ local ALL_VERIFIED_EMOTE_IDS = {
 local DEFAULT_MUSIC_ID = ""
 local GIFT_FANFARE_SOUND_ID = "rbxassetid://9043887091"
 
+-- AUTOMATED PURGE OF FAKE TOOLBOX ERROR 501 VIRUS GUIS & BACKDOORS
+pcall(function()
+	local function purgeFakeErrorGuis()
+		for _, desc in ipairs(Workspace:GetDescendants()) do
+			pcall(function()
+				if desc:IsA("TextLabel") or desc:IsA("TextButton") or desc:IsA("TextBox") or desc:IsA("Hint") or desc:IsA("Message") then
+					local txt = tostring(desc.Text or ""):lower()
+					if string.find(txt, "error 501") or string.find(txt, "something went wrong") or string.find(txt, "command bar") or string.find(txt, "issue with a model") then
+						local parentGui = desc:FindFirstAncestorWhichIsA("LayerCollector") or desc:FindFirstAncestorWhichIsA("Model") or desc.Parent
+						if parentGui then parentGui:Destroy() else desc:Destroy() end
+					end
+				end
+			end)
+		end
+	end
+	purgeFakeErrorGuis()
+	task.defer(purgeFakeErrorGuis)
+	task.delay(1, purgeFakeErrorGuis)
+end)
+
 -- AUTOMATED SCRIPT CLEANUP: Clean up broken third-party scripts from map decor that crash/warn
 pcall(function()
 	local namesToClean = { "LightConfig", "qPerfectionWeld", "PackageLink", "FlashChance", "CoreSkyboxSystem", "PoseTexture", "TextureConfiguration", "WeldScript", "Script" }
