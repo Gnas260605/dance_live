@@ -708,6 +708,130 @@ router.delete('/v1/dashboard/dance/:id', optionalAuth, (req, res) => {
     res.json({ success: true, dances: tenant.customDances });
 });
 
+// Auto-Fetch Roblox Animations API Endpoint
+router.post('/v1/dashboard/dance/auto-fetch-roblox', optionalAuth, async (req, res) => {
+    const apiKey = getApiKeyFromReq(req);
+    const { input, setActive = true } = req.body;
+    if (!input || !input.trim()) return res.status(400).json({ error: 'Vui lòng nhập Asset ID hoặc Username Roblox' });
+
+    const cleanInput = input.trim();
+    const assetIdMatch = cleanInput.match(/(\d{8,16})/);
+    const tenant = getTenant(apiKey);
+    if (!tenant.customDances) tenant.customDances = [];
+
+    try {
+        if (assetIdMatch) {
+            const assetId = assetIdMatch[1];
+            const formattedId = `rbxassetid://${assetId}`;
+
+            let fetchedName = `Roblox Animation (${assetId})`;
+            let creatorName = 'Roblox Creator';
+
+            try {
+                const apiRes = await fetch(`https://economy.roblox.com/v2/assets/${assetId}/details`);
+                if (apiRes.ok) {
+                    const data = await apiRes.json();
+                    if (data && data.Name && !data.Name.includes('###')) {
+                        fetchedName = data.Name;
+                    }
+                    if (data && data.Creator && data.Creator.Name) {
+                        creatorName = data.Creator.Name;
+                    }
+                }
+            } catch (err) {
+                console.warn('[AutoFetch] Roblox Economy API warning:', err.message);
+            }
+
+            let dance = tenant.customDances.find(d => d.danceId === formattedId);
+            if (!dance) {
+                dance = {
+                    id: Date.now().toString() + '_' + Math.random().toString(36).substring(2, 5),
+                    name: `🔥 ${fetchedName}`,
+                    danceId: formattedId,
+                    genre: 'TRENDING',
+                    danceStyle: 'bounce',
+                    verificationStatus: 'verified',
+                    verificationMode: 'asset',
+                    creator: creatorName,
+                    addedAt: new Date().toISOString()
+                };
+                tenant.customDances.unshift(dance);
+            }
+
+            if (setActive) {
+                tenant.selectedDanceId = dance.danceId;
+                tenant.selectedDanceStyle = dance.danceStyle;
+                tenant.selectedDanceName = dance.name;
+            }
+
+            addTenantLog(apiKey, `🔍 Auto-Fetch Roblox API: Đã tự động thêm & kích hoạt điệu nhảy "${dance.name}" (${formattedId})`, true);
+            return res.json({ success: true, message: `Đã tự động lấy thành công điệu nhảy "${dance.name}"!`, dance, dances: tenant.customDances, selectedDanceId: tenant.selectedDanceId });
+        } else {
+            const userRes = await fetch('https://users.roblox.com/v1/usernames/users', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ usernames: [cleanInput], excludeBannedUsers: true })
+            });
+            const userData = await userRes.json();
+            if (!userData || !userData.data || userData.data.length === 0) {
+                return res.status(404).json({ error: `Không tìm thấy tài khoản Roblox "${cleanInput}".` });
+            }
+
+            const userId = userData.data[0].id;
+            const verifiedName = userData.data[0].name;
+
+            const invRes = await fetch(`https://inventory.roblox.com/v2/users/${userId}/inventory/24?limit=25&sortOrder=Desc`);
+            let userDancesAdded = [];
+
+            if (invRes.ok) {
+                const invData = await invRes.json();
+                if (invData && invData.data && invData.data.length > 0) {
+                    for (const item of invData.data) {
+                        const itemAssetId = item.assetId || item.id;
+                        if (!itemAssetId) continue;
+                        const formattedId = `rbxassetid://${itemAssetId}`;
+                        const itemName = item.name || `Animation ${itemAssetId}`;
+
+                        let dance = tenant.customDances.find(d => d.danceId === formattedId);
+                        if (!dance) {
+                            dance = {
+                                id: Date.now().toString() + '_' + Math.random().toString(36).substring(2, 5),
+                                name: `💃 ${itemName} (@${verifiedName})`,
+                                danceId: formattedId,
+                                genre: 'CUSTOM',
+                                danceStyle: 'bounce',
+                                verificationStatus: 'verified',
+                                verificationMode: 'asset',
+                                creator: verifiedName,
+                                addedAt: new Date().toISOString()
+                            };
+                            tenant.customDances.unshift(dance);
+                            userDancesAdded.push(dance);
+                        }
+                    }
+                }
+            }
+
+            if (userDancesAdded.length > 0 && setActive) {
+                tenant.selectedDanceId = userDancesAdded[0].danceId;
+                tenant.selectedDanceStyle = userDancesAdded[0].danceStyle;
+                tenant.selectedDanceName = userDancesAdded[0].name;
+            }
+
+            addTenantLog(apiKey, `🔍 Auto-Fetch Roblox: Quét tài khoản @${verifiedName} → Tìm thấy & thêm ${userDancesAdded.length} điệu nhảy.`, true);
+            return res.json({
+                success: true,
+                message: `Đã quét tài khoản @${verifiedName} và tự động lấy ${userDancesAdded.length} điệu nhảy!`,
+                addedCount: userDancesAdded.length,
+                dances: tenant.customDances,
+                selectedDanceId: tenant.selectedDanceId
+            });
+        }
+    } catch (err) {
+        return res.status(500).json({ error: `Lỗi kết nối Roblox API: ${err.message}` });
+    }
+});
+
 router.post('/v1/dashboard/overlay', optionalAuth, (req, res) => {
     const apiKey = getApiKeyFromReq(req);
     const { overlayTitle, overlayColor } = req.body;
