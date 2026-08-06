@@ -756,21 +756,37 @@ local function playDanceAnimation(character, animAssetId, danceStyle, playerId, 
 			resolvedAnimId = "rbxassetid://" .. rawIdStr
 		end
 
+		local candidateIds = {}
+
+		-- Priority 1: User's selected Dance Animation from Web Dashboard
+		if resolvedAnimId and resolvedAnimId ~= "" and resolvedAnimId ~= "rbxassetid://" then
+			table.insert(candidateIds, resolvedAnimId)
+		end
+
+		-- Priority 2: Scan Roblox Studio Workspace/ReplicatedStorage for local Animation objects (e.g. ImportedAnimation)
+		pcall(function()
+			for _, desc in ipairs(game:GetDescendants()) do
+				if desc:IsA("Animation") and desc.AnimationId and desc.AnimationId ~= "" then
+					if not table.find(candidateIds, desc.AnimationId) then
+						table.insert(candidateIds, desc.AnimationId)
+					end
+				end
+			end
+		end)
+
+		-- Priority 3: Fallback catalog verified emotes
 		globalDanceCounter = globalDanceCounter + 1
 		local primaryEmoteIdx = ((globalDanceCounter - 1) % #ALL_VERIFIED_EMOTE_IDS) + 1
 		local primaryEmoteId = "rbxassetid://" .. ALL_VERIFIED_EMOTE_IDS[primaryEmoteIdx]
-
-		local candidateIds = { primaryEmoteId }
+		if not table.find(candidateIds, primaryEmoteId) then
+			table.insert(candidateIds, primaryEmoteId)
+		end
 
 		for _, eId in ipairs(ALL_VERIFIED_EMOTE_IDS) do
 			local fullStr = "rbxassetid://" .. eId
 			if not table.find(candidateIds, fullStr) then
 				table.insert(candidateIds, fullStr)
 			end
-		end
-
-		if resolvedAnimId and not table.find(candidateIds, resolvedAnimId) then
-			table.insert(candidateIds, resolvedAnimId)
 		end
 
 		local animPlayedSuccessfully = false
