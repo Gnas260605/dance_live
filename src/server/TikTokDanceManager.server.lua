@@ -582,7 +582,9 @@ local function startProceduralDance(character, danceStyle)
 				offsetCFrame = CFrame.new(0, yOffset, 0) * CFrame.Angles(0, rotY, 0)
 			end
 
-			character:PivotTo(baseCF * offsetCFrame)
+			pcall(function()
+				hrp.CFrame = baseCF * offsetCFrame
+			end)
 			task.wait(0.03)
 		end
 	end)
