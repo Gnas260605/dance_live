@@ -278,14 +278,18 @@ local function getSlotOffset(index)
 	local xOffset = (col - 2) * xSpacing
 	local zOffset = (row - 0.5) * zSpacing
 	
-	local stageFloor = Workspace:FindFirstChild("StageFloor")
-	if stageFloor then
-		local stageFloorPos = stageFloor.Position
-		local stagePos = stage.Position
-		local relY = stageFloorPos.Y + 1.2 - stagePos.Y
-		return Vector3.new(xOffset, relY, zOffset)
+	local yOffset = 3.2
+	if stage then
+		local stageSize = getStageSize(stage)
+		yOffset = (stageSize.Y / 2) + 3.0
 	end
-	return Vector3.new(xOffset, -5.5, zOffset)
+
+	local stageFloor = Workspace:FindFirstChild("StageFloor") or (stage and stage:FindFirstChild("StageFloor"))
+	if stageFloor and stage then
+		yOffset = (stageFloor.Position.Y + 3.0) - stage.Position.Y
+	end
+
+	return Vector3.new(xOffset, yOffset, zOffset)
 end
 
 -- Change Stage Music
@@ -841,7 +845,8 @@ task.spawn(function()
 						data.player.isVIP,
 						data.player.giftDetails,
 						data.overlayTitle,
-						data.overlayColor
+						data.overlayColor,
+						data.player.danceStyle or data.selectedDanceStyle
 					)
 				elseif data.selectedDanceId and data.selectedDanceId ~= currentSelectedDanceId then
 					currentSelectedDanceId = data.selectedDanceId

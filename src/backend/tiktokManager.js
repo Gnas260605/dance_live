@@ -189,30 +189,30 @@ async function processNewCommentForTenant(apiKey, tiktokUsername, commentText, i
     const isAlreadyQueued = tenant.playerQueue.some(p => p.robloxUsername.toLowerCase() === verifiedUsername.toLowerCase());
 
     if (isCurrentlyActive || isAlreadyQueued) {
-        // If testing via web simulator, replace active player ID to re-trigger spawn
-        if (tiktokUsername.startsWith('viewer_')) {
-        const freshPlayerData = {
-            id: Date.now().toString() + '_' + Math.random().toString(36).substring(2, 5),
-            robloxUsername: verifiedUsername,
-            tiktokUsername: tiktokUsername,
-            commentText: commentText,
-            animationId: tenant.selectedDanceId || 'rbxassetid://507771019',
-            danceStyle: tenant.selectedDanceStyle || 'bounce',
-            danceName: tenant.selectedDanceName || 'Bounce Starter',
-            danceVerification: {
-                success: false,
-                mode: 'pending',
-                danceId: tenant.selectedDanceId || 'rbxassetid://507771019',
+        // If testing via web simulator or test viewer, generate fresh player ID to re-trigger spawn immediately
+        if (tiktokUsername.startsWith('viewer_') || tiktokUsername.startsWith('rose_fan_') || tiktokUsername.startsWith('test_') || tiktokUsername.startsWith('user_') || isVIP) {
+            const freshPlayerData = {
+                id: Date.now().toString() + '_' + Math.random().toString(36).substring(2, 5),
+                robloxUsername: verifiedUsername,
+                tiktokUsername: tiktokUsername,
+                commentText: commentText,
+                animationId: tenant.selectedDanceId || 'rbxassetid://507771019',
                 danceStyle: tenant.selectedDanceStyle || 'bounce',
-                message: 'Dang cho Roblox xac nhan nhan vat bat dau nhay.',
-                verifiedAt: null
-            },
-            isVIP: isVIP,
-            giftDetails: giftDetails,
-            timestamp: now
-        };
+                danceName: tenant.selectedDanceName || 'Bounce Starter',
+                danceVerification: {
+                    success: false,
+                    mode: 'pending',
+                    danceId: tenant.selectedDanceId || 'rbxassetid://507771019',
+                    danceStyle: tenant.selectedDanceStyle || 'bounce',
+                    message: 'Dang cho Roblox xac nhan nhan vat bat dau nhay.',
+                    verifiedAt: null
+                },
+                isVIP: isVIP,
+                giftDetails: giftDetails,
+                timestamp: now
+            };
             tenant.activePlayer = freshPlayerData;
-            addTenantLog(apiKey, `💬 Test Comment: "${commentText}" → Roblox Avatar Test: "${verifiedUsername}"`);
+            addTenantLog(apiKey, `💬 Comment/Test: "${commentText}" → Spawn Avatar: "${verifiedUsername}"`);
             return { success: true, playerData: freshPlayerData };
         }
 
