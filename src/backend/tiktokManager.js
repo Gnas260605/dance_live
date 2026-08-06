@@ -294,7 +294,8 @@ function connectTikTokForTenant(apiKey, uniqueId) {
 
     const connectionOptions = {
         processInitialData: false,
-        enableExtendedGiftInfo: true,
+        fetchRoomInfoOnConnect: false,
+        enableExtendedGiftInfo: false,
         signApiKey: signerApiKey
     };
 
