@@ -37,9 +37,7 @@ local API_KEY = script:GetAttribute("API_KEY") or "demo-api-key-sg-music"
 local PUBLIC_URL = "https://dance-live.onrender.com"
 local LOCAL_URL = "http://127.0.0.1:3001"
 
--- Smart dynamic URL auto-detection: checks local server first, falls back to Render cloud server
-local currentResolvedBaseUrl = nil
-
+-- Default to Render Public URL (https://dance-live.onrender.com) so Roblox Studio & Web Dashboard sync seamlessly
 local function getActiveBaseUrl()
 	local customDomain = script:GetAttribute("DOMAIN_URL")
 	if customDomain and customDomain ~= "" then
@@ -50,17 +48,7 @@ local function getActiveBaseUrl()
 		return LOCAL_URL .. "/api/v1/streamer/" .. API_KEY
 	end
 
-	-- Try connecting to local server first if in Studio
-	if RunService:IsStudio() then
-		local localUrl = LOCAL_URL .. "/api/v1/streamer/" .. API_KEY
-		local ok, _ = pcall(function()
-			return HttpService:GetAsync(localUrl .. "/current-player", false, { ["bypass-tunnel-reminder"] = "true" })
-		end)
-		if ok then
-			return localUrl
-		end
-	end
-
+	-- Default to production Render URL so web test commands trigger Roblox Studio instantly
 	return PUBLIC_URL .. "/api/v1/streamer/" .. API_KEY
 end
 
