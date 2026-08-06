@@ -49,6 +49,14 @@ local function getActiveBaseUrl()
 	return PUBLIC_URL .. "/api/v1/streamer/" .. API_KEY
 end
 
+local function getRequestHeaders()
+	return {
+		["bypass-tunnel-reminder"] = "true",
+		["Authorization"] = "Bearer " .. API_KEY,
+		["X-Bridge-Version"] = "2.0.0"
+	}
+end
+
 local POLL_INTERVAL    = 1.5   -- slightly slower to reduce rate-limit pressure
 local MAX_STAGE_DANCERS = 10
 local danceDurationSeconds = 60
@@ -273,37 +281,53 @@ local function changeStageMusic(musicAssetId)
 end
 
 -- ====================================
--- ACTION HANDLERS (Gift effects)
+-- ACTION HANDLERS (Gift effects & Primitives)
 -- ====================================
 local ActionHandlers = {}
 
-ActionHandlers.FLOWER_RAIN = function(action, context)
+-- Primitive Action Handlers (Phase 5 Dynamic Action Executor)
+ActionHandlers.SPAWN_PARTICLES = function(action, context)
 	pcall(function()
+		local params = action.parameters or {}
 		if giftEffectEvent then
-			giftEffectEvent:FireAllClients({ giftId = "rose", giftName = "Rose" }, context.tiktokUsername or "Viewer", getStageCFrame(stage).Position, true)
+			local giftId = params.giftId or params.giftName or "rose"
+			local giftName = params.giftName or giftId
+			giftEffectEvent:FireAllClients(
+				{ giftId = tostring(giftId):lower(), giftName = tostring(giftName) },
+				context.tiktokUsername or "Viewer",
+				getStageCFrame(stage).Position,
+				true
+			)
 		end
 	end)
 end
 
-ActionHandlers.HEART_BURST = function(action, context)
+ActionHandlers.TWEEN_LIGHTING = function(action, context)
 	pcall(function()
-		if giftEffectEvent then
-			giftEffectEvent:FireAllClients({ giftId = "hand_heart", giftName = "Hand Heart" }, context.tiktokUsername or "Viewer", getStageCFrame(stage).Position, true)
-		end
-	end)
-end
+		local params = action.parameters or {}
+		local color = params.color or "#00f2fe"
+		local brightness = params.brightness or 3.5
+		local duration = (params.durationMs or action.durationMs or 6000) / 1000
 
-ActionHandlers.CHANGE_STAGE_LIGHT = function(action, context)
-	pcall(function()
 		local ledWall = Workspace:FindFirstChild("LEDWall")
-		local duration = ((action.durationMs or 6000) / 1000)
 		if not ledWall then return end
 		local origColor = ledWall.Color
-		ledWall.Color = Color3.fromRGB(0, 242, 254)
-		if spotLight then spotLight.Brightness = 3.5 end
-		if giftEffectEvent then
-			giftEffectEvent:FireAllClients({ giftId = "galaxy", giftName = "Galaxy" }, context.tiktokUsername or "Viewer", getStageCFrame(stage).Position, true)
+		
+		local r, g, b = 0, 242, 254
+		if type(color) == "string" and string.sub(color, 1, 1) == "#" then
+			local hex = string.sub(color, 2)
+			r = tonumber(string.sub(hex, 1, 2), 16) or 0
+			g = tonumber(string.sub(hex, 3, 4), 16) or 242
+			b = tonumber(string.sub(hex, 5, 6), 16) or 254
+		elseif type(color) == "table" then
+			r = color.R or color[1] or 0
+			g = color.G or color[2] or 242
+			b = color.B or color[3] or 254
 		end
+		
+		ledWall.Color = Color3.fromRGB(r, g, b)
+		if spotLight then spotLight.Brightness = brightness end
+		
 		task.delay(duration, function()
 			pcall(function()
 				ledWall.Color = origColor
@@ -313,46 +337,62 @@ ActionHandlers.CHANGE_STAGE_LIGHT = function(action, context)
 	end)
 end
 
-ActionHandlers.FIREWORKS  = function(action, context)
+ActionHandlers.PLAY_SOUND = function(action, context)
 	pcall(function()
-		if giftEffectEvent then
-			giftEffectEvent:FireAllClients({ giftId = "fireworks", giftName = "Fireworks" }, context.tiktokUsername or "Viewer", getStageCFrame(stage).Position, true)
+		local params = action.parameters or {}
+		local soundId = params.soundId or params.musicId
+		if soundId then
+			changeStageMusic(tostring(soundId))
 		end
 	end)
+end
+
+ActionHandlers.BROADCAST_MESSAGE = function(action, context)
+	pcall(function()
+		local params = action.parameters or {}
+		local template = params.template or "🎁 %s vừa tặng quà!"
+		local msgText = string.format(template, context.tiktokUsername or "Khán giả")
+		print("[RobloxAction] BROADCAST_MESSAGE: " .. msgText)
+		if liveAnimEvent then
+			liveAnimEvent:FireAllClients("message", msgText)
+		end
+	end)
+end
+
+-- Backward Compatibility Mappings (Call primitives internally)
+ActionHandlers.FLOWER_RAIN = function(action, context)
+	ActionHandlers.SPAWN_PARTICLES({ parameters = { giftId = "rose", giftName = "Rose" } }, context)
+end
+
+ActionHandlers.HEART_BURST = function(action, context)
+	ActionHandlers.SPAWN_PARTICLES({ parameters = { giftId = "hand_heart", giftName = "Hand Heart" } }, context)
+end
+
+ActionHandlers.FIREWORKS = function(action, context)
+	ActionHandlers.SPAWN_PARTICLES({ parameters = { giftId = "fireworks", giftName = "Fireworks" } }, context)
 end
 
 ActionHandlers.DRAGON_AURA = function(action, context)
-	pcall(function()
-		if giftEffectEvent then
-			giftEffectEvent:FireAllClients({ giftId = "dragon", giftName = "Dragon" }, context.tiktokUsername or "Viewer", getStageCFrame(stage).Position, true)
-		end
-	end)
+	ActionHandlers.SPAWN_PARTICLES({ parameters = { giftId = "dragon", giftName = "Dragon" } }, context)
 end
 
 ActionHandlers.LION_KING = function(action, context)
-	pcall(function()
-		if giftEffectEvent then
-			giftEffectEvent:FireAllClients({ giftId = "lion", giftName = "Lion King" }, context.tiktokUsername or "Viewer", getStageCFrame(stage).Position, true)
-		end
-	end)
+	ActionHandlers.SPAWN_PARTICLES({ parameters = { giftId = "lion", giftName = "Lion King" } }, context)
+end
+
+ActionHandlers.CHANGE_STAGE_LIGHT = function(action, context)
+	ActionHandlers.TWEEN_LIGHTING(action, context)
 end
 
 ActionHandlers.SHOW_MESSAGE = function(action, context)
-	pcall(function()
-		local params = action.parameters or {}
-		local msgText = params.template or string.format("🎁 %s vừa tặng quà!", context.tiktokUsername or "Khán giả")
-		print("[RobloxAction] SHOW_MESSAGE: " .. msgText)
-	end)
+	ActionHandlers.BROADCAST_MESSAGE(action, context)
 end
 
 ActionHandlers.CHANGE_MUSIC = function(action, context)
-	pcall(function()
-		local params = action.parameters or {}
-		if params.musicId then changeStageMusic(params.musicId) end
-	end)
+	ActionHandlers.PLAY_SOUND(action, context)
 end
 
--- Execute Game Event
+-- Execute Game Event (Phase 5: Detailed sub-actions ACK & diagnostics)
 local processedEventIds = {}
 local function executeGameEvent(gameEvent)
 	if not gameEvent or not gameEvent.eventId then return end
@@ -363,23 +403,58 @@ local function executeGameEvent(gameEvent)
 
 	local allSuccess = true
 	local lastErr    = nil
+	local actionsAck = {}
 
 	for _, action in ipairs(gameEvent.actions or {}) do
 		local handler = ActionHandlers[action.type]
+		local success = false
+		local runErr  = nil
 		if handler then
 			local ok, err = pcall(function() handler(action, gameEvent.context or {}) end)
-			if not ok then
+			if ok then
+				success = true
+			else
 				allSuccess = false
-				lastErr    = tostring(err)
-				warn(string.format("[TikTokDanceManager] Action error [%s]: %s", action.type, tostring(err)))
+				runErr = tostring(err)
+				lastErr = runErr
+				warn(string.format("[TikTokDanceManager] Action error [%s]: %s", action.type, runErr))
 			end
+		else
+			allSuccess = false
+			runErr = "Unknown action type"
+			lastErr = runErr
+			warn(string.format("[TikTokDanceManager] Unknown Action type: %s", action.type))
 		end
+
+		table.insert(actionsAck, {
+			actionId = action.actionId or action.id or action.type,
+			success = success,
+			["error"] = runErr
+		})
 	end
 
 	pcall(function()
+		local stats = game:GetService("Stats")
+		local memUsage = stats and stats:GetTotalMemoryUsageMb() or 250
+		local fps = 60
+		pcall(function()
+			fps = math.round(Workspace:GetRealPhysicsFPS())
+		end)
+
+		local diagnostics = {
+			fps = fps,
+			memoryUsage = math.round(memUsage),
+			ping = 15
+		}
+
 		local ackUrl = getActiveBaseUrl() .. "/game-events/" .. gameEvent.eventId .. "/ack"
-		local body   = HttpService:JSONEncode({ success = allSuccess, error = lastErr })
-		HttpService:PostAsync(ackUrl, body, Enum.HttpContentType.ApplicationJson)
+		local body   = HttpService:JSONEncode({
+			success = allSuccess,
+			["error"] = lastErr,
+			actions = actionsAck,
+			diagnostics = diagnostics
+		})
+		HttpService:PostAsync(ackUrl, body, Enum.HttpContentType.ApplicationJson, false, getRequestHeaders())
 	end)
 end
 
@@ -497,7 +572,7 @@ local function reportDanceStatus(playerId, robloxUsername, danceId, danceStyle, 
 			mode           = mode or "pending",
 			message        = message or ""
 		})
-		HttpService:PostAsync(danceStatusUrl, payload, Enum.HttpContentType.ApplicationJson, false, { ["bypass-tunnel-reminder"] = "true" })
+		HttpService:PostAsync(danceStatusUrl, payload, Enum.HttpContentType.ApplicationJson, false, getRequestHeaders())
 	end)
 end
 
@@ -890,9 +965,9 @@ task.spawn(function()
 			local payload = HttpService:JSONEncode({
 				placeId   = tostring(game.PlaceId),
 				jobId     = tostring(game.JobId),
-				scriptVer = "2.1.0"
+				scriptVer = "2.2.0"
 			})
-			HttpService:PostAsync(heartbeatUrl, payload, Enum.HttpContentType.ApplicationJson, false, { ["bypass-tunnel-reminder"] = "true" })
+			HttpService:PostAsync(heartbeatUrl, payload, Enum.HttpContentType.ApplicationJson, false, getRequestHeaders())
 		end)
 		if not ok then
 			warn("[TikTokDanceManager] Heartbeat Error: " .. tostring(err))
@@ -902,23 +977,27 @@ task.spawn(function()
 end)
 
 -- ====================================
--- MAIN POLLING LOOP
+-- MAIN POLLING LOOP (Phase 5: Exponential Backoff & Jitter)
 -- ====================================
 local lastProcessedPlayerId  = ""
 local currentSelectedDanceId = "rbxassetid://86539981118136"
 
 task.spawn(function()
 	print(string.format("[TikTokDanceManager] 🚀 Poller started [API Key: %s]", API_KEY))
-	local customHeaders = { ["bypass-tunnel-reminder"] = "true" }
+	
+	local currentPollInterval = POLL_INTERVAL
+	local baseInterval        = POLL_INTERVAL
+	local maxInterval         = 30.0
 
 	while true do
 		local activeBase = getActiveBaseUrl()
 		local playerUrl  = activeBase .. "/current-player"
 		local eventsUrl  = activeBase .. "/game-events"
+		local pollSuccess = true
 
 		-- 1. Poll current player
 		local ok1, err1 = pcall(function()
-			local response = HttpService:GetAsync(playerUrl, false, customHeaders)
+			local response = HttpService:GetAsync(playerUrl, false, getRequestHeaders())
 			local data     = HttpService:JSONDecode(response)
 
 			if data and data.success then
@@ -964,12 +1043,13 @@ task.spawn(function()
 			end
 		end)
 		if not ok1 then
+			pollSuccess = false
 			warn("[TikTokDanceManager] Player Poll Error: " .. tostring(err1))
 		end
 
 		-- 2. Poll game events (gift effects etc.)
 		local ok2, err2 = pcall(function()
-			local response = HttpService:GetAsync(eventsUrl, false, customHeaders)
+			local response = HttpService:GetAsync(eventsUrl, false, getRequestHeaders())
 			local data     = HttpService:JSONDecode(response)
 			if data and data.success and data.events then
 				for _, gameEvent in ipairs(data.events) do
@@ -978,10 +1058,20 @@ task.spawn(function()
 			end
 		end)
 		if not ok2 then
+			pollSuccess = false
 			warn("[TikTokDanceManager] Events Poll Error: " .. tostring(err2))
 		end
 
-		task.wait(POLL_INTERVAL)
+		-- Exponential Backoff poller check
+		if pollSuccess then
+			currentPollInterval = baseInterval
+		else
+			local jitter = 0.8 + math.random() * 0.4
+			currentPollInterval = math.min(maxInterval, currentPollInterval * 2 * jitter)
+			print(string.format("[TikTokDanceManager] ⚠️ Connection error. Backing off for %.2f seconds...", currentPollInterval))
+		end
+
+		task.wait(currentPollInterval)
 	end
 end)
 

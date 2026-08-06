@@ -9,11 +9,15 @@ let failed = 0;
 const errors = [];
 let jwtToken = null;
 let streamerUrl = STREAMER;
+let creatorApiKey = null;
 
-async function req(method, url, body) {
+async function req(method, url, body, customHeaders) {
     const opts = {
         method,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+            'Content-Type': 'application/json',
+            ...(customHeaders || {})
+        },
     };
     if (jwtToken && url.startsWith(DASH)) {
         opts.headers['Authorization'] = `Bearer ${jwtToken}`;
@@ -21,8 +25,10 @@ async function req(method, url, body) {
     if (body) opts.body = JSON.stringify(body);
     const res = await fetch(url, opts);
     const text = await res.text();
-    try { return { status: res.status, data: JSON.parse(text) }; }
-    catch { return { status: res.status, data: text }; }
+    const resHeaders = {};
+    res.headers.forEach((v, k) => { resHeaders[k.toLowerCase()] = v; });
+    try { return { status: res.status, data: JSON.parse(text), headers: resHeaders }; }
+    catch { return { status: res.status, data: text, headers: resHeaders }; }
 }
 
 function assert(label, cond, detail = '') {
@@ -52,6 +58,7 @@ async function runTests() {
         assert('apiKey returned', !!r.data?.user?.apiKey);
         
         jwtToken = r.data?.token;
+        creatorApiKey = r.data?.user?.apiKey;
         streamerUrl = `${API}/v1/streamer/${r.data?.user?.apiKey}`;
     }
 
@@ -263,6 +270,53 @@ async function runTests() {
         const rPollAfterStop = await req('GET', `${streamerUrl}/game-events`);
         const stoppedEvent = rPollAfterStop.data?.events?.find(e => e.eventId === stopDedupeId);
         assert('event is no longer active in queued events', !stoppedEvent);
+    }
+
+    console.log('\n=== 16. ROBLOX BRIDGE V2 (Phase 5) ===');
+    {
+        // 1. Test Bearer auth and Server Identity header using game-events endpoint
+        const headers = {
+            'Authorization': `Bearer ${creatorApiKey}`,
+            'X-Bridge-Version': '2.0.0'
+        };
+        const rPollV2 = await req('GET', `${API}/v1/streamer/invalid-path-key/game-events`, null, headers);
+        assert('GET /game-events V2 with Bearer → 200', rPollV2.status === 200, `got status ${rPollV2.status} ${JSON.stringify(rPollV2.data)}`);
+        assert('Server Identity header present', !!rPollV2.headers?.['x-server-identity']);
+        
+        // 2. Test detailed ACK body format
+        const testDedupeId = 'evt_test_v2_ack_' + Date.now();
+        const rSim = await req('POST', `${DASH}/simulate-gift`, {
+            tiktokUsername: 'v2_tester',
+            giftName: 'Rose',
+            giftId: 'rose',
+            repeatCount: 1,
+            diamondCount: 1,
+            sourceEventId: testDedupeId
+        });
+        assert('Create event for V2 ACK test → 200', rSim.status === 200);
+        await new Promise(resolve => setTimeout(resolve, 300));
+
+        const rPoll = await req('GET', `${API}/v1/streamer/invalid-path-key/game-events`, null, headers);
+        const testEvent = rPoll.data?.events?.find(e => e.context?.tiktokUsername === 'v2_tester');
+        assert('event exists in V2 queue', !!testEvent);
+
+        if (testEvent) {
+            const eventId = testEvent.eventId;
+            const ackBody = {
+                success: true,
+                actions: [
+                    { actionId: 'act_rose_particles', success: true }
+                ],
+                diagnostics: {
+                    fps: 59,
+                    memoryUsage: 215,
+                    ping: 18
+                }
+            };
+            const rAck = await req('POST', `${API}/v1/streamer/invalid-path-key/game-events/${eventId}/ack`, ackBody, headers);
+            assert('Detailed ACK V2 → 200', rAck.status === 200, `got status ${rAck.status}`);
+            assert('ACK status = ACKED', rAck.data?.status === 'ACKED');
+        }
     }
 
     // ============ SUMMARY ============

@@ -49,6 +49,43 @@ function optionalAuth(req, res, next) {
     return authenticateToken(req, res, next);
 }
 
+const crypto = require('crypto');
+const serverInstanceId = crypto.randomUUID();
+
+// Middleware robloxAuth for Phase 5 Roblox Bridge V2
+const robloxAuth = (req, res, next) => {
+    // Expose Server Identity
+    res.setHeader('X-Server-Identity', serverInstanceId);
+
+    const clientVer = req.headers['x-bridge-version'];
+    if (clientVer) {
+        req.clientVersion = clientVer;
+    }
+
+    let apiKey = null;
+    const authHeader = req.headers['authorization'];
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+        apiKey = authHeader.substring(7);
+    } else {
+        apiKey = req.params.apiKey || req.query.apiKey;
+    }
+
+    if (!apiKey) {
+        return res.status(401).json({ success: false, error: 'Unauthorized: Missing API Key' });
+    }
+
+    const { findUserByApiKey } = require('./store');
+    const user = findUserByApiKey(apiKey);
+    if (!user) {
+        return res.status(404).json({ success: false, error: 'Tenant workspace not found' });
+    }
+
+    req.apiKey = apiKey;
+    req.user = user;
+    req.tenant = getTenant(apiKey);
+    next();
+};
+
 function normalizeDanceId(danceId) {
     if (!danceId || !danceId.trim()) return '';
     let formattedId = danceId.trim();
@@ -191,9 +228,8 @@ router.get('/auth/me', optionalAuth, (req, res) => {
 // =========================================================
 // Roblox Bridge API Endpoints (Polling, ACK, Heartbeat)
 // =========================================================
-router.get('/v1/streamer/:apiKey/current-player', (req, res) => {
-    const apiKey = req.params.apiKey || 'demo-api-key-sg-music';
-    const tenant = getTenant(apiKey);
+router.get('/v1/streamer/:apiKey/current-player', robloxAuth, (req, res) => {
+    const { tenant } = req;
     res.json({
         success: true,
         player: tenant.activePlayer,
@@ -210,9 +246,8 @@ router.get('/v1/streamer/:apiKey/current-player', (req, res) => {
     });
 });
 
-router.get('/current-player', (req, res) => {
-    const defaultApiKey = req.query.apiKey || 'demo-api-key-sg-music';
-    const tenant = getTenant(defaultApiKey);
+router.get('/current-player', robloxAuth, (req, res) => {
+    const { tenant } = req;
     res.json({
         success: true,
         player: tenant.activePlayer,
@@ -230,15 +265,12 @@ router.get('/current-player', (req, res) => {
 });
 
 // GET: Roblox Game Events Polling Endpoint (Returns pending QUEUED events for Roblox execution)
-router.get('/v1/streamer/:apiKey/game-events', async (req, res) => {
-    const apiKey = req.params.apiKey || 'demo-api-key-sg-music';
-    const tenant = getTenant(apiKey);
+router.get('/v1/streamer/:apiKey/game-events', robloxAuth, async (req, res) => {
+    const { apiKey, tenant, user } = req;
     const now = new Date();
 
-    const { findUserByApiKey } = require('./store');
-    const user = findUserByApiKey(apiKey);
-    if (!user || !prisma) {
-        return res.status(404).json({ error: 'Tenant workspace not found' });
+    if (!prisma) {
+        return res.status(500).json({ error: 'Database provider not initialized' });
     }
 
     try {
@@ -294,16 +326,13 @@ router.get('/v1/streamer/:apiKey/game-events', async (req, res) => {
 });
 
 // POST: Roblox ACK Endpoint (Receives ACK execution status from Lua script)
-router.post('/v1/streamer/:apiKey/game-events/:eventId/ack', async (req, res) => {
-    const apiKey = req.params.apiKey || 'demo-api-key-sg-music';
+router.post('/v1/streamer/:apiKey/game-events/:eventId/ack', robloxAuth, async (req, res) => {
+    const { apiKey, tenant, user } = req;
     const { eventId } = req.params;
-    const { success = true, error = null } = req.body;
-    const tenant = getTenant(apiKey);
+    const { success = true, error = null, actions = [], diagnostics = {} } = req.body;
 
-    const { findUserByApiKey } = require('./store');
-    const user = findUserByApiKey(apiKey);
-    if (!user || !prisma) {
-        return res.status(404).json({ error: 'Tenant workspace not found' });
+    if (!prisma) {
+        return res.status(500).json({ error: 'Database provider not initialized' });
     }
 
     try {
@@ -335,7 +364,17 @@ router.post('/v1/streamer/:apiKey/game-events/:eventId/ack', async (req, res) =>
             histEvent.ackedAt = updatedEvent.ackedAt.toISOString();
         }
 
-        addTenantLog(apiKey, `✅ Roblox ACK [${eventId}]: ${success ? 'Thành công' : 'Lỗi: ' + error}`);
+        let diagStr = '';
+        if (diagnostics && (diagnostics.fps || diagnostics.memoryUsage)) {
+            diagStr = ` (FPS: ${diagnostics.fps || 'N/A'}, RAM: ${diagnostics.memoryUsage || 'N/A'}MB)`;
+        }
+
+        let actionsLog = '';
+        if (actions && actions.length > 0) {
+            actionsLog = ` | Actions: [${actions.map(a => `${a.actionId || a.type || 'Action'}: ${a.success ? 'OK' : 'FAIL'}`).join(', ')}]`;
+        }
+
+        addTenantLog(apiKey, `✅ Roblox ACK [${eventId}]: ${success ? 'Thành công' : 'Lỗi: ' + error}${diagStr}${actionsLog}`);
         res.json({ success: true, eventId, status: finalStatus });
     } catch (err) {
         console.error('[Roblox ACK Error]', err.message);
@@ -344,10 +383,9 @@ router.post('/v1/streamer/:apiKey/game-events/:eventId/ack', async (req, res) =>
 });
 
 // POST: Roblox Heartbeat Endpoint
-router.post('/v1/streamer/:apiKey/heartbeat', async (req, res) => {
-    const apiKey = req.params.apiKey || 'demo-api-key-sg-music';
+router.post('/v1/streamer/:apiKey/heartbeat', robloxAuth, async (req, res) => {
+    const { apiKey, tenant, user } = req;
     const { placeId, jobId, scriptVer } = req.body;
-    const tenant = getTenant(apiKey);
 
     tenant.robloxHeartbeat = {
         lastHeartbeat: new Date().toISOString(),
@@ -357,9 +395,7 @@ router.post('/v1/streamer/:apiKey/heartbeat', async (req, res) => {
         scriptVer: scriptVer || '1.0.0'
     };
 
-    const { findUserByApiKey } = require('./store');
-    const user = findUserByApiKey(apiKey);
-    if (prisma && user) {
+    if (prisma) {
         try {
             await prisma.robloxSession.upsert({
                 where: { userId: user.id },
@@ -387,9 +423,8 @@ router.post('/v1/streamer/:apiKey/heartbeat', async (req, res) => {
     res.json({ success: true, isOnline: true, timestamp: Date.now() });
 });
 
-router.post('/v1/streamer/:apiKey/dance-status', (req, res) => {
-    const apiKey = req.params.apiKey || 'demo-api-key-sg-music';
-    const tenant = getTenant(apiKey);
+router.post('/v1/streamer/:apiKey/dance-status', robloxAuth, (req, res) => {
+    const { apiKey, tenant } = req;
     const {
         playerId = null,
         robloxUsername = null,
