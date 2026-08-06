@@ -282,10 +282,16 @@ function connectTikTokForTenant(apiKey, uniqueId) {
     const tiktokConnectorModule = require('tiktok-live-connector');
     const ConnectionClass = tiktokConnectorModule.TikTokLiveConnection || tiktokConnectorModule.WebcastPushConnection;
 
-    const signerApiKey = process.env.EULERSTREAM_API_KEY || tenant.eulerApiKey || '';
-    if (tiktokConnectorModule.SignConfig && signerApiKey) {
-        tiktokConnectorModule.SignConfig.apiKey = signerApiKey;
+    const signerApiKey = (process.env.EULERSTREAM_API_KEY || tenant.eulerApiKey || '').trim();
+    if (signerApiKey) {
+        addTenantLog(apiKey, `🔑 Đã nạp EulerStream API Key: ${signerApiKey.substring(0, 10)}...`);
+        if (tiktokConnectorModule.SignConfig) {
+            tiktokConnectorModule.SignConfig.apiKey = signerApiKey;
+        }
+    } else {
+        addTenantLog(apiKey, `⚠️ Chưa phát hiện EULERSTREAM_API_KEY trong môi trường.`);
     }
+
     const connectionOptions = {
         processInitialData: false,
         enableExtendedGiftInfo: true,
@@ -301,12 +307,12 @@ function connectTikTokForTenant(apiKey, uniqueId) {
     }).catch(err => {
         tenant.isConnected = false;
         const msg = err && err.message ? err.message : String(err);
-        if (msg.includes("Business plan") || msg.includes("fetchWebcastSignatureFromEulerRoute") || msg.includes("Eulerstream") || msg.includes("requires a Business plan")) {
-            addTenantLog(apiKey, `⚠️ TikTok yêu cầu EulerStream API Key để ký chữ ký Live. Bạn tạo 1 API Key MIỄN PHÍ tại https://www.eulerstream.com (Gói Community Free), dán vào .env (EULERSTREAM_API_KEY) để mở khóa Live 24/7! Hoặc dùng Web Simulator để test ngay lập tức.`, true);
-        } else if (msg.includes("isn't online") || msg.includes("offline")) {
-            addTenantLog(apiKey, `❌ Lỗi kết nối @${cleanUniqueId}: Kênh TikTok này hiện đang OFF Live (chưa bật nút Phát Live trên ứng dụng TikTok)`, true);
+        if (!signerApiKey && (msg.includes("Business plan") || msg.includes("fetchWebcastSignatureFromEulerRoute") || msg.includes("Eulerstream") || msg.includes("requires a Business plan"))) {
+            addTenantLog(apiKey, `⚠️ TikTok yêu cầu EulerStream API Key để ký chữ ký Live. Bạn tạo 1 API Key MIỄN PHÍ tại https://www.eulerstream.com (Gói Community Free), dán vào Render (EULERSTREAM_API_KEY) để mở khóa Live 24/7!`, true);
+        } else if (msg.includes("isn't online") || msg.includes("offline") || msg.includes("User is offline")) {
+            addTenantLog(apiKey, `❌ Lỗi kết nối @${cleanUniqueId}: Kênh TikTok này hiện đang OFF Live (Chưa bấm nút "Phát LIVE" trên ứng dụng TikTok)`, true);
         } else {
-            addTenantLog(apiKey, `❌ Lỗi kết nối @${cleanUniqueId}: ${msg}`, true);
+            addTenantLog(apiKey, `❌ Lỗi kết nối TikTok Live @${cleanUniqueId}: ${msg}`, true);
         }
     });
 
