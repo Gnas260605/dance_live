@@ -630,7 +630,7 @@ router.post('/v1/dashboard/dance', optionalAuth, (req, res) => {
     const { name, danceId, genre, danceStyle, setActive = true } = req.body;
     const normalizedStyle = (danceStyle || genre || 'bounce').toString().trim().toLowerCase();
     const formattedId = normalizeDanceId(danceId);
-    const verificationStatus = formattedId ? (VERIFIED_DANCE_IDS.has(formattedId) ? 'verified' : 'pending') : 'verified';
+    const verificationStatus = 'verified';
     const verificationMode = formattedId ? 'asset' : 'procedural';
 
     const tenant = getTenant(apiKey);
@@ -662,11 +662,6 @@ router.post('/v1/dashboard/dance', optionalAuth, (req, res) => {
     }
 
     if (setActive !== false) {
-        if (formattedId && verificationStatus !== 'verified') {
-            return res.status(400).json({
-                error: 'Dance asset nay chua nam trong danh sach emote da xac minh. Hay verify trong Roblox truoc khi kich hoat.'
-            });
-        }
         tenant.selectedDanceId = formattedId;
         tenant.selectedDanceStyle = normalizedStyle;
         tenant.selectedDanceName = savedDance.name;
