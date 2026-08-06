@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const apiRoutes = require('./src/backend/routes');
-const { getTenant } = require('./src/backend/store');
+const { getTenant, saveStreamConfig } = require('./src/backend/store');
 const { processNewCommentForTenant } = require('./src/backend/tiktokManager');
 
 const app = express();
@@ -48,7 +48,7 @@ app.post('/api/mock-comment', async (req, res) => {
     res.json({ success: true, playerData: result });
 });
 
-app.post('/api/add-music', (req, res) => {
+app.post('/api/add-music', async (req, res) => {
     const defaultApiKey = req.query.apiKey || 'demo-api-key-sg-music';
     const { name, musicId } = req.body;
     if (!musicId) return res.status(400).json({ error: 'musicId is required' });
@@ -60,10 +60,11 @@ app.post('/api/add-music', (req, res) => {
 
     const tenant = getTenant(defaultApiKey);
     tenant.currentMusicId = formattedId;
+    await saveStreamConfig(defaultApiKey);
     res.json({ success: true, currentMusicId: formattedId });
 });
 
-app.post('/api/add-dance', (req, res) => {
+app.post('/api/add-dance', async (req, res) => {
     const defaultApiKey = req.query.apiKey || 'demo-api-key-sg-music';
     const { name, danceId } = req.body;
     if (!danceId) return res.status(400).json({ error: 'danceId is required' });
@@ -75,6 +76,7 @@ app.post('/api/add-dance', (req, res) => {
 
     const tenant = getTenant(defaultApiKey);
     tenant.selectedDanceId = formattedId;
+    await saveStreamConfig(defaultApiKey);
     res.json({ success: true, selectedDanceId: formattedId });
 });
 

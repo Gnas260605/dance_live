@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -53,6 +53,7 @@ model StreamConfig {
   overlayTitle    String   @default("🎵 S&G MUSIC - ROBLOX TIKTOK DANCE LIVE 🎵")
   overlayColor    String   @default("#ff007f")
   maxQueueSize    Int      @default(10)
+  danceDuration   Int      @default(12)
   isLive          Boolean  @default(false)
   updatedAt       DateTime @updatedAt
 }

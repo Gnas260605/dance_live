@@ -14,7 +14,12 @@ const {
     getTenant, 
     addTenantLog, 
     DEFAULT_THEMES,
-    saveStore
+    saveStore,
+    saveStreamConfig,
+    saveEventMappings,
+    saveActionDefinitions,
+    saveMusicLibrary,
+    saveDanceLibrary
 } = require('./store');
 
 const { 
@@ -36,25 +41,11 @@ const {
 
 function getApiKeyFromReq(req) {
     if (req.user && req.user.apiKey) return req.user.apiKey;
-    return 'demo-api-key-sg-music';
+    throw new Error('API Key unresolved - user is unauthenticated');
 }
 
 function optionalAuth(req, res, next) {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
-    if (!token) return next();
-
-    const jwt = require('jsonwebtoken');
-    const { JWT_SECRET } = require('./authMiddleware');
-    const { findUserById } = require('./store');
-
-    jwt.verify(token, JWT_SECRET, (err, userPayload) => {
-        if (!err && userPayload) {
-            const user = findUserById(userPayload.id);
-            if (user) req.user = user;
-        }
-        next();
-    });
+    return authenticateToken(req, res, next);
 }
 
 function normalizeDanceId(danceId) {
@@ -389,18 +380,20 @@ router.get('/v1/dashboard/status', optionalAuth, (req, res) => {
     });
 });
 
-router.post('/v1/dashboard/connect', optionalAuth, (req, res) => {
+router.post('/v1/dashboard/connect', optionalAuth, async (req, res) => {
     const apiKey = getApiKeyFromReq(req);
     const { tiktokUsername } = req.body;
     if (!tiktokUsername) return res.status(400).json({ error: 'tiktokUsername is required' });
 
     connectTikTokForTenant(apiKey, tiktokUsername);
+    await saveStreamConfig(apiKey);
     res.json({ success: true, message: `Khởi chạy kết nối tới @${tiktokUsername}` });
 });
 
-router.post('/v1/dashboard/disconnect', optionalAuth, (req, res) => {
+router.post('/v1/dashboard/disconnect', optionalAuth, async (req, res) => {
     const apiKey = getApiKeyFromReq(req);
     disconnectTikTokForTenant(apiKey);
+    await saveStreamConfig(apiKey);
     res.json({ success: true, message: 'Đã ngắt kết nối' });
 });
 
@@ -411,7 +404,7 @@ router.get('/v1/dashboard/event-mappings', optionalAuth, (req, res) => {
     res.json({ success: true, eventMappings: tenant.eventMappings || DEFAULT_EVENT_MAPPINGS });
 });
 
-router.post('/v1/dashboard/event-mappings', optionalAuth, (req, res) => {
+router.post('/v1/dashboard/event-mappings', optionalAuth, async (req, res) => {
     const apiKey = getApiKeyFromReq(req);
     const tenant = getTenant(apiKey);
     const mapping = req.body;
@@ -426,11 +419,12 @@ router.post('/v1/dashboard/event-mappings', optionalAuth, (req, res) => {
     if (!tenant.eventMappings) tenant.eventMappings = [];
     tenant.eventMappings.unshift(mapping);
     addTenantLog(apiKey, `🎯 Đã tạo Event Mapping mới: "${mapping.name}"`, true);
+    await saveEventMappings(apiKey);
 
     res.json({ success: true, mapping, eventMappings: tenant.eventMappings });
 });
 
-router.put('/v1/dashboard/event-mappings/:id', optionalAuth, (req, res) => {
+router.put('/v1/dashboard/event-mappings/:id', optionalAuth, async (req, res) => {
     const apiKey = getApiKeyFromReq(req);
     const tenant = getTenant(apiKey);
     const { id } = req.params;
@@ -441,11 +435,12 @@ router.put('/v1/dashboard/event-mappings/:id', optionalAuth, (req, res) => {
 
     tenant.eventMappings[idx] = { ...tenant.eventMappings[idx], ...updates, updatedAt: new Date().toISOString() };
     addTenantLog(apiKey, `🎯 Đã cập nhật Event Mapping: "${tenant.eventMappings[idx].name}"`);
+    await saveEventMappings(apiKey);
 
     res.json({ success: true, mapping: tenant.eventMappings[idx], eventMappings: tenant.eventMappings });
 });
 
-router.delete('/v1/dashboard/event-mappings/:id', optionalAuth, (req, res) => {
+router.delete('/v1/dashboard/event-mappings/:id', optionalAuth, async (req, res) => {
     const apiKey = getApiKeyFromReq(req);
     const tenant = getTenant(apiKey);
     const { id } = req.params;
@@ -455,6 +450,7 @@ router.delete('/v1/dashboard/event-mappings/:id', optionalAuth, (req, res) => {
 
     const deleted = tenant.eventMappings.splice(idx, 1)[0];
     addTenantLog(apiKey, `🗑️ Đã xóa Event Mapping: "${deleted.name}"`);
+    await saveEventMappings(apiKey);
 
     res.json({ success: true, eventMappings: tenant.eventMappings });
 });
@@ -487,7 +483,7 @@ router.get('/v1/dashboard/actions', optionalAuth, (req, res) => {
     res.json({ success: true, actionDefs: tenant.actionDefs || DEFAULT_ACTION_DEFS });
 });
 
-router.post('/v1/dashboard/actions', optionalAuth, (req, res) => {
+router.post('/v1/dashboard/actions', optionalAuth, async (req, res) => {
     const apiKey = getApiKeyFromReq(req);
     const tenant = getTenant(apiKey);
     const action = req.body;
@@ -502,11 +498,12 @@ router.post('/v1/dashboard/actions', optionalAuth, (req, res) => {
     if (!tenant.actionDefs) tenant.actionDefs = [];
     tenant.actionDefs.unshift(action);
     addTenantLog(apiKey, `⚡ Đã thêm Action mới vào thư viện: "${action.name}" (${action.type})`, true);
+    await saveActionDefinitions(apiKey);
 
     res.json({ success: true, action, actionDefs: tenant.actionDefs });
 });
 
-router.put('/v1/dashboard/actions/:id', optionalAuth, (req, res) => {
+router.put('/v1/dashboard/actions/:id', optionalAuth, async (req, res) => {
     const apiKey = getApiKeyFromReq(req);
     const tenant = getTenant(apiKey);
     const { id } = req.params;
@@ -517,11 +514,12 @@ router.put('/v1/dashboard/actions/:id', optionalAuth, (req, res) => {
 
     tenant.actionDefs[idx] = { ...tenant.actionDefs[idx], ...updates, updatedAt: new Date().toISOString() };
     addTenantLog(apiKey, `⚡ Đã cập nhật Action: "${tenant.actionDefs[idx].name}"`);
+    await saveActionDefinitions(apiKey);
 
     res.json({ success: true, action: tenant.actionDefs[idx], actionDefs: tenant.actionDefs });
 });
 
-router.delete('/v1/dashboard/actions/:id', optionalAuth, (req, res) => {
+router.delete('/v1/dashboard/actions/:id', optionalAuth, async (req, res) => {
     const apiKey = getApiKeyFromReq(req);
     const tenant = getTenant(apiKey);
     const { id } = req.params;
@@ -535,6 +533,7 @@ router.delete('/v1/dashboard/actions/:id', optionalAuth, (req, res) => {
 
     const deleted = tenant.actionDefs.splice(idx, 1)[0];
     addTenantLog(apiKey, `🗑️ Đã xóa Action: "${deleted.name}"`);
+    await saveActionDefinitions(apiKey);
 
     res.json({ success: true, actionDefs: tenant.actionDefs });
 });
@@ -612,7 +611,7 @@ router.post('/v1/dashboard/emergency-stop', optionalAuth, (req, res) => {
 });
 
 // Music & Dance Dashboard Endpoints
-router.post('/v1/dashboard/music', optionalAuth, (req, res) => {
+router.post('/v1/dashboard/music', optionalAuth, async (req, res) => {
     const apiKey = getApiKeyFromReq(req);
     const { name, musicId } = req.body;
     if (!musicId) return res.status(400).json({ error: 'musicId is required' });
@@ -623,6 +622,7 @@ router.post('/v1/dashboard/music', optionalAuth, (req, res) => {
     const tenant = getTenant(apiKey);
     tenant.currentMusicId = formattedId;
     addTenantLog(apiKey, `🎵 Đã phát ngay: ${name || formattedId}`, true);
+    await saveStreamConfig(apiKey);
 
     res.json({ success: true, currentMusicId: formattedId });
 });
@@ -633,7 +633,7 @@ router.get('/v1/dashboard/music-library', optionalAuth, (req, res) => {
     res.json({ success: true, tracks: tenant.customMusic || [], currentMusicId: tenant.currentMusicId });
 });
 
-router.post('/v1/dashboard/music-library', optionalAuth, (req, res) => {
+router.post('/v1/dashboard/music-library', optionalAuth, async (req, res) => {
     const apiKey = getApiKeyFromReq(req);
     const { name, musicId } = req.body;
     if (!musicId) return res.status(400).json({ error: 'musicId is required' });
@@ -656,11 +656,12 @@ router.post('/v1/dashboard/music-library', optionalAuth, (req, res) => {
     };
     tenant.customMusic.unshift(track);
     addTenantLog(apiKey, `📚 Đã thêm vào Music Library: "${name.trim()}" (${formattedId})`);
+    await saveMusicLibrary(apiKey);
 
     res.json({ success: true, track, tracks: tenant.customMusic });
 });
 
-router.delete('/v1/dashboard/music-library/:trackId', optionalAuth, (req, res) => {
+router.delete('/v1/dashboard/music-library/:trackId', optionalAuth, async (req, res) => {
     const apiKey = getApiKeyFromReq(req);
     const { trackId } = req.params;
     const tenant = getTenant(apiKey);
@@ -671,6 +672,7 @@ router.delete('/v1/dashboard/music-library/:trackId', optionalAuth, (req, res) =
 
     const removed = tenant.customMusic.splice(idx, 1)[0];
     addTenantLog(apiKey, `🗑️ Đã xóa khỏi Library: "${removed.name}"`);
+    await saveMusicLibrary(apiKey);
     res.json({ success: true, tracks: tenant.customMusic });
 });
 
@@ -688,7 +690,7 @@ router.get('/v1/dashboard/dance', optionalAuth, (req, res) => {
     });
 });
 
-router.post('/v1/dashboard/dance', optionalAuth, (req, res) => {
+router.post('/v1/dashboard/dance', optionalAuth, async (req, res) => {
     const apiKey = getApiKeyFromReq(req);
     const { name, danceId, genre, danceStyle, setActive = true } = req.body;
     const normalizedStyle = (danceStyle || genre || 'bounce').toString().trim().toLowerCase();
@@ -740,7 +742,9 @@ router.post('/v1/dashboard/dance', optionalAuth, (req, res) => {
         };
     }
 
-    addTenantLog(apiKey, `???? ???? c??i ??i???u nh???y: ${savedDance.name}${formattedId ? ' ??? ' + formattedId : ' ??? procedural only'}`, true);
+    addTenantLog(apiKey, `🎯 Đã cập nhật điệu nhảy: ${savedDance.name}${formattedId ? ' → ' + formattedId : ' → procedural only'}`, true);
+    await saveDanceLibrary(apiKey);
+    await saveStreamConfig(apiKey);
 
     res.json({
         success: true,
@@ -753,7 +757,7 @@ router.post('/v1/dashboard/dance', optionalAuth, (req, res) => {
     });
 });
 
-router.delete('/v1/dashboard/dance/:id', optionalAuth, (req, res) => {
+router.delete('/v1/dashboard/dance/:id', optionalAuth, async (req, res) => {
     const apiKey = getApiKeyFromReq(req);
     const tenant = getTenant(apiKey);
     const { id } = req.params;
@@ -763,6 +767,7 @@ router.delete('/v1/dashboard/dance/:id', optionalAuth, (req, res) => {
 
     const removed = tenant.customDances.splice(idx, 1)[0];
     addTenantLog(apiKey, `🗑️ Đã xóa điệu nhảy: "${removed.name}"`);
+    await saveDanceLibrary(apiKey);
     res.json({ success: true, dances: tenant.customDances });
 });
 
@@ -823,6 +828,8 @@ router.post('/v1/dashboard/dance/auto-fetch-roblox', optionalAuth, async (req, r
             }
 
             addTenantLog(apiKey, `🔍 Auto-Fetch Roblox API: Đã tự động thêm & kích hoạt điệu nhảy "${dance.name}" (${formattedId})`, true);
+            await saveDanceLibrary(apiKey);
+            await saveStreamConfig(apiKey);
             return res.json({ success: true, message: `Đã tự động lấy thành công điệu nhảy "${dance.name}"!`, dance, dances: tenant.customDances, selectedDanceId: tenant.selectedDanceId });
         } else {
             const userRes = await fetch('https://users.roblox.com/v1/usernames/users', {
@@ -877,6 +884,8 @@ router.post('/v1/dashboard/dance/auto-fetch-roblox', optionalAuth, async (req, r
             }
 
             addTenantLog(apiKey, `🔍 Auto-Fetch Roblox: Quét tài khoản @${verifiedName} → Tìm thấy & thêm ${userDancesAdded.length} điệu nhảy.`, true);
+            await saveDanceLibrary(apiKey);
+            await saveStreamConfig(apiKey);
             return res.json({
                 success: true,
                 message: `Đã quét tài khoản @${verifiedName} và tự động lấy ${userDancesAdded.length} điệu nhảy!`,
@@ -890,7 +899,7 @@ router.post('/v1/dashboard/dance/auto-fetch-roblox', optionalAuth, async (req, r
     }
 });
 
-router.post('/v1/dashboard/overlay', optionalAuth, (req, res) => {
+router.post('/v1/dashboard/overlay', optionalAuth, async (req, res) => {
     const apiKey = getApiKeyFromReq(req);
     const { overlayTitle, overlayColor } = req.body;
     const tenant = getTenant(apiKey);
@@ -899,10 +908,11 @@ router.post('/v1/dashboard/overlay', optionalAuth, (req, res) => {
     if (overlayColor) tenant.overlayColor = overlayColor;
 
     addTenantLog(apiKey, `🎨 Đã cập nhật nhận diện thương hiệu Stream Overlay!`, true);
+    await saveStreamConfig(apiKey);
     res.json({ success: true, overlayTitle: tenant.overlayTitle, overlayColor: tenant.overlayColor });
 });
 
-router.post('/v1/dashboard/settings', optionalAuth, (req, res) => {
+router.post('/v1/dashboard/settings', optionalAuth, async (req, res) => {
     const apiKey = getApiKeyFromReq(req);
     const { danceDuration } = req.body;
     const tenant = getTenant(apiKey);
@@ -912,6 +922,7 @@ router.post('/v1/dashboard/settings', optionalAuth, (req, res) => {
     }
 
     addTenantLog(apiKey, `⏱️ Đã cập nhật thời gian nhảy: ${tenant.danceDuration} giây/người`, true);
+    await saveStreamConfig(apiKey);
     res.json({ success: true, danceDuration: tenant.danceDuration });
 });
 
@@ -1026,18 +1037,18 @@ router.post('/v1/dashboard/connect-tiktok', optionalAuth, async (req, res) => {
     if (!tiktokUsername) return res.status(400).json({ error: 'tiktokUsername required' });
 
     const cleanUsername = tiktokUsername.replace('@', '').trim();
-    // Delegate to the real TikTok connector (same as /v1/dashboard/connect)
     connectTikTokForTenant(apiKey, cleanUsername);
+    await saveStreamConfig(apiKey);
 
     const tenant = getTenant(apiKey);
     addTenantLog(apiKey, `📡 Dashboard: Yêu cầu kết nối TikTok LIVE @${cleanUsername}`, true);
     res.json({ success: true, tiktokUsername: cleanUsername, isConnected: tenant.isConnected, message: `📡 Đang kết nối TikTok LIVE @${cleanUsername}...` });
 });
 
-router.post('/v1/dashboard/disconnect-tiktok', optionalAuth, (req, res) => {
+router.post('/v1/dashboard/disconnect-tiktok', optionalAuth, async (req, res) => {
     const apiKey = getApiKeyFromReq(req);
-    // Delegate to the real disconnect function (same as /v1/dashboard/disconnect)
     disconnectTikTokForTenant(apiKey);
+    await saveStreamConfig(apiKey);
     addTenantLog(apiKey, '🔌 Dashboard: Đã ngắt kết nối TikTok LIVE', true);
     res.json({ success: true, isConnected: false, message: '🔌 Đã ngắt kết nối TikTok LIVE' });
 });

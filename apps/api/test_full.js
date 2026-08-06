@@ -1,4 +1,4 @@
-// test_full.js - Comprehensive API test suite
+// test_full.js - Comprehensive API test suite with Real JWT Authentication
 const API = 'http://localhost:3001/api';
 const API_KEY = 'demo-api-key-sg-music';
 const STREAMER = `${API}/v1/streamer/${API_KEY}`;
@@ -7,12 +7,17 @@ const DASH = `${API}/v1/dashboard`;
 let passed = 0;
 let failed = 0;
 const errors = [];
+let jwtToken = null;
+let streamerUrl = STREAMER;
 
 async function req(method, url, body) {
     const opts = {
         method,
         headers: { 'Content-Type': 'application/json' },
     };
+    if (jwtToken && url.startsWith(DASH)) {
+        opts.headers['Authorization'] = `Bearer ${jwtToken}`;
+    }
     if (body) opts.body = JSON.stringify(body);
     const res = await fetch(url, opts);
     const text = await res.text();
@@ -34,6 +39,22 @@ function assert(label, cond, detail = '') {
 async function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 async function runTests() {
+    console.log('\n=== 0. REGISTER & LOGIN REAL TEST CREATOR ===');
+    const testEmail = `test_creator_${Date.now()}_${Math.random().toString(36).substring(2, 5)}@sgmusic.com`;
+    {
+        const r = await req('POST', `${API}/auth/register`, {
+            name: 'Test Hardened Creator',
+            email: testEmail,
+            password: 'password123'
+        });
+        assert('POST /auth/register → 200', r.status === 200, `got ${r.status} ${JSON.stringify(r.data)}`);
+        assert('token returned', !!r.data?.token);
+        assert('apiKey returned', !!r.data?.user?.apiKey);
+        
+        jwtToken = r.data?.token;
+        streamerUrl = `${API}/v1/streamer/${r.data?.user?.apiKey}`;
+    }
+
     console.log('\n=== 1. SERVER HEALTH ===');
     {
         const r = await req('GET', `${DASH}/status`);
@@ -59,7 +80,7 @@ async function runTests() {
 
     console.log('\n=== 3. CURRENT-PLAYER ENDPOINT (Roblox polling) ===');
     {
-        const r = await req('GET', `${STREAMER}/current-player`);
+        const r = await req('GET', `${streamerUrl}/current-player`);
         assert('GET /current-player → 200', r.status === 200, `got ${r.status}`);
         assert('player.robloxUsername = jokerick_Hiep', r.data?.player?.robloxUsername === 'jokerick_Hiep', r.data?.player?.robloxUsername);
         assert('player.id matches', r.data?.player?.id === firstPlayerId, `${r.data?.player?.id} vs ${firstPlayerId}`);
@@ -76,14 +97,14 @@ async function runTests() {
         });
         assert('second comment → 200', r.status === 200, `got ${r.status}`);
         // The player ID must stay SAME (bug fix: no duplicate spawn)
-        const r2 = await req('GET', `${STREAMER}/current-player`);
+        const r2 = await req('GET', `${streamerUrl}/current-player`);
         assert('player.id SAME after re-comment (no dup spawn)', r2.data?.player?.id === firstPlayerId,
             `first=${firstPlayerId}, second=${r2.data?.player?.id}`);
     }
 
     console.log('\n=== 5. DANCE STATUS REPORT (Roblox → Backend) ===');
     {
-        const r = await req('POST', `${STREAMER}/dance-status`, {
+        const r = await req('POST', `${streamerUrl}/dance-status`, {
             playerId: firstPlayerId,
             robloxUsername: 'jokerick_Hiep',
             danceId: 'rbxassetid://86539981118136',
@@ -103,7 +124,7 @@ async function runTests() {
 
     console.log('\n=== 6. HEARTBEAT (Roblox → Backend) ===');
     {
-        const r = await req('POST', `${STREAMER}/heartbeat`, {
+        const r = await req('POST', `${streamerUrl}/heartbeat`, {
             placeId: '123456789',
             jobId: 'test-job-abc',
             scriptVer: '2.1.0',
@@ -118,7 +139,7 @@ async function runTests() {
 
     console.log('\n=== 7. GAME EVENTS QUEUE ===');
     {
-        const r = await req('GET', `${STREAMER}/game-events`);
+        const r = await req('GET', `${streamerUrl}/game-events`);
         assert('GET /game-events → 200', r.status === 200, `got ${r.status}`);
         assert('events is array', Array.isArray(r.data?.events));
     }
@@ -128,7 +149,6 @@ async function runTests() {
         const r = await req('POST', `${DASH}/connect-tiktok`, { tiktokUsername: 'sandg.music' });
         assert('POST /connect-tiktok → 200', r.status === 200, `got ${r.status}`);
         assert('tiktokUsername echoed', r.data?.tiktokUsername === 'sandg.music');
-        // message should say "Đang kết nối" not "Đã kết nối" (since real connect is async)
         assert('message is informative', typeof r.data?.message === 'string' && r.data.message.length > 0, r.data?.message);
     }
 
@@ -144,7 +164,7 @@ async function runTests() {
         const r = await req('POST', `${DASH}/clear-queue`, {});
         assert('POST /clear-queue → 200', r.status === 200);
 
-        const r2 = await req('GET', `${STREAMER}/current-player`);
+        const r2 = await req('GET', `${streamerUrl}/current-player`);
         assert('player is null after clear', r2.data?.player === null);
     }
 
@@ -154,7 +174,7 @@ async function runTests() {
         await req('POST', `${DASH}/simulate-comment`, { tiktokUsername: 'u1', comment: '!dance Builderman' });
         const r = await req('POST', `${DASH}/emergency-stop`, {});
         assert('POST /emergency-stop → 200', r.status === 200);
-        const r2 = await req('GET', `${STREAMER}/current-player`);
+        const r2 = await req('GET', `${streamerUrl}/current-player`);
         assert('player null after emergency stop', r2.data?.player === null);
     }
 
@@ -172,7 +192,7 @@ async function runTests() {
         assert('GET /music-library → 200', r.status === 200);
         // Add a track
         const add = await req('POST', `${DASH}/music-library`, { name: 'Test Track', musicId: '1837879082' });
-        assert('POST /music-library → 200', add.status === 200);
+        assert('POST /music-library → 200', add.status === 200, `got ${add.status} ${JSON.stringify(add.data)}`);
         assert('track added', add.data?.track?.musicId === 'rbxassetid://1837879082');
     }
 

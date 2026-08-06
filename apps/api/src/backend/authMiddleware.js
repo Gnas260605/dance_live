@@ -2,7 +2,12 @@
 const jwt = require('jsonwebtoken');
 const { findUserByApiKey, findUserById } = require('./store');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'sg_music_roblox_production_secret_2026_key';
+const JWT_SECRET = process.env.JWT_SECRET;
+if (process.env.NODE_ENV === 'production' && (!JWT_SECRET || JWT_SECRET === 'sg_music_roblox_production_secret_2026_key')) {
+    console.error('❌ [SECURITY CRITICAL] JWT_SECRET MUST be set in production environment to a secure, custom value! Exiting...');
+    process.exit(1);
+}
+const SECRET_KEY = JWT_SECRET || 'sg_music_roblox_production_secret_2026_key';
 
 // JWT authentication for Web Dashboard
 function authenticateToken(req, res, next) {
@@ -13,7 +18,7 @@ function authenticateToken(req, res, next) {
         return res.status(401).json({ error: 'Authentication token required' });
     }
 
-    jwt.verify(token, JWT_SECRET, (err, userPayload) => {
+    jwt.verify(token, SECRET_KEY, (err, userPayload) => {
         if (err) {
             return res.status(403).json({ error: 'Invalid or expired token' });
         }
@@ -47,13 +52,13 @@ function authenticateApiKey(req, res, next) {
 function generateToken(user) {
     return jwt.sign(
         { id: user.id, email: user.email, apiKey: user.apiKey, planTier: user.planTier },
-        JWT_SECRET,
+        SECRET_KEY,
         { expiresIn: '7d' }
     );
 }
 
 module.exports = {
-    JWT_SECRET,
+    JWT_SECRET: SECRET_KEY,
     authenticateToken,
     authenticateApiKey,
     generateToken

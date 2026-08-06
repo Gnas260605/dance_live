@@ -1,6 +1,7 @@
 // tiktokManager.js
 const { WebcastPushConnection } = require('tiktok-live-connector');
 const { getTenant, addTenantLog, TIKTOK_GIFTS } = require('./store');
+const prisma = require('./db');
 
 const activeConnections = new Map();
 const userCooldowns = new Map();
@@ -333,6 +334,20 @@ function connectTikTokForTenant(apiKey, uniqueId) {
             lastTikTokRoomId: state ? (state.roomId || state.roomInfo?.roomId || null) : null
         });
         addTenantLog(apiKey, `🟢 Kết nối thành công tới TikTok Live ID: ${state ? (state.roomId || state.roomInfo?.roomId || 'LiveActive') : 'LiveActive'}`, true);
+
+        // Async create DB session
+        const { users } = require('./store');
+        const user = users.find(u => u.apiKey === apiKey);
+        if (prisma && user) {
+            prisma.streamSession.create({
+                data: {
+                    userId: user.id,
+                    tiktokUsername: cleanUniqueId
+                }
+            }).then(session => {
+                tenant.currentSessionId = session.id;
+            }).catch(err => console.warn('[DB Session Create Error]', err.message));
+        }
     }).catch(err => {
         tenant.isConnected = false;
         const msg = err && err.message ? err.message : String(err);
@@ -409,6 +424,15 @@ function disconnectTikTokForTenant(apiKey) {
     tenant.isConnected = false;
     markTikTokState(tenant, 'disconnected');
     addTenantLog(apiKey, `Đang ngắt kết nối TikTok.`);
+
+    // Close session in DB
+    if (tenant.currentSessionId && prisma) {
+        prisma.streamSession.update({
+            where: { id: tenant.currentSessionId },
+            data: { endedAt: new Date() }
+        }).catch(err => console.warn('[DB Session Close Error]', err.message));
+        tenant.currentSessionId = null;
+    }
 }
 
 // TikFinity Desktop App Auto-Connector (ws://localhost:21213/)
