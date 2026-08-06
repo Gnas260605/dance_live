@@ -642,14 +642,36 @@ local function playDanceAnimation(character, animAssetId, danceStyle, playerId, 
 		local animPlayedSuccessfully = false
 		local verifiedDanceId = animAssetId or ""
 
-		-- Step 1: Scan for local Animation instances inside Roblox Studio (ReplicatedStorage, Workspace, ServerStorage, AnimSaves)
+		-- Step 1: Scan for local Animation or KeyframeSequence instances inside Roblox Studio (ReplicatedStorage, Workspace, ServerStorage, AnimSaves)
+		local KeyframeSequenceProvider = game:GetService("KeyframeSequenceProvider")
 		pcall(function()
 			for _, desc in ipairs(game:GetDescendants()) do
-				if desc:IsA("Animation") then
+				if desc:IsA("Animation") or desc:IsA("KeyframeSequence") then
 					local animName = desc.Name:lower()
-					local animId = desc.AnimationId or ""
-					if animId == resolvedAnimId or string.find(animName, "tung") or string.find(animName, "trend") or string.find(animName, "nhay") or string.find(animName, "custom") or string.find(animName, "import") then
-						local success, track = pcall(function() return animator:LoadAnimation(desc) end)
+					local animId = desc:IsA("Animation") and (desc.AnimationId or "") or ""
+					
+					if animId == resolvedAnimId 
+						or string.find(animName, "tung") 
+						or string.find(animName, "trend") 
+						or string.find(animName, "nhay") 
+						or string.find(animName, "custom") 
+						or string.find(animName, "import")
+						or desc.Parent.Name == "ReplicatedStorage" 
+						or desc:FindFirstAncestor("ReplicatedStorage") then
+						
+						local animToLoad = desc
+						if desc:IsA("KeyframeSequence") then
+							pcall(function()
+								local hashId = KeyframeSequenceProvider:RegisterKeyframeSequence(desc)
+								if hashId then
+									local tempAnim = Instance.new("Animation")
+									tempAnim.AnimationId = hashId
+									animToLoad = tempAnim
+								end
+							end)
+						end
+
+						local success, track = pcall(function() return animator:LoadAnimation(animToLoad) end)
 						if success and track then
 							track.Priority = Enum.AnimationPriority.Action4
 							track.Looped = true
@@ -658,7 +680,7 @@ local function playDanceAnimation(character, animAssetId, danceStyle, playerId, 
 							if track.IsPlaying then
 								animPlayedSuccessfully = true
 								verifiedDanceId = animId ~= "" and animId or desc.Name
-								print(string.format("[TikTokDanceManager] 💃 Playing LOCAL Studio Animation Object [%s] for %s!", desc.Name, character.Name))
+								print(string.format("[TikTokDanceManager] 💃 Playing LOCAL Studio %s [%s] for %s!", desc.ClassName, desc.Name, character.Name))
 								reportDanceStatus(playerId, robloxUsername or character.Name, verifiedDanceId, danceStyle, true, "asset", "Local Studio Animation loaded and playing.")
 								return
 							else
