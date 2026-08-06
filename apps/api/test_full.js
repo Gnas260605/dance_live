@@ -204,6 +204,67 @@ async function runTests() {
         assert('Backend API Service check passes', r.data?.checks?.find(c => c.name === 'Backend API Service')?.pass === true);
     }
 
+    console.log('\n=== 15. EVENT ENGINE V2 (Phase 3) ===');
+    {
+        const testDedupeId = 'evt_test_dedupe_' + Date.now();
+        const r1 = await req('POST', `${DASH}/simulate-gift`, {
+            tiktokUsername: 'vip_tester',
+            giftName: 'Rose',
+            giftId: 'rose',
+            repeatCount: 1,
+            diamondCount: 1,
+            sourceEventId: testDedupeId
+        });
+        assert('POST /simulate-gift (first) → 200', r1.status === 200);
+        await new Promise(resolve => setTimeout(resolve, 300));
+
+        const r2 = await req('POST', `${DASH}/simulate-gift`, {
+            tiktokUsername: 'vip_tester',
+            giftName: 'Rose',
+            giftId: 'rose',
+            repeatCount: 1,
+            diamondCount: 1,
+            sourceEventId: testDedupeId
+        });
+        assert('POST /simulate-gift (second/duplicate) → 200', r2.status === 200);
+        assert('second attempt is marked duplicate', r2.data?.result?.duplicate === true);
+
+        const rPoll = await req('GET', `${streamerUrl}/game-events`);
+        assert('GET /game-events → 200', rPoll.status === 200);
+        const testEvent = rPoll.data?.events?.find(e => e.context?.giftId === 'rose' || e.context?.giftName === 'Rose');
+        assert('event exists in polled events queue', !!testEvent);
+
+        if (testEvent) {
+            const eventId = testEvent.eventId;
+            const rAck1 = await req('POST', `${streamerUrl}/game-events/${eventId}/ack`, { success: true });
+            assert('First ACK → 200', rAck1.status === 200);
+            assert('First ACK status = ACKED', rAck1.data?.status === 'ACKED');
+
+            const rAck2 = await req('POST', `${streamerUrl}/game-events/${eventId}/ack`, { success: true });
+            assert('Second ACK (Idempotent) → 200', rAck2.status === 200);
+            assert('Second ACK status still = ACKED', rAck2.data?.status === 'ACKED');
+        }
+
+        const stopDedupeId = 'evt_test_stop_' + Date.now();
+        const rSim = await req('POST', `${DASH}/simulate-gift`, {
+            tiktokUsername: 'vip_tester',
+            giftName: 'Rose',
+            giftId: 'rose',
+            repeatCount: 1,
+            diamondCount: 1,
+            sourceEventId: stopDedupeId
+        });
+        assert('Create event for stop test → 200', rSim.status === 200);
+        await new Promise(resolve => setTimeout(resolve, 300));
+
+        const rStop = await req('POST', `${DASH}/emergency-stop`, {});
+        assert('POST /emergency-stop → 200', rStop.status === 200);
+
+        const rPollAfterStop = await req('GET', `${streamerUrl}/game-events`);
+        const stoppedEvent = rPollAfterStop.data?.events?.find(e => e.eventId === stopDedupeId);
+        assert('event is no longer active in queued events', !stoppedEvent);
+    }
+
     // ============ SUMMARY ============
     console.log('\n' + '='.repeat(50));
     console.log(`TOTAL: ${passed + failed} tests | ✅ ${passed} passed | ❌ ${failed} failed`);

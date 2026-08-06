@@ -2,10 +2,25 @@
 const { WebcastPushConnection } = require('tiktok-live-connector');
 const { getTenant, addTenantLog, TIKTOK_GIFTS } = require('./store');
 const prisma = require('./db');
+const crypto = require('crypto');
 
 const activeConnections = new Map();
 const userCooldowns = new Map();
 const COOLDOWN_MS = 2000;
+
+const processedEvents = new Set();
+function checkAndRegisterEvent(apiKey, eventId) {
+    const key = `${apiKey}_${eventId}`;
+    if (processedEvents.has(key)) {
+        return true;
+    }
+    processedEvents.add(key);
+    if (processedEvents.size > 2000) {
+        const firstKey = processedEvents.values().next().value;
+        processedEvents.delete(firstKey);
+    }
+    return false;
+}
 
 function markTikTokState(tenant, state, extra = {}) {
     tenant.tiktokConnectionState = state;
@@ -78,43 +93,47 @@ function renderTemplateVariables(template, context) {
  * Core Gift Event Processor according to Section 21 of Spec.
  * Decouples gift actions from comment queue into unique GameEvents with ACK tracking.
  */
-function processGiftEventForTenant(apiKey, giftPayload) {
-    const tenant = getTenant(apiKey);
-    const { giftId, giftName, repeatCount = 1, singleCoinValue = 0, totalCoins = 0, tiktokUsername, nickname } = giftPayload;
+/**
+ * Pure rules evaluator following Phase 3 requirements.
+ * Evaluates trigger constraints and maps event to action plan.
+ */
+function evaluateRules(normalizedEvent, eventMappings, actionDefs) {
+    const resolvedActions = [];
+    const matchedMappings = [];
+    const { giftId, giftName, repeatCount = 1, totalCoins = 0 } = normalizedEvent;
 
     const context = {
-        tiktokUsername: tiktokUsername || 'Anonymous',
-        nickname: nickname || tiktokUsername || 'Anonymous',
+        tiktokUsername: normalizedEvent.viewerUsername || 'Anonymous',
+        nickname: normalizedEvent.viewerNickname || normalizedEvent.viewerUsername || 'Anonymous',
         giftId: giftId || 'gift',
         giftName: giftName || 'TikTok Gift',
         repeatCount,
-        singleCoinValue,
+        singleCoinValue: normalizedEvent.singleCoinValue || 0,
         totalCoins
     };
 
-    const activeMappings = (tenant.eventMappings || []).filter(m => m.enabled);
-    const sortedMappings = [...activeMappings].sort((a, b) => (b.priority || 0) - (a.priority || 0));
-
-    let matchedAnyMapping = false;
+    const sortedMappings = [...eventMappings]
+        .filter(m => m.enabled)
+        .sort((a, b) => (b.priority || 0) - (a.priority || 0));
 
     for (const mapping of sortedMappings) {
         const trigger = mapping.trigger || {};
         if (trigger.type !== 'TIKTOK_GIFT') continue;
 
-        // Check Gift ID / Gift Name match
-        const idMatch = trigger.giftId && (trigger.giftId.toLowerCase() === (giftId || '').toLowerCase() || trigger.giftId.toLowerCase() === (giftName || '').toLowerCase());
+        const idMatch = trigger.giftId && (
+            trigger.giftId.toLowerCase() === (giftId || '').toLowerCase() || 
+            trigger.giftId.toLowerCase() === (giftName || '').toLowerCase()
+        );
         const nameMatch = trigger.giftName && trigger.giftName.toLowerCase() === (giftName || '').toLowerCase();
-        
+
         if (!idMatch && !nameMatch && trigger.giftId) continue;
 
-        // Check Repeat & Coin thresholds
         if (trigger.minRepeatCount && repeatCount < trigger.minRepeatCount) continue;
         if (trigger.minTotalCoins && totalCoins < trigger.minTotalCoins) continue;
 
-        // Resolve actions for this mapping
-        const resolvedActions = [];
+        const mappingActions = [];
         for (const actionRef of (mapping.actions || [])) {
-            const actionDef = (tenant.actionDefs || []).find(a => a.id === actionRef.actionId && a.enabled);
+            const actionDef = actionDefs.find(a => a.id === actionRef.actionId && a.enabled);
             if (!actionDef) continue;
 
             const parsedParams = typeof actionDef.parameters === 'string' ? JSON.parse(actionDef.parameters) : (actionDef.parameters || {});
@@ -128,7 +147,7 @@ function processGiftEventForTenant(apiKey, giftPayload) {
                 }
             }
 
-            resolvedActions.push({
+            mappingActions.push({
                 actionId: actionDef.id,
                 name: actionDef.name,
                 type: actionDef.type,
@@ -138,30 +157,96 @@ function processGiftEventForTenant(apiKey, giftPayload) {
             });
         }
 
-        if (resolvedActions.length > 0) {
-            const gameEvent = {
-                eventId: 'evt_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 7),
-                tenantId: apiKey,
-                mappingId: mapping.id,
-                mappingName: mapping.name,
-                eventType: 'gift_effect',
-                actions: resolvedActions,
-                context: context,
-                createdAt: new Date().toISOString(),
-                expiresAt: new Date(Date.now() + 60000).toISOString(), // 60s TTL
-                status: 'QUEUED',
-                deliveryAttempts: 0
-            };
-
-            tenant.gameEventQueue.push(gameEvent);
-            tenant.gameEventsHistory.unshift(gameEvent);
-            if (tenant.gameEventsHistory.length > 100) tenant.gameEventsHistory.pop();
-
-            addTenantLog(apiKey, `🎯 Event Match: "${mapping.name}" → Tạo GameEvent [${gameEvent.eventId}] (${resolvedActions.length} actions)`, true);
-            matchedAnyMapping = true;
-
-            if (mapping.stopProcessingAfterMatch) break;
+        if (mappingActions.length > 0) {
+            resolvedActions.push(...mappingActions);
+            matchedMappings.push(mapping);
+            if (mapping.stopProcessingAfterMatch) {
+                break;
+            }
         }
+    }
+
+    return { resolvedActions, matchedMappings, context };
+}
+
+/**
+ * Core Gift Event Processor.
+ * Ingests events, checks deduplication, evaluates rules, and records persistent GameEvents in the DB.
+ */
+function processGiftEventForTenant(apiKey, giftPayload, sourceEventId = null) {
+    const tenant = getTenant(apiKey);
+    const { giftId, giftName, repeatCount = 1, singleCoinValue = 0, totalCoins = 0, tiktokUsername, nickname } = giftPayload;
+
+    const dedupeId = sourceEventId || `${tiktokUsername}_gift_${giftId}_${repeatCount}_${Date.now()}`;
+    if (checkAndRegisterEvent(apiKey, dedupeId)) {
+        addTenantLog(apiKey, `⚠️ [Deduplicate] Bỏ qua quà tặng trùng lặp: ${giftName} x${repeatCount} từ @${tiktokUsername}`);
+        return { matchedAnyMapping: false, duplicate: true };
+    }
+
+    const normalizedEvent = {
+        source: 'tiktok_live',
+        sourceEventId: dedupeId,
+        eventType: 'TIKTOK_GIFT',
+        viewerUsername: tiktokUsername,
+        viewerNickname: nickname,
+        giftId,
+        giftName,
+        repeatCount,
+        singleCoinValue,
+        totalCoins,
+        timestamp: new Date()
+    };
+
+    const { resolvedActions, matchedMappings, context } = evaluateRules(
+        normalizedEvent,
+        tenant.eventMappings || [],
+        tenant.actionDefs || []
+    );
+
+    let matchedAnyMapping = false;
+
+    if (resolvedActions.length > 0) {
+        matchedAnyMapping = true;
+        const eventId = 'evt_' + crypto.randomBytes(8).toString('hex');
+        
+        // Find user model to get database userId
+        const { findUserByApiKey } = require('./store');
+        const user = findUserByApiKey(apiKey);
+        
+        if (prisma && user) {
+            prisma.gameEvent.create({
+                data: {
+                    eventId,
+                    userId: user.id,
+                    mappingId: matchedMappings[0]?.id || null,
+                    eventType: 'gift_effect',
+                    actionsJson: JSON.stringify(resolvedActions),
+                    contextJson: JSON.stringify(context),
+                    status: 'QUEUED',
+                    deliveryAttempts: 0,
+                    expiresAt: new Date(Date.now() + 60000) // 60s TTL
+                }
+            }).then(dbEvent => {
+                const ramEvent = {
+                    eventId: dbEvent.eventId,
+                    tenantId: apiKey,
+                    mappingId: dbEvent.mappingId,
+                    mappingName: matchedMappings[0]?.name || 'Gift Effect',
+                    eventType: dbEvent.eventType,
+                    actions: resolvedActions,
+                    context: context,
+                    createdAt: dbEvent.createdAt.toISOString(),
+                    expiresAt: dbEvent.expiresAt.toISOString(),
+                    status: dbEvent.status,
+                    deliveryAttempts: dbEvent.deliveryAttempts
+                };
+                tenant.gameEventQueue.push(ramEvent);
+                tenant.gameEventsHistory.unshift(ramEvent);
+                if (tenant.gameEventsHistory.length > 100) tenant.gameEventsHistory.pop();
+            }).catch(err => console.error('[DB Event Ingestion Error]', err.message));
+        }
+
+        addTenantLog(apiKey, `🎯 Event Match: "${matchedMappings[0]?.name}" → Tạo GameEvent [${eventId}] (${resolvedActions.length} actions)`, true);
     }
 
     // Fallback: Coin Milestone Music Switch if no exact mapping matched or if coin value > 0
@@ -366,12 +451,20 @@ function connectTikTokForTenant(apiKey, uniqueId) {
 
     connection.on('chat', data => {
         tenant.lastTikTokEventAt = new Date().toISOString();
+        if (data.msgId && checkAndRegisterEvent(apiKey, data.msgId)) {
+            return; // Skip duplicate chat comments
+        }
         processNewCommentForTenant(apiKey, data.uniqueId, data.comment);
     });
 
     connection.on('gift', data => {
         tenant.lastTikTokEventAt = new Date().toISOString();
         if (data.giftType === 1 && data.repeatEnd === false) return; // Streak packet intermediate skip
+        if (data.msgId && checkAndRegisterEvent(apiKey, data.msgId)) {
+            addTenantLog(apiKey, `⚠️ [Deduplicate] Bỏ qua quà tặng trùng lặp từ live listener: @${data.uniqueId} [${data.msgId}]`);
+            return;
+        }
+
         const giftName = data.giftName || 'TikTok Gift';
         const giftId = (data.giftId || giftName).toString().toLowerCase().replace(/[^a-z0-9_]/g, '_');
         const giftCount = data.repeatCount || 1;
@@ -398,7 +491,7 @@ function connectTikTokForTenant(apiKey, uniqueId) {
             totalCoins,
             tiktokUsername: data.uniqueId,
             nickname: data.nickname || data.uniqueId
-        });
+        }, data.msgId);
     });
 
     connection.on('streamEnd', () => {

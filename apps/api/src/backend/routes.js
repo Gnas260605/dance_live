@@ -33,6 +33,7 @@ const {
     processNewCommentForTenant,
     processGiftEventForTenant
 } = require('./tiktokManager');
+const prisma = require('./db');
 const { 
     authLimiter, 
     dashboardLimiter, 
@@ -229,51 +230,121 @@ router.get('/current-player', (req, res) => {
 });
 
 // GET: Roblox Game Events Polling Endpoint (Returns pending QUEUED events for Roblox execution)
-router.get('/v1/streamer/:apiKey/game-events', (req, res) => {
+router.get('/v1/streamer/:apiKey/game-events', async (req, res) => {
     const apiKey = req.params.apiKey || 'demo-api-key-sg-music';
     const tenant = getTenant(apiKey);
-    const now = Date.now();
+    const now = new Date();
 
-    // Filter unexpired queued events
-    const pendingEvents = (tenant.gameEventQueue || []).filter(e => e.status === 'QUEUED' && new Date(e.expiresAt).getTime() > now);
+    const { findUserByApiKey } = require('./store');
+    const user = findUserByApiKey(apiKey);
+    if (!user || !prisma) {
+        return res.status(404).json({ error: 'Tenant workspace not found' });
+    }
 
-    // Mark delivered
-    pendingEvents.forEach(e => {
-        e.status = 'DELIVERED';
-        e.deliveryAttempts = (e.deliveryAttempts || 0) + 1;
-    });
+    try {
+        const dbEvents = await prisma.gameEvent.findMany({
+            where: {
+                userId: user.id,
+                status: 'QUEUED',
+                expiresAt: { gt: now }
+            },
+            orderBy: { createdAt: 'asc' }
+        });
 
-    res.json({
-        success: true,
-        events: pendingEvents,
-        count: pendingEvents.length,
-        timestamp: now
-    });
+        if (dbEvents.length > 0) {
+            const ids = dbEvents.map(e => e.id);
+            await prisma.gameEvent.updateMany({
+                where: { id: { in: ids } },
+                data: {
+                    status: 'DELIVERED',
+                    deliveryAttempts: { increment: 1 }
+                }
+            });
+
+            dbEvents.forEach(e => {
+                const ramEvent = tenant.gameEventQueue.find(r => r.eventId === e.eventId);
+                if (ramEvent) {
+                    ramEvent.status = 'DELIVERED';
+                    ramEvent.deliveryAttempts += 1;
+                }
+            });
+        }
+
+        const eventsPayload = dbEvents.map(e => ({
+            eventId: e.eventId,
+            eventType: e.eventType,
+            actions: JSON.parse(e.actionsJson || '[]'),
+            context: JSON.parse(e.contextJson || '{}'),
+            createdAt: e.createdAt.toISOString(),
+            expiresAt: e.expiresAt.toISOString(),
+            status: 'DELIVERED',
+            deliveryAttempts: e.deliveryAttempts + 1
+        }));
+
+        res.json({
+            success: true,
+            events: eventsPayload,
+            count: eventsPayload.length,
+            timestamp: Date.now()
+        });
+    } catch (err) {
+        console.error('[Roblox Polling Error]', err.message);
+        res.status(500).json({ error: 'Internal database error' });
+    }
 });
 
 // POST: Roblox ACK Endpoint (Receives ACK execution status from Lua script)
-router.post('/v1/streamer/:apiKey/game-events/:eventId/ack', (req, res) => {
+router.post('/v1/streamer/:apiKey/game-events/:eventId/ack', async (req, res) => {
     const apiKey = req.params.apiKey || 'demo-api-key-sg-music';
     const { eventId } = req.params;
     const { success = true, error = null } = req.body;
     const tenant = getTenant(apiKey);
 
-    const event = (tenant.gameEventsHistory || []).find(e => e.eventId === eventId);
-    if (event) {
-        event.status = success ? 'ACKED' : 'FAILED';
-        event.ackedAt = new Date().toISOString();
-        if (error) event.lastError = error;
+    const { findUserByApiKey } = require('./store');
+    const user = findUserByApiKey(apiKey);
+    if (!user || !prisma) {
+        return res.status(404).json({ error: 'Tenant workspace not found' });
     }
 
-    // Remove from active queue
-    tenant.gameEventQueue = (tenant.gameEventQueue || []).filter(e => e.eventId !== eventId);
+    try {
+        const dbEvent = await prisma.gameEvent.findUnique({
+            where: { eventId }
+        });
 
-    addTenantLog(apiKey, `✅ Roblox ACK [${eventId}]: ${success ? 'Thành công' : 'Lỗi: ' + error}`);
-    res.json({ success: true, eventId, status: event ? event.status : 'ACKED' });
+        if (!dbEvent) {
+            return res.status(404).json({ error: 'GameEvent not found' });
+        }
+
+        if (dbEvent.status === 'ACKED' || dbEvent.status === 'FAILED') {
+            return res.json({ success: true, eventId, status: dbEvent.status });
+        }
+
+        const finalStatus = success ? 'ACKED' : 'FAILED';
+        const updatedEvent = await prisma.gameEvent.update({
+            where: { eventId },
+            data: {
+                status: finalStatus,
+                ackedAt: new Date()
+            }
+        });
+
+        tenant.gameEventQueue = (tenant.gameEventQueue || []).filter(e => e.eventId !== eventId);
+        const histEvent = (tenant.gameEventsHistory || []).find(e => e.eventId === eventId);
+        if (histEvent) {
+            histEvent.status = finalStatus;
+            histEvent.ackedAt = updatedEvent.ackedAt.toISOString();
+        }
+
+        addTenantLog(apiKey, `✅ Roblox ACK [${eventId}]: ${success ? 'Thành công' : 'Lỗi: ' + error}`);
+        res.json({ success: true, eventId, status: finalStatus });
+    } catch (err) {
+        console.error('[Roblox ACK Error]', err.message);
+        res.status(500).json({ error: 'Internal database error' });
+    }
 });
 
 // POST: Roblox Heartbeat Endpoint
-router.post('/v1/streamer/:apiKey/heartbeat', (req, res) => {
+router.post('/v1/streamer/:apiKey/heartbeat', async (req, res) => {
     const apiKey = req.params.apiKey || 'demo-api-key-sg-music';
     const { placeId, jobId, scriptVer } = req.body;
     const tenant = getTenant(apiKey);
@@ -285,6 +356,33 @@ router.post('/v1/streamer/:apiKey/heartbeat', (req, res) => {
         jobId: jobId || null,
         scriptVer: scriptVer || '1.0.0'
     };
+
+    const { findUserByApiKey } = require('./store');
+    const user = findUserByApiKey(apiKey);
+    if (prisma && user) {
+        try {
+            await prisma.robloxSession.upsert({
+                where: { userId: user.id },
+                update: {
+                    placeId: placeId || '',
+                    jobId: jobId || '',
+                    scriptVer: scriptVer || '1.0.0',
+                    lastHeartbeat: new Date(),
+                    isOnline: true
+                },
+                create: {
+                    userId: user.id,
+                    placeId: placeId || '',
+                    jobId: jobId || '',
+                    scriptVer: scriptVer || '1.0.0',
+                    lastHeartbeat: new Date(),
+                    isOnline: true
+                }
+            });
+        } catch (err) {
+            console.error('[Heartbeat DB Upsert Error]', err.message);
+        }
+    }
 
     res.json({ success: true, isOnline: true, timestamp: Date.now() });
 });
@@ -598,7 +696,7 @@ router.post('/v1/dashboard/preflight', optionalAuth, (req, res) => {
 });
 
 // Emergency Stop
-router.post('/v1/dashboard/emergency-stop', optionalAuth, (req, res) => {
+router.post('/v1/dashboard/emergency-stop', optionalAuth, async (req, res) => {
     const apiKey = getApiKeyFromReq(req);
     const tenant = getTenant(apiKey);
 
@@ -606,7 +704,25 @@ router.post('/v1/dashboard/emergency-stop', optionalAuth, (req, res) => {
     tenant.playerQueue = [];
     tenant.activePlayer = null;
 
-    addTenantLog(apiKey, `🚨 DỪNG KHẨN CẤP (EMERGENCY STOP): Đã xóa sạch hàng chờ nhảy và hiệu ứng game!`, true);
+    const { findUserByApiKey } = require('./store');
+    const user = findUserByApiKey(apiKey);
+    if (prisma && user) {
+        try {
+            await prisma.gameEvent.updateMany({
+                where: {
+                    userId: user.id,
+                    status: { in: ['QUEUED', 'DELIVERED'] }
+                },
+                data: {
+                    status: 'CANCELLED'
+                }
+            });
+        } catch (err) {
+            console.error('[Emergency Stop DB Error]', err.message);
+        }
+    }
+
+    addTenantLog(apiKey, `🚨 DỪNG KHẨN CẤP (EMERGENCY STOP): Đã xóa sạch hàng chờ nhảy và hủy bỏ các hiệu ứng game!`, true);
     res.json({ success: true, message: 'Đã kích hoạt dừng khẩn cấp. Toàn bộ hàng chờ đã được làm sạch!' });
 });
 
@@ -955,19 +1071,25 @@ router.post('/v1/dashboard/simulate-comment', optionalAuth, handleSimulateCommen
 // Gift Simulation (alias for simulate-gift & mock-gift)
 const handleSimulateGift = async (req, res) => {
     const apiKey = getApiKeyFromReq(req);
-    const { tiktokUsername, giftName, giftId, repeatCount, diamondCount } = req.body;
+    const { tiktokUsername, giftName, giftId, repeatCount, diamondCount, sourceEventId } = req.body;
     
-    const giftData = {
+    const singleCoin = diamondCount || 1;
+    const count = repeatCount || 1;
+
+    const giftPayload = {
         giftId: giftId || 'rose',
         giftName: giftName || 'Rose',
-        repeatCount: repeatCount || 1,
-        diamondCount: diamondCount || 1
+        repeatCount: count,
+        singleCoinValue: singleCoin,
+        totalCoins: singleCoin * count,
+        tiktokUsername: tiktokUsername || 'gifter_' + Math.floor(Math.random() * 100),
+        nickname: tiktokUsername || 'Gifter Nickname'
     };
 
     const result = await processGiftEventForTenant(
         apiKey,
-        tiktokUsername || 'gifter_' + Math.floor(Math.random() * 100),
-        giftData
+        giftPayload,
+        sourceEventId
     );
 
     res.json({ success: true, message: 'Đã bắn sự kiện quà tặng thử nghiệm!', result });
