@@ -98,8 +98,7 @@ export default function LiveControl() {
   const [preflight, setPreflight] = useState<PreflightCheck[] | null>(null);
   const [checkingPreflight, setCheckingPreflight] = useState(false);
 
-  // Logs ref for auto scroll
-  const logEndRef = useRef<HTMLDivElement>(null);
+  const logsContainerRef = useRef<HTMLDivElement>(null);
 
   // Polling for updates
   useEffect(() => {
@@ -109,8 +108,8 @@ export default function LiveControl() {
   }, []);
 
   useEffect(() => {
-    if (logEndRef.current) {
-      logEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    if (logsContainerRef.current) {
+      logsContainerRef.current.scrollTop = logsContainerRef.current.scrollHeight;
     }
   }, [dashboard?.logs]);
 
@@ -597,20 +596,23 @@ export default function LiveControl() {
             </div>
 
             <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
-              <div style={{ 
-                background: '#030406', 
-                border: '1px solid rgba(255,255,255,0.02)', 
-                borderRadius: '8px', 
-                padding: '14px', 
-                flexGrow: 1, 
-                maxHeight: '300px', 
-                overflowY: 'auto',
-                fontFamily: 'var(--font-mono)',
-                fontSize: '0.7rem',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '5px'
-              }}>
+              <div 
+                ref={logsContainerRef}
+                style={{ 
+                  background: '#030406', 
+                  border: '1px solid rgba(255,255,255,0.02)', 
+                  borderRadius: '8px', 
+                  padding: '14px', 
+                  flexGrow: 1, 
+                  maxHeight: '300px', 
+                  overflowY: 'auto',
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: '0.7rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '5px'
+                }}
+              >
                 {dashboard?.logs && dashboard.logs.length > 0 ? (
                   dashboard.logs.map((log, idx) => (
                     <div key={idx} style={{ 
@@ -619,7 +621,7 @@ export default function LiveControl() {
                       paddingBottom: '3px'
                     }}>
                       <span style={{ color: 'var(--accent-blue)', marginRight: '6px', opacity: 0.8 }}>
-                        [{new Date(log.timestamp).toLocaleTimeString()}]
+                        [{log.timestamp}]
                       </span>
                       {log.message}
                     </div>
@@ -627,7 +629,6 @@ export default function LiveControl() {
                 ) : (
                   <div style={{ color: 'var(--text-secondary)', opacity: 0.5 }}>Console stream buffer silent...</div>
                 )}
-                <div ref={logEndRef} />
               </div>
             </div>
           </div>
