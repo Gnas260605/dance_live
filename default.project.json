@@ -3,14 +3,14 @@
   "tree": {
     "$className": "DataModel",
     "ServerScriptService": {
-      "$path": "src/server"
+      "$path": "roblox/server"
     },
     "ReplicatedStorage": {
-      "$path": "src/shared"
+      "$path": "roblox/shared"
     },
     "StarterPlayer": {
       "StarterPlayerScripts": {
-        "$path": "src/client"
+        "$path": "roblox/client"
       }
     }
   }

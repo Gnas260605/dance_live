@@ -101,15 +101,13 @@ export default function App() {
             <span className="glow-text-pink">DL</span>
           )}
         </div>
-
         <ul className="sidebar-menu">
           <li className={`sidebar-item ${activeTab === 'live' ? 'active' : ''}`}>
             <a href="#" onClick={(e) => { e.preventDefault(); setActiveTab('live'); }}>
               <Tv size={18} color={activeTab === 'live' ? 'var(--accent-pink)' : 'var(--text-secondary)'} />
-              {!isSidebarCollapsed && <span>Live Control</span>}
+              {!isSidebarCollapsed && <span>Kết nối & Điều khiển Live</span>}
             </a>
           </li>
-
           <li className={`sidebar-item ${activeTab === 'dancers' ? 'active' : ''}`}>
             <a href="#" onClick={(e) => { e.preventDefault(); setActiveTab('dancers'); }}>
               <UserCheck size={18} color={activeTab === 'dancers' ? 'var(--accent-pink)' : 'var(--text-secondary)'} />

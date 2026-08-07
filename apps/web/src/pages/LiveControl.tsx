@@ -274,16 +274,29 @@ export default function LiveControl() {
           </div>
         </div>
 
-        <div className="hud-panel" style={{ padding: '20px', display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <div style={{ padding: '12px', background: 'rgba(0, 240, 255, 0.1)', borderRadius: '10px', color: 'var(--accent-blue)' }}>
-            <Activity size={22} />
-          </div>
-          <div>
-            <div style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', fontFamily: 'var(--font-display)', letterSpacing: '1px' }}>ROBLOX ENGINE</div>
-            <div className="glow-text-blue" style={{ fontSize: '1.15rem', fontWeight: 700, color: dashboard?.isRobloxOnline ? 'var(--accent-green)' : 'var(--accent-red)' }}>
-              {dashboard?.isRobloxOnline ? 'ONLINE' : 'OFFLINE'}
+        <div className="hud-panel" style={{ padding: '20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <div style={{ padding: '12px', background: 'rgba(0, 240, 255, 0.1)', borderRadius: '10px', color: 'var(--accent-blue)' }}>
+              <Activity size={22} />
+            </div>
+            <div>
+              <div style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', fontFamily: 'var(--font-display)', letterSpacing: '1px' }}>ROBLOX ENGINE</div>
+              <div className="glow-text-blue" style={{ fontSize: '1.15rem', fontWeight: 700, color: dashboard?.isRobloxOnline ? 'var(--accent-green)' : 'var(--accent-red)' }}>
+                {dashboard?.isRobloxOnline ? 'ONLINE' : 'OFFLINE'}
+              </div>
             </div>
           </div>
+          {dashboard?.robloxHeartbeat?.placeId && (
+            <a 
+              href={`https://www.roblox.com/games/${dashboard.robloxHeartbeat.placeId}`} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="btn btn-secondary"
+              style={{ fontSize: '0.7rem', padding: '6px 12px', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+            >
+              🎮 Vào Game
+            </a>
+          )}
         </div>
 
         <div className="hud-panel" style={{ padding: '20px', display: 'flex', alignItems: 'center', gap: '16px' }}>
@@ -508,17 +521,17 @@ export default function LiveControl() {
           {/* TikTok Live Stream Connection Control */}
           <div className="hud-panel">
             <div className="panel-header-tech">
-              <div className="panel-title-tech">[HUD_04 // TIKTOK_BRIDGE]</div>
-              <div className="panel-meta-tech">WEBCAST GATEWAY</div>
+              <div className="panel-title-tech">[HUD_04 // KẾT NỐI TIKTOK LIVE]</div>
+              <div className="panel-meta-tech">CỔNG KẾT NỐI LIVE</div>
             </div>
 
             <div style={{ padding: '20px' }}>
               <form onSubmit={handleConnect} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  <label style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', fontFamily: 'var(--font-display)', letterSpacing: '0.5px' }}>TARGET TIKTOK LIVE USERNAME</label>
+                  <label style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', fontFamily: 'var(--font-display)', letterSpacing: '0.5px' }}>USERNAME TÀI KHOẢN TIKTOK ĐANG LIVE (không nhập chữ @)</label>
                   <input 
                     type="text" 
-                    placeholder="e.g. sandg.music" 
+                    placeholder="Ví dụ: sandg.music" 
                     value={tiktokUser} 
                     onChange={(e) => setTiktokUser(e.target.value)}
                     disabled={dashboard?.isConnected || isConnecting}
@@ -527,15 +540,15 @@ export default function LiveControl() {
                 </div>
                 {dashboard?.isConnected ? (
                   <button type="button" className="btn btn-danger" onClick={handleDisconnect} style={{ width: '100%' }}>
-                    Terminate Connection
+                    Ngắt Kết Nối TikTok
                   </button>
                 ) : (
                   <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={isConnecting}>
                     {isConnecting ? (
                       <>
-                        <RotateCw size={14} className="spinning" /> Synchronizing...
+                        <RotateCw size={14} className="spinning" /> Đang kết nối...
                       </>
-                    ) : 'Initialize Link'}
+                    ) : 'Bắt đầu kết nối LIVE'}
                   </button>
                 )}
               </form>

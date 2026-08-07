@@ -34,19 +34,28 @@ end
 -- ====================================
 
 local API_KEY    = script:GetAttribute("API_KEY") or "demo-api-key-sg-music"
-local PUBLIC_URL = "https://dance-live.onrender.com"
+local PUBLIC_URL = "https://dance-live.onrender.com/"
 local LOCAL_URL  = "http://127.0.0.1:3001"
 
+-- Clean trailing slash from base URLs to prevent double-slash (//) routing issues
+local function cleanUrl(url)
+	if url and string.sub(url, -1) == "/" then
+		return string.sub(url, 1, -2)
+	end
+	return url
+end
+
 local function getActiveBaseUrl()
+	local baseUrl = PUBLIC_URL
 	local customDomain = script:GetAttribute("DOMAIN_URL")
 	if customDomain and customDomain ~= "" then
-		return customDomain .. "/api/v1/streamer/" .. API_KEY
+		baseUrl = customDomain
+	elseif script:GetAttribute("USE_LOCAL") == true then
+		baseUrl = LOCAL_URL
 	end
-	-- Studio testing normally runs against the local Node server unless overridden.
-	if script:GetAttribute("USE_LOCAL") == true or RunService:IsStudio() then
-		return LOCAL_URL .. "/api/v1/streamer/" .. API_KEY
-	end
-	return PUBLIC_URL .. "/api/v1/streamer/" .. API_KEY
+	
+	baseUrl = cleanUrl(baseUrl)
+	return baseUrl .. "/api/v1/streamer/" .. API_KEY
 end
 
 local function getRequestHeaders()

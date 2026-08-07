@@ -29,7 +29,7 @@ EXPOSE 3000
 
 ENV PORT=3000
 ENV NODE_ENV=production
-ENV DATABASE_URL="file:/app/data/production.db"
+ENV DATABASE_URL="postgresql://postgres:postgres@localhost:5432/postgres"
 ENV JWT_SECRET="sg_music_roblox_production_secret_2026_key"
 
 # Start the API backend workspace, generate client, push schema and start

@@ -179,9 +179,23 @@ export default function Settings() {
                       {robloxSession.isOnline ? 'ONLINE' : 'OFFLINE'}
                     </span>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.02)', paddingBottom: '6px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.02)', paddingBottom: '6px', alignItems: 'center' }}>
                     <span style={{ color: 'var(--text-secondary)' }}>Roblox Place ID:</span>
-                    <span style={{ fontFamily: 'var(--font-mono)' }}>{robloxSession.placeId || 'N/A'}</span>
+                    {robloxSession.placeId ? (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ fontFamily: 'var(--font-mono)' }}>{robloxSession.placeId}</span>
+                        <a 
+                          href={`https://www.roblox.com/games/${robloxSession.placeId}`} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          style={{ color: 'var(--accent-blue)', textDecoration: 'underline', fontSize: '0.75rem' }}
+                        >
+                          [Mở game]
+                        </a>
+                      </div>
+                    ) : (
+                      <span style={{ fontFamily: 'var(--font-mono)' }}>N/A</span>
+                    )}
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.02)', paddingBottom: '6px' }}>
                     <span style={{ color: 'var(--text-secondary)' }}>Roblox Job ID:</span>
@@ -220,17 +234,22 @@ export default function Settings() {
               </div>
               <p>1. Mở Roblox Studio game của bạn.</p>
               <p>2. Dán mã nguồn Lua script của S&G Music vào ServerScriptService.</p>
-              <p>3. Mở cài đặt Script, nhập biến config:</p>
+              <p>3. Mở cài đặt Script, nhập các biến cấu hình sau:</p>
               <pre style={{
                 background: 'rgba(0,0,0,0.3)',
-                padding: '6px 10px',
-                borderRadius: '4px',
+                padding: '10px 14px',
+                borderRadius: '6px',
                 fontFamily: 'var(--font-mono)',
                 color: 'var(--accent-blue)',
                 border: '1px solid var(--border-color)',
-                marginTop: '4px'
+                marginTop: '4px',
+                whiteSpace: 'pre-wrap',
+                wordBreak: 'break-all',
+                fontSize: '0.7rem',
+                lineHeight: '1.4'
               }}>
-                API_KEY = "API_KEY_CỦA_BẠN"
+                API_KEY = "{apiKey || 'API_KEY_CỦA_BẠN'}"{"\n"}
+                DOMAIN_URL = "{window.location.origin}"
               </pre>
               <p style={{ marginTop: '4px' }}>4. Bật <strong>Allow HTTP Requests</strong> trong Roblox Game Settings để hoàn thành kết nối.</p>
             </div>
