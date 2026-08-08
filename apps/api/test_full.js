@@ -1,5 +1,5 @@
 // test_full.js - Comprehensive API test suite with Real JWT Authentication
-const API = 'http://localhost:3001/api';
+const API = 'http://127.0.0.1:3001/api';
 const API_KEY = 'demo-api-key-sg-music';
 const STREAMER = `${API}/v1/streamer/${API_KEY}`;
 const DASH = `${API}/v1/dashboard`;

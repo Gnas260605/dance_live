@@ -844,12 +844,32 @@ router.get('/v1/dashboard/dance', optionalAuth, (req, res) => {
 router.post('/v1/dashboard/dance', optionalAuth, async (req, res) => {
     const apiKey = getApiKeyFromReq(req);
     const { name, danceId, genre, danceStyle, setActive = true } = req.body;
+    const tenant = getTenant(apiKey);
+
+    if (danceId === 'none' || setActive === false) {
+        tenant.selectedDanceId = '';
+        tenant.selectedDanceStyle = '';
+        tenant.selectedDanceName = '';
+        tenant.lastDanceVerification = null;
+
+        addTenantLog(apiKey, `🎯 Đã tắt điệu nhảy chính. Trở về chế độ mặc định/ngẫu nhiên.`, true);
+        await saveStreamConfig(apiKey);
+
+        return res.json({
+            success: true,
+            selectedDanceId: '',
+            selectedDanceStyle: '',
+            selectedDanceName: '',
+            lastDanceVerification: null,
+            dances: tenant.customDances || []
+        });
+    }
+
     const normalizedStyle = (danceStyle || genre || 'bounce').toString().trim().toLowerCase();
     const formattedId = normalizeDanceId(danceId);
     const verificationStatus = 'verified';
     const verificationMode = formattedId ? 'asset' : 'procedural';
 
-    const tenant = getTenant(apiKey);
     if (!tenant.customDances) tenant.customDances = [];
 
     let savedDance = tenant.customDances.find(d => formattedId && d.danceId === formattedId);
@@ -923,12 +943,11 @@ router.delete('/v1/dashboard/dance/:id', optionalAuth, async (req, res) => {
 });
 
 // Auto-Fetch Roblox Animations API Endpoint
-router.post('/v1/dashboard/dance/auto-fetch-roblox', optionalAuth, async (req, res) => {
+router.post(['/v1/dashboard/dance/auto-fetch-roblox', '/v1/dashboard/dance/scan'], optionalAuth, async (req, res) => {
     const apiKey = getApiKeyFromReq(req);
-    const { input, setActive = true } = req.body;
-    if (!input || !input.trim()) return res.status(400).json({ error: 'Vui lòng nhập Asset ID hoặc Username Roblox' });
-
-    const cleanInput = input.trim();
+    const { input, username, setActive = true } = req.body;
+    const cleanInput = (input || username || '').trim();
+    if (!cleanInput) return res.status(400).json({ error: 'Vui lòng nhập Asset ID hoặc Username Roblox' });
     const assetIdMatch = cleanInput.match(/(\d{8,16})/);
     const tenant = getTenant(apiKey);
     if (!tenant.customDances) tenant.customDances = [];
@@ -981,7 +1000,14 @@ router.post('/v1/dashboard/dance/auto-fetch-roblox', optionalAuth, async (req, r
             addTenantLog(apiKey, `🔍 Auto-Fetch Roblox API: Đã tự động thêm & kích hoạt điệu nhảy "${dance.name}" (${formattedId})`, true);
             await saveDanceLibrary(apiKey);
             await saveStreamConfig(apiKey);
-            return res.json({ success: true, message: `Đã tự động lấy thành công điệu nhảy "${dance.name}"!`, dance, dances: tenant.customDances, selectedDanceId: tenant.selectedDanceId });
+            return res.json({ 
+                success: true, 
+                message: `Đã tự động lấy thành công điệu nhảy "${dance.name}"!`, 
+                dance, 
+                dances: tenant.customDances, 
+                selectedDanceId: tenant.selectedDanceId,
+                selectedDanceName: tenant.selectedDanceName
+            });
         } else {
             const userRes = await fetch('https://users.roblox.com/v1/usernames/users', {
                 method: 'POST',
@@ -1042,7 +1068,8 @@ router.post('/v1/dashboard/dance/auto-fetch-roblox', optionalAuth, async (req, r
                 message: `Đã quét tài khoản @${verifiedName} và tự động lấy ${userDancesAdded.length} điệu nhảy!`,
                 addedCount: userDancesAdded.length,
                 dances: tenant.customDances,
-                selectedDanceId: tenant.selectedDanceId
+                selectedDanceId: tenant.selectedDanceId,
+                selectedDanceName: tenant.selectedDanceName
             });
         }
     } catch (err) {

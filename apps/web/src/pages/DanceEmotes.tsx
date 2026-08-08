@@ -14,6 +14,7 @@ interface Dance {
 export default function DanceEmotes() {
   const [dances, setDances] = useState<Dance[]>([]);
   const [selectedDanceId, setSelectedDanceId] = useState('');
+  const [selectedDanceName, setSelectedDanceName] = useState('');
   const [scanUsername, setScanUsername] = useState('');
   const [scanSetActive, setScanSetActive] = useState(true);
   const [scanLoading, setScanLoading] = useState(false);
@@ -26,6 +27,7 @@ export default function DanceEmotes() {
       if (res.success) {
         setDances(res.verifiedDances || []);
         setSelectedDanceId(res.selectedDanceId || '');
+        setSelectedDanceName(res.selectedDanceName || '');
       }
     } catch (err: any) {
       setError(err.message || 'Lỗi tải thư viện điệu nhảy.');
@@ -40,16 +42,31 @@ export default function DanceEmotes() {
     try {
       setError('');
       setSuccess('');
+
+      const isCurrentlySelected = (selectedDanceId || selectedDanceName)
+        ? (dance.danceId ? selectedDanceId === dance.danceId : selectedDanceName === dance.name)
+        : false;
+
       const res = await apiFetch('/v1/dashboard/dance', {
         method: 'POST',
-        body: JSON.stringify({ danceId: dance.danceId, setActive: true })
+        body: JSON.stringify({ 
+          danceId: isCurrentlySelected ? 'none' : dance.danceId, 
+          name: isCurrentlySelected ? 'none' : dance.name,
+          danceStyle: isCurrentlySelected ? 'none' : dance.danceStyle,
+          setActive: !isCurrentlySelected 
+        })
       });
       if (res.success) {
-        setSelectedDanceId(res.selectedDanceId);
-        setSuccess(`Đã kích hoạt điệu nhảy "${dance.name}" làm điệu nhảy chính!`);
+        setSelectedDanceId(res.selectedDanceId || '');
+        setSelectedDanceName(res.selectedDanceName || '');
+        if (isCurrentlySelected) {
+          setSuccess('Đã hủy chọn điệu nhảy chính! Trả sân khấu về chế độ mặc định.');
+        } else {
+          setSuccess(`Đã kích hoạt điệu nhảy "${dance.name}" làm điệu nhảy chính!`);
+        }
       }
     } catch (err: any) {
-      setError(err.message || 'Không thể chọn điệu nhảy chính.');
+      setError(err.message || 'Không thể thay đổi cấu hình điệu nhảy chính.');
     }
   };
 
@@ -75,9 +92,8 @@ export default function DanceEmotes() {
 
       if (res.success) {
         setDances(res.dances || []);
-        if (res.selectedDanceId) {
-          setSelectedDanceId(res.selectedDanceId);
-        }
+        setSelectedDanceId(res.selectedDanceId || '');
+        setSelectedDanceName(res.selectedDanceName || '');
         setSuccess(res.message || 'Đã đồng bộ điệu nhảy thành công!');
         setScanUsername('');
       }
@@ -117,7 +133,9 @@ export default function DanceEmotes() {
 
           <div style={{ padding: '20px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', maxHeight: '480px', overflowY: 'auto' }}>
             {dances.map(dance => {
-              const isSelected = selectedDanceId === dance.danceId;
+              const isSelected = (selectedDanceId || selectedDanceName)
+                ? (dance.danceId ? selectedDanceId === dance.danceId : selectedDanceName === dance.name)
+                : false;
               return (
                 <div key={dance.id} style={{
                   padding: '14px',

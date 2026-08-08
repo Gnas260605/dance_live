@@ -32,25 +32,32 @@ function extractRobloxUsername(text) {
     if (!text || typeof text !== 'string') return null;
     const cleanText = text.trim();
 
-    // 1. Check !dance <username> or /dance <username> or dance <username>
-    const cmdMatch = cleanText.match(/(?:!|\/)?dance\s+@?([a-zA-Z0-9_]{3,20})/i);
+    // 1. Command-based patterns: prefix command + whitespace + username
+    // Commands: dance, nhay, nhảy, play, join, spawn, ten, tên, nick, acc, roblox, rbx
+    // Prefixes: optional !, /, or none
+    const cmdMatch = cleanText.match(/(?:!|\/)?(?:dance|nhay|nhảy|play|join|spawn|ten|tên|nick|acc|roblox|rbx)\s+@?([a-zA-Z0-9_]{3,20})/i);
     if (cmdMatch) return cmdMatch[1];
 
-    // 2. Check direct username with optional @ or punctuation
-    const standaloneMatch = cleanText.match(/^@?([a-zA-Z0-9_]{3,20})[.!:]?$/);
-    if (standaloneMatch) return standaloneMatch[1];
+    // 2. Colon-based patterns: (e.g. "roblox: Builderman", "ten: Builderman", "nick: Builderman")
+    const colonMatch = cleanText.match(/(?:roblox|rbx|ten|tên|nick|acc|user|username)\s*:\s*@?([a-zA-Z0-9_]{3,20})/i);
+    if (colonMatch) return colonMatch[1];
 
-    // 3. Scan words in comment for any valid Roblox username (3-20 chars alphanumeric + _)
-    const words = cleanText.split(/\s+/);
-    for (const word of words) {
-        const cleanedWord = word.replace(/^@/, '').replace(/[.!:]$/, '');
-        if (/^[a-zA-Z0-9_]{3,20}$/.test(cleanedWord)) {
-            const lower = cleanedWord.toLowerCase();
-            if (!['hello', 'xinchao', 'chao', 'like', 'follow', 'share', 'dance', 'sub', 'gift'].includes(lower)) {
-                return cleanedWord;
-            }
+    // 3. Standalone username with optional @ or punctuation at start/end
+    const standaloneMatch = cleanText.match(/^@?([a-zA-Z0-9_]{3,20})[.!:]?$/);
+    if (standaloneMatch) {
+        const username = standaloneMatch[1];
+        const lower = username.toLowerCase();
+        const commonWords = [
+            'hello', 'xinchao', 'chao', 'hi', 'like', 'follow', 'share', 'dance', 
+            'nhay', 'nhảy', 'sub', 'gift', 'vip', 'ad', 'admin', 'hay', 'dep', 
+            'đẹp', 'qua', 'quá', 'ok', 'oke', 'tui', 'cho', 'nha', 'di', 'đi', 
+            'lam', 'làm', 'ghe', 'ghê', 'voi', 'với', 'minh', 'mình', 'em', 'anh'
+        ];
+        if (!commonWords.includes(lower)) {
+            return username;
         }
     }
+
     return null;
 }
 
@@ -62,11 +69,15 @@ async function validateRobloxUsername(username) {
             body: JSON.stringify({ usernames: [username], excludeBannedUsers: true })
         });
         const data = await res.json();
-        if (data && data.data && data.data.length > 0) return data.data[0];
+        if (data && data.data && data.data.length > 0) {
+            return data.data[0];
+        } else {
+            return null; // Successfully verified that the user DOES NOT exist
+        }
     } catch (err) {
         console.error('[RobloxAPI] Validation error:', err.message);
+        return { name: username, networkError: true }; // Network/API error, fallback to raw name
     }
-    return { name: username };
 }
 
 function resolveMusicByCoins(tenant, coins) {
@@ -275,8 +286,11 @@ function processGiftEventForTenant(apiKey, giftPayload, sourceEventId = null) {
 async function processNewCommentForTenant(apiKey, tiktokUsername, commentText, isVIP = false, giftDetails = null) {
     const tenant = getTenant(apiKey);
     const extracted = extractRobloxUsername(commentText);
-    const fallbackUser = (tiktokUsername || 'Viewer').replace(/^@/, '').replace(/[^a-zA-Z0-9_]/g, '');
-    const rawUsername = extracted || (fallbackUser.length >= 3 ? fallbackUser : 'Builderman');
+    
+    if (!extracted) {
+        return { success: false, reason: 'NO_ROBLOX_USERNAME', error: 'Bình luận không chứa tên nhân vật Roblox hợp lệ!' };
+    }
+    const rawUsername = extracted;
 
     const now = Date.now();
     const cooldownKey = `${apiKey}_${tiktokUsername}`;
@@ -291,7 +305,11 @@ async function processNewCommentForTenant(apiKey, tiktokUsername, commentText, i
     }
 
     const robloxAccount = await validateRobloxUsername(rawUsername);
-    const verifiedUsername = robloxAccount ? robloxAccount.name : rawUsername;
+    if (robloxAccount === null) {
+        addTenantLog(apiKey, `⚠️ [Bỏ qua] Tài khoản Roblox "${rawUsername}" (@${tiktokUsername}) không tồn tại trên hệ thống.`);
+        return { success: false, reason: 'INVALID_USERNAME', error: `Tài khoản Roblox "${rawUsername}" không tồn tại!` };
+    }
+    const verifiedUsername = robloxAccount.name;
 
     const isCurrentlyActive = tenant.activePlayer && tenant.activePlayer.robloxUsername.toLowerCase() === verifiedUsername.toLowerCase();
     const isAlreadyQueued = tenant.playerQueue.some(p => p.robloxUsername.toLowerCase() === verifiedUsername.toLowerCase());
