@@ -69,6 +69,7 @@ end
 local POLL_INTERVAL    = 1.5   -- slightly slower to reduce rate-limit pressure
 local MAX_STAGE_DANCERS = 10
 local danceDurationSeconds = 60
+local stage = nil
 
 local globalDanceCounter = 0
 
@@ -204,7 +205,7 @@ local function getStageSize(stg)
 end
 
 -- Ensure Stage exists
-local stage = Workspace:FindFirstChild("KPopStage") or Workspace:FindFirstChild("DanceStage")
+stage = Workspace:FindFirstChild("KPopStage") or Workspace:FindFirstChild("DanceStage")
 local panels = {}
 
 if not stage then
@@ -274,6 +275,48 @@ if not stage then
 	ledWall.Material  = Enum.Material.Glass
 	ledWall.Transparency = 0.15
 	ledWall.Color     = Color3.fromRGB(0, 180, 240)
+end
+
+-- Ensure DancerSpawnPad exists
+local spawnPad = Workspace:FindFirstChild("DancerSpawnPad")
+if not spawnPad and stage then
+	local stageCF = getStageCFrame(stage)
+	local stageSize = getStageSize(stage)
+	
+	spawnPad = Instance.new("Part")
+	spawnPad.Name = "DancerSpawnPad"
+	spawnPad.Shape = Enum.PartType.Cylinder
+	spawnPad.Size = Vector3.new(0.2, 6, 6)
+	spawnPad.Orientation = Vector3.new(0, 0, 90) -- lay flat
+	
+	-- Position it at the back center of the stage
+	local yOffset = 3.0
+	local stageFloor = Workspace:FindFirstChild("StageFloor") or stage:FindFirstChild("StageFloor") or stage:FindFirstChild("DanceFloor")
+	if stageFloor then
+		yOffset = (stageFloor.Position.Y + 0.1) - stageCF.Position.Y
+	else
+		yOffset = (stageSize.Y / 2) + 0.1
+	end
+	
+	spawnPad.CFrame = stageCF * CFrame.new(0, yOffset, 10) -- centered at the back of the stage
+	spawnPad.Anchored = true
+	spawnPad.CanCollide = false
+	spawnPad.Material = Enum.Material.Neon
+	spawnPad.Color = Color3.fromRGB(0, 242, 254)
+	spawnPad.Transparency = 0.3
+	spawnPad.Parent = Workspace
+	
+	-- Add a nice glowing spotlight above the spawn pad
+	local attachment = Instance.new("Attachment")
+	attachment.Parent = spawnPad
+	
+	local spotlight = Instance.new("SpotLight")
+	spotlight.Color = Color3.fromRGB(0, 242, 254)
+	spotlight.Brightness = 8
+	spotlight.Range = 25
+	spotlight.Angle = 45
+	spotlight.Face = Enum.NormalId.Top
+	spotlight.Parent = attachment
 end
 
 -- Spawn cheering audience NPCs
@@ -1120,10 +1163,15 @@ local function spawnDancer(playerId, robloxUsername, tiktokUsername, animationId
 			end
 		end
 
-		-- Position on stage BEFORE parenting to Workspace so it spawns EXACTLY on the stage floor (no falling)
-		local stageCF     = getStageCFrame(stage)
-		local offset      = getSlotOffset(3) -- spawn at center first, updateDancerPositions will shift
-		local targetCFrame = stageCF * CFrame.new(offset) * CFrame.Angles(0, math.rad(180), 0)
+		-- Position on DancerSpawnPad initially (or fallback center-back of the stage)
+		local spawnPadObj = Workspace:FindFirstChild("DancerSpawnPad")
+		local targetCFrame
+		if spawnPadObj then
+			targetCFrame = spawnPadObj.CFrame * CFrame.new(0, 3.0, 0) * CFrame.Angles(0, math.rad(180), 0)
+		else
+			local stageCF = getStageCFrame(stage)
+			targetCFrame = stageCF * CFrame.new(0, 5.0, 10) * CFrame.Angles(0, math.rad(180), 0)
+		end
 		characterModel:PivotTo(targetCFrame)
 
 		characterModel.Name   = robloxUsername
@@ -1142,9 +1190,6 @@ local function spawnDancer(playerId, robloxUsername, tiktokUsername, animationId
 			isVIP          = isVIP,
 			spawnTime      = tick(),
 		})
-
-		-- Dynamically rearrange everyone's slot positions (newest gets front center)
-		pcall(updateDancerPositions)
 
 		-- Nametag
 		createNametag(characterModel, tiktokUsername, robloxUsername, isVIP)
@@ -1165,6 +1210,10 @@ local function spawnDancer(playerId, robloxUsername, tiktokUsername, animationId
 				focusEvent:FireAllClients(characterModel, tiktokUsername, robloxUsername, #activeDancersList, isVIP, customTitle, customColor)
 			end)
 		end
+
+		-- Wait a brief moment on the spawn pad for visual highlight, then rearrange everyone to slots!
+		task.wait(0.7)
+		pcall(updateDancerPositions)
 	end)
 end
 
