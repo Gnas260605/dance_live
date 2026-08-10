@@ -262,14 +262,18 @@ if not stage then
 	neonRim.Adornee       = stage
 	neonRim.Parent        = stage
 
-	local ledWall = Instance.new("Part")
-	ledWall.Name      = "LEDWall"
-	ledWall.Size      = Vector3.new(36, 18, 1)
-	ledWall.Position  = Vector3.new(0, 12, -13)
-	ledWall.Anchored  = true
-	ledWall.Material  = Enum.Material.Neon
-	ledWall.Color     = Color3.fromRGB(255, 0, 127)
-	ledWall.Parent    = Workspace
+	local ledWall = stage:FindFirstChild("LEDWall") or Workspace:FindFirstChild("LEDWall")
+	if not ledWall then
+		ledWall = Instance.new("Part")
+		ledWall.Name      = "LEDWall"
+		ledWall.Size      = Vector3.new(36, 18, 1)
+		ledWall.Position  = Vector3.new(0, 12, -13)
+		ledWall.Anchored  = true
+		ledWall.Parent    = Workspace
+	end
+	ledWall.Material  = Enum.Material.Glass
+	ledWall.Transparency = 0.15
+	ledWall.Color     = Color3.fromRGB(0, 180, 240)
 end
 
 -- Spawn cheering audience NPCs
@@ -354,11 +358,14 @@ pcall(spawnAudience)
 -- Stage dynamic light show (HSV spectrum cycling with diagonal waves)
 _G.IsTweeningLighting = false
 
--- Initialize LEDWall to stable Cyan
+-- Initialize LEDWall to stable Glossy Glass Cyan (anti-glare)
 task.spawn(function()
-	local ledWall = Workspace:FindFirstChild("LEDWall")
+	local stage = Workspace:FindFirstChild("KPopStage") or Workspace:FindFirstChild("DanceStage")
+	local ledWall = (stage and stage:FindFirstChild("LEDWall")) or Workspace:FindFirstChild("LEDWall")
 	if ledWall then
-		ledWall.Color = Color3.fromRGB(0, 200, 255)
+		ledWall.Material = Enum.Material.Glass
+		ledWall.Transparency = 0.15
+		ledWall.Color = Color3.fromRGB(0, 180, 240)
 	end
 end)
 
