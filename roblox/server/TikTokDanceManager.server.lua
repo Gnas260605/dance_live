@@ -192,6 +192,8 @@ end
 -- Stage helpers
 local function getStageCFrame(stg)
 	if not stg then return CFrame.new(0, 1.5, 0) end
+	local mainStage = stg:FindFirstChild("MainStage") or stg:FindFirstChild("StageFloor") or stg:FindFirstChild("DanceFloor")
+	if mainStage then return mainStage.CFrame end
 	if stg:IsA("Model") then return stg:GetPivot() end
 	if stg:IsA("BasePart") then return stg.CFrame end
 	return CFrame.new(0, 1.5, 0)
@@ -199,6 +201,8 @@ end
 
 local function getStageSize(stg)
 	if not stg then return Vector3.new(44, 3, 28) end
+	local mainStage = stg:FindFirstChild("MainStage") or stg:FindFirstChild("StageFloor") or stg:FindFirstChild("DanceFloor")
+	if mainStage then return mainStage.Size end
 	if stg:IsA("Model") then return stg:GetExtentsSize() end
 	if stg:IsA("BasePart") then return stg.Size end
 	return Vector3.new(44, 3, 28)
