@@ -86,8 +86,8 @@ local function startDynamicTrackingCamera()
 	RunService.RenderStepped:Connect(function(dt)
 		pcall(function()
 			Camera.CameraType = Enum.CameraType.Scriptable
-			swayTimer = swayTimer + dt * 0.45
-			local orbitAngle = math.rad(math.sin(swayTimer * 0.2) * 22)
+			swayTimer = swayTimer + dt * 0.3 -- slower, more cinematic sway increment
+			local orbitAngle = math.rad(math.sin(swayTimer * 0.15) * 18)
 
 			local stage = Workspace:FindFirstChild("KPopStage") or Workspace:FindFirstChild("DanceStage")
 			local stageCenter = getStageCenter(stage)
@@ -99,12 +99,13 @@ local function startDynamicTrackingCamera()
 				local hrp = currentTargetModel:FindFirstChild("HumanoidRootPart") or currentTargetModel.PrimaryPart
 
 				if hrp and focusTimer < 9 then
-					-- Close-up spotlight view on active commenter
+					-- Close-up spotlight view on active commenter (damped sway offsets)
 					local targetPos = hrp.Position
+					local slowSway = swayTimer * 0.4
 					local offset = Vector3.new(
-						math.sin(swayTimer) * 4.5,
-						2.2 + math.cos(swayTimer * 0.8) * 0.4,
-						12 + math.sin(swayTimer * 0.5) * 1.5
+						math.sin(slowSway) * 3.5,
+						2.0 + math.cos(slowSway * 0.8) * 0.25,
+						11 + math.sin(slowSway * 0.5) * 1.0
 					)
 					cameraPos = targetPos + offset
 					targetFocus = targetPos + Vector3.new(0, 1.2, 0)
@@ -115,19 +116,20 @@ local function startDynamicTrackingCamera()
 			end
 
 			if not currentTargetModel then
-				-- Wide stage overview shot
+				-- Wide stage overview shot (damped sway offsets)
 				local radius = 32
 				cameraPos = stageCenter + Vector3.new(
 					math.sin(orbitAngle) * radius,
-					6 + math.sin(swayTimer * 0.5) * 1.5,
+					5.5 + math.sin(swayTimer * 0.3) * 1.0,
 					radius
 				)
 				targetFocus = stageCenter
 			end
 
 			local targetCFrame = CFrame.new(cameraPos, targetFocus)
-			-- Smooth lerp camera without stuttering or lag
-			Camera.CFrame = Camera.CFrame:Lerp(targetCFrame, math.clamp(dt * 4.5, 0.05, 0.35))
+			-- Buttery-smooth, framerate-independent exponential decay interpolation
+			local alpha = 1 - math.exp(-5.0 * dt)
+			Camera.CFrame = Camera.CFrame:Lerp(targetCFrame, alpha)
 		end)
 	end)
 end

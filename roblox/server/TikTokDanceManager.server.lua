@@ -149,9 +149,9 @@ pcall(function()
 	local bloom = Lighting:FindFirstChildOfClass("BloomEffect")
 	if not bloom then
 		bloom = Instance.new("BloomEffect")
-		bloom.Intensity = 1.5
-		bloom.Size = 24
-		bloom.Threshold = 0.35
+		bloom.Intensity = 0.4
+		bloom.Size = 18
+		bloom.Threshold = 0.85
 		bloom.Parent = Lighting
 	end
 
