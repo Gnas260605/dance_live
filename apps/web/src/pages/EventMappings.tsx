@@ -78,8 +78,8 @@ export default function EventMappings() {
       setSuccessMsg('');
       const updated = { ...map, enabled: !map.enabled };
       
-      const res = await apiFetch('/v1/dashboard/event-mappings', {
-        method: 'POST',
+      const res = await apiFetch(`/v1/dashboard/event-mappings/${map.id}`, {
+        method: 'PUT',
         body: JSON.stringify(updated)
       });
 
