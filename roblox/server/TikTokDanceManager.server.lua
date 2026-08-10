@@ -801,12 +801,10 @@ local function playDanceAnimation(character, animAssetId, danceStyle, playerId, 
 		local defaultAnimate = character:FindFirstChild("Animate")
 		if defaultAnimate then pcall(function() defaultAnimate:Destroy() end) end
 
-		-- HRP: must NOT be anchored for Animator to work
+		-- HRP: must be anchored to keep dancer locked in place
 		local hrp = character:FindFirstChild("HumanoidRootPart") or character.PrimaryPart
 		if hrp then
-			hrp.Anchored = false
-			-- Give network ownership to server
-			pcall(function() hrp:SetNetworkOwner(nil) end)
+			hrp.Anchored = true
 		end
 
 		-- Stop old ProceduralDance
@@ -1073,11 +1071,6 @@ local function spawnDancer(playerId, robloxUsername, tiktokUsername, animationId
 			local template = Workspace:FindFirstChild("R15") or Workspace:FindFirstChild("Rig")
 			if template then
 				characterModel = template:Clone()
-				for _, part in ipairs(characterModel:GetDescendants()) do
-					if part:IsA("BasePart") then
-						part.Anchored = false
-					end
-				end
 			else
 				characterModel = Instance.new("Model")
 
@@ -1112,6 +1105,18 @@ local function spawnDancer(playerId, robloxUsername, tiktokUsername, animationId
 			local oldest = table.remove(activeDancersList, 1)
 			if oldest and oldest.model and oldest.model.Parent then
 				pcall(function() oldest.model:Destroy() end)
+			end
+		end
+
+		-- Apply physics and collision defaults to prevent character collisions and bouncing
+		for _, part in ipairs(characterModel:GetDescendants()) do
+			if part:IsA("BasePart") then
+				if part.Name == "HumanoidRootPart" then
+					part.Anchored = true
+				else
+					part.Anchored = false
+				end
+				part.CanCollide = false
 			end
 		end
 
