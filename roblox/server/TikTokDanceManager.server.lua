@@ -353,6 +353,15 @@ pcall(spawnAudience)
 
 -- Stage dynamic light show (HSV spectrum cycling with diagonal waves)
 _G.IsTweeningLighting = false
+
+-- Initialize LEDWall to stable Cyan
+task.spawn(function()
+	local ledWall = Workspace:FindFirstChild("LEDWall")
+	if ledWall then
+		ledWall.Color = Color3.fromRGB(0, 200, 255)
+	end
+end)
+
 task.spawn(function()
 	local baseHue = 0
 	while true do
@@ -370,22 +379,18 @@ task.spawn(function()
 						end
 					end
 				else
-					-- Fallback: Cycle any Neon part inside the stage model
+					-- Fallback: Cycle any Neon part inside the stage model (excluding screens/leds)
 					local stageObj = Workspace:FindFirstChild("DanceStage") or Workspace:FindFirstChild("KPopStage")
 					if stageObj then
 						for _, child in ipairs(stageObj:GetDescendants()) do
 							if child:IsA("BasePart") and child.Material == Enum.Material.Neon then
-								child.Color = Color3.fromHSV(baseHue, 0.8, 0.8)
+								local nameLower = child.Name:lower()
+								if not string.find(nameLower, "led") and not string.find(nameLower, "screen") then
+									child.Color = Color3.fromHSV(baseHue, 0.8, 0.8)
+								end
 							end
 						end
 					end
-				end
-				
-				-- Cycle ledWall
-				local ledWall = Workspace:FindFirstChild("LEDWall")
-				if ledWall then
-					local ledHue = (baseHue + 0.5) % 1.0
-					ledWall.Color = Color3.fromHSV(ledHue, 0.8, 1.0)
 				end
 				
 				-- Cycle stage rim
