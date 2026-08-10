@@ -30,30 +30,69 @@ function markTikTokState(tenant, state, extra = {}) {
 
 function extractRobloxUsername(text) {
     if (!text || typeof text !== 'string') return null;
-    const cleanText = text.trim();
+    let cleanText = text.trim();
 
-    // 1. Command-based patterns: prefix command + whitespace + username
-    // Commands: dance, nhay, nhảy, play, join, spawn, ten, tên, nick, acc, roblox, rbx
-    // Prefixes: optional !, /, or none
+    // 1. Colon-based patterns: if there is a colon, extract the first valid username after it
+    if (cleanText.includes(':')) {
+        const parts = cleanText.split(':');
+        const afterColon = parts[parts.length - 1].trim();
+        const match = afterColon.match(/@?([a-zA-Z0-9_]{3,20})/);
+        if (match) {
+            const username = match[1];
+            const commonWords = [
+                'hello', 'xinchao', 'chao', 'hi', 'like', 'follow', 'share', 'dance', 
+                'nhay', 'nhảy', 'sub', 'gift', 'vip', 'ad', 'admin', 'hay', 'dep', 
+                'đẹp', 'qua', 'quá', 'ok', 'oke', 'tui', 'cho', 'nha', 'di', 'đi', 
+                'lam', 'làm', 'ghe', 'ghê', 'voi', 'với', 'minh', 'mình', 'em', 'anh',
+                'roblox', 'rbx', 'acc', 'nick', 'user', 'username'
+            ];
+            if (!commonWords.includes(username.toLowerCase())) {
+                return username;
+            }
+        }
+    }
+
+    // 2. Tokenize the text into words (removing punctuation)
+    const words = cleanText.split(/[\s,!?.\/\\#\-\+]+/);
+    
+    const keywords = [
+        'dance', 'nhay', 'nhảy', 'play', 'join', 'spawn', 'ten', 'tên', 'nick', 
+        'acc', 'roblox', 'rbx', 'user', 'username'
+    ];
+    
+    const commonWords = [
+        'hello', 'xinchao', 'chao', 'hi', 'like', 'follow', 'share', 'dance', 
+        'nhay', 'nhảy', 'sub', 'gift', 'vip', 'ad', 'admin', 'hay', 'dep', 
+        'đẹp', 'qua', 'quá', 'ok', 'oke', 'tui', 'cho', 'nha', 'di', 'đi', 
+        'lam', 'làm', 'ghe', 'ghê', 'voi', 'với', 'minh', 'mình', 'em', 'anh',
+        'la', 'là', 'của', 'cua', 'cai', 'cái', 'nay', 'này', 'va', 'và', 'co', 'có'
+    ];
+
+    // Find all alphanumeric words that match Roblox username requirements
+    const candidates = [];
+    for (let word of words) {
+        if (word.startsWith('@')) {
+            word = word.substring(1);
+        }
+        
+        if (/^[a-zA-Z0-9_]{3,20}$/.test(word)) {
+            const lowerWord = word.toLowerCase();
+            if (!commonWords.includes(lowerWord) && !keywords.includes(lowerWord)) {
+                candidates.push(word);
+            }
+        }
+    }
+
+    // If we found candidates, the username is usually the last one (since Vietnamese sentences place it at the end)
+    if (candidates.length > 0) {
+        return candidates[candidates.length - 1];
+    }
+
+    // Fallback: If no candidate found but there is a command match
     const cmdMatch = cleanText.match(/(?:!|\/)?(?:dance|nhay|nhảy|play|join|spawn|ten|tên|nick|acc|roblox|rbx)\s+@?([a-zA-Z0-9_]{3,20})/i);
-    if (cmdMatch) return cmdMatch[1];
-
-    // 2. Colon-based patterns: (e.g. "roblox: Builderman", "ten: Builderman", "nick: Builderman")
-    const colonMatch = cleanText.match(/(?:roblox|rbx|ten|tên|nick|acc|user|username)\s*:\s*@?([a-zA-Z0-9_]{3,20})/i);
-    if (colonMatch) return colonMatch[1];
-
-    // 3. Standalone username with optional @ or punctuation at start/end
-    const standaloneMatch = cleanText.match(/^@?([a-zA-Z0-9_]{3,20})[.!:]?$/);
-    if (standaloneMatch) {
-        const username = standaloneMatch[1];
-        const lower = username.toLowerCase();
-        const commonWords = [
-            'hello', 'xinchao', 'chao', 'hi', 'like', 'follow', 'share', 'dance', 
-            'nhay', 'nhảy', 'sub', 'gift', 'vip', 'ad', 'admin', 'hay', 'dep', 
-            'đẹp', 'qua', 'quá', 'ok', 'oke', 'tui', 'cho', 'nha', 'di', 'đi', 
-            'lam', 'làm', 'ghe', 'ghê', 'voi', 'với', 'minh', 'mình', 'em', 'anh'
-        ];
-        if (!commonWords.includes(lower)) {
+    if (cmdMatch) {
+        const username = cmdMatch[1];
+        if (!keywords.includes(username.toLowerCase())) {
             return username;
         }
     }

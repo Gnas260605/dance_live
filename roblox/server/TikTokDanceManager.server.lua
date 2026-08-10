@@ -134,16 +134,36 @@ end)
 
 -- ====================================
 -- STAGE SETUP
--- ====================================
-
-Players.CharacterAutoLoads = false
+-- ====================================Players.CharacterAutoLoads = false
 
 pcall(function()
-	Lighting.ClockTime      = 14
-	Lighting.Brightness     = 1.0
+	Lighting.ClockTime      = 20 -- Set to night (8 PM) for awesome lighting contrast!
+	Lighting.Brightness     = 0.65
 	Lighting.GlobalShadows  = true
-	Lighting.Ambient        = Color3.fromRGB(110, 110, 130)
-	Lighting.OutdoorAmbient = Color3.fromRGB(90, 90, 110)
+	Lighting.Ambient        = Color3.fromRGB(15, 15, 30)
+	Lighting.OutdoorAmbient = Color3.fromRGB(10, 10, 20)
+	Lighting.EnvironmentDiffuseScale = 0.4
+	Lighting.EnvironmentSpecularScale = 0.4
+
+	-- Ensure Bloom exists for neon glow
+	local bloom = Lighting:FindFirstChildOfClass("BloomEffect")
+	if not bloom then
+		bloom = Instance.new("BloomEffect")
+		bloom.Intensity = 1.5
+		bloom.Size = 24
+		bloom.Threshold = 0.35
+		bloom.Parent = Lighting
+	end
+
+	-- Ensure ColorCorrection exists for vibrant saturation
+	local cc = Lighting:FindFirstChildOfClass("ColorCorrectionEffect")
+	if not cc then
+		cc = Instance.new("ColorCorrectionEffect")
+		cc.Brightness = 0.03
+		cc.Contrast = 0.12
+		cc.Saturation = 0.22
+		cc.Parent = Lighting
+	end
 end)
 
 -- Remote Events
@@ -154,7 +174,7 @@ if not focusEvent then
 	focusEvent.Parent = ReplicatedStorage
 end
 
-local giftEffectEvent = ReplicatedStorage:FindFirstChild("GiftEffectEvent") or ReplicatedStorage:FindFirstChild("TikTokGiftEffectRemote")
+local giftEffectEvent = ReplicatedStorage:FindFirstChild("TikTokGiftEffectEvent") or ReplicatedStorage:FindFirstChild("TikTokGiftEffectRemote")
 if not giftEffectEvent then
 	giftEffectEvent = Instance.new("RemoteEvent")
 	giftEffectEvent.Name = "TikTokGiftEffectRemote"
@@ -185,6 +205,8 @@ end
 
 -- Ensure Stage exists
 local stage = Workspace:FindFirstChild("KPopStage") or Workspace:FindFirstChild("DanceStage")
+local panels = {}
+
 if not stage then
 	stage = Instance.new("Part")
 	stage.Name     = "DanceStage"
@@ -192,7 +214,7 @@ if not stage then
 	stage.Position = Vector3.new(0, 1.5, 0)
 	stage.Anchored = true
 	stage.Material = Enum.Material.SmoothPlastic
-	stage.Color    = Color3.fromRGB(30, 35, 55)
+	stage.Color    = Color3.fromRGB(15, 15, 25)
 	stage.Parent   = Workspace
 
 	local stageFloor = Instance.new("Part")
@@ -202,14 +224,41 @@ if not stage then
 	stageFloor.Anchored     = true
 	stageFloor.Material     = Enum.Material.Glass
 	stageFloor.Color        = Color3.fromRGB(0, 242, 254)
-	stageFloor.Transparency = 0.5
+	stageFloor.Transparency = 0.6
 	stageFloor.CanCollide   = false
 	stageFloor.Parent       = Workspace
+
+	-- Spawn grid panels for beautiful light waves
+	local gridContainer = Instance.new("Folder")
+	gridContainer.Name = "StageGrid"
+	gridContainer.Parent = Workspace
+	
+	local rows = 4
+	local cols = 6
+	local startX = -18.75
+	local startZ = -11.25
+	local spacingX = 7.5
+	local spacingZ = 7.5
+	
+	for r = 1, rows do
+		for c = 1, cols do
+			local p = Instance.new("Part")
+			p.Name = "GridPanel_" .. r .. "_" .. c
+			p.Size = Vector3.new(7.0, 0.05, 7.0)
+			p.Position = Vector3.new(startX + (c - 1) * spacingX, 3.06, startZ + (r - 1) * spacingZ)
+			p.Anchored = true
+			p.Material = Enum.Material.Neon
+			p.Color = Color3.fromRGB(20, 20, 30)
+			p.CanCollide = false
+			p.Parent = gridContainer
+			table.insert(panels, {part = p, row = r, col = c})
+		end
+	end
 
 	local neonRim = Instance.new("SelectionBox")
 	neonRim.Name          = "NeonRim"
 	neonRim.Color3        = Color3.fromRGB(255, 0, 127)
-	neonRim.LineThickness = 0.1
+	neonRim.LineThickness = 0.15
 	neonRim.Adornee       = stage
 	neonRim.Parent        = stage
 
@@ -222,6 +271,136 @@ if not stage then
 	ledWall.Color     = Color3.fromRGB(255, 0, 127)
 	ledWall.Parent    = Workspace
 end
+
+-- Spawn cheering audience NPCs
+local function spawnAudience()
+	local audienceFolder = Workspace:FindFirstChild("StageAudience")
+	if audienceFolder then pcall(function() audienceFolder:Destroy() end) end
+	
+	audienceFolder = Instance.new("Folder")
+	audienceFolder.Name = "StageAudience"
+	audienceFolder.Parent = Workspace
+	
+	local audiencePositions = {
+		Vector3.new(-22, 1.6, 18),
+		Vector3.new(-12, 1.6, 20),
+		Vector3.new(0, 1.6, 21),
+		Vector3.new(12, 1.6, 20),
+		Vector3.new(22, 1.6, 18),
+	}
+	
+	for idx, pos in ipairs(audiencePositions) do
+		pcall(function()
+			local dummy = Instance.new("Model")
+			dummy.Name = "Audience_" .. idx
+			dummy.Parent = audienceFolder
+			
+			local head = Instance.new("Part")
+			head.Name = "Head"
+			head.Size = Vector3.new(1.2, 1.2, 1.2)
+			head.Position = pos + Vector3.new(0, 3.0, 0)
+			head.Color = Color3.fromRGB(150, 140, 160)
+			head.Anchored = true
+			head.CanCollide = false
+			head.Parent = dummy
+			
+			local torso = Instance.new("Part")
+			torso.Name = "Torso"
+			torso.Size = Vector3.new(2, 2, 1)
+			torso.Position = pos + Vector3.new(0, 1.5, 0)
+			torso.Color = Color3.fromRGB(40, 45, 60)
+			torso.Anchored = true
+			torso.CanCollide = false
+			torso.Parent = dummy
+			
+			-- Glow stick
+			local stick = Instance.new("Part")
+			stick.Name = "GlowStick"
+			stick.Size = Vector3.new(0.3, 2.5, 0.3)
+			stick.Position = pos + Vector3.new(0.8, 2.2, -0.8)
+			stick.Rotation = Vector3.new(20, 0, 15)
+			stick.Material = Enum.Material.Neon
+			stick.Color = Color3.fromHSV(math.random(), 0.9, 1.0)
+			stick.Anchored = true
+			stick.CanCollide = false
+			stick.Parent = dummy
+			
+			-- Make them wave
+			task.spawn(function()
+				local tOffset = math.random() * 10
+				local stickBaseCFrame = stick.CFrame
+				local torsoBaseCFrame = torso.CFrame
+				local headBaseCFrame = head.CFrame
+				
+				while dummy and dummy.Parent do
+					local t = tick() + tOffset
+					local waveAngle = math.sin(t * 3) * 15
+					local torsoTilt = math.sin(t * 1.5) * 3
+					
+					pcall(function()
+						stick.CFrame = stickBaseCFrame * CFrame.Angles(math.rad(waveAngle), 0, math.rad(waveAngle/2))
+						torso.CFrame = torsoBaseCFrame * CFrame.Angles(0, 0, math.rad(torsoTilt))
+						head.CFrame = headBaseCFrame * CFrame.Angles(0, 0, math.rad(torsoTilt * 1.2))
+					end)
+					task.wait(0.05)
+				end
+			end)
+		end)
+	end
+end
+
+pcall(spawnAudience)
+
+-- Stage dynamic light show (HSV spectrum cycling with diagonal waves)
+_G.IsTweeningLighting = false
+task.spawn(function()
+	local baseHue = 0
+	while true do
+		baseHue = (baseHue + 0.003) % 1.0
+		
+		pcall(function()
+			if not _G.IsTweeningLighting then
+				-- Cycle grid panels if they exist
+				if #panels > 0 then
+					for _, item in ipairs(panels) do
+						local p = item.part
+						if p and p.Parent then
+							local panelHue = (baseHue + (item.row + item.col) * 0.04) % 1.0
+							p.Color = Color3.fromHSV(panelHue, 0.8, 0.8)
+						end
+					end
+				else
+					-- Fallback: Cycle any Neon part inside the stage model
+					local stageObj = Workspace:FindFirstChild("DanceStage") or Workspace:FindFirstChild("KPopStage")
+					if stageObj then
+						for _, child in ipairs(stageObj:GetDescendants()) do
+							if child:IsA("BasePart") and child.Material == Enum.Material.Neon then
+								child.Color = Color3.fromHSV(baseHue, 0.8, 0.8)
+							end
+						end
+					end
+				end
+				
+				-- Cycle ledWall
+				local ledWall = Workspace:FindFirstChild("LEDWall")
+				if ledWall then
+					local ledHue = (baseHue + 0.5) % 1.0
+					ledWall.Color = Color3.fromHSV(ledHue, 0.8, 1.0)
+				end
+				
+				-- Cycle stage rim
+				local stageObj = Workspace:FindFirstChild("DanceStage") or Workspace:FindFirstChild("KPopStage")
+				if stageObj then
+					local neonRim = stageObj:FindFirstChild("NeonRim")
+					if neonRim then
+						neonRim.Color3 = Color3.fromHSV(baseHue, 0.8, 1.0)
+					end
+				end
+			end
+		end)
+		task.wait(0.05)
+	end
+end)
 
 -- Spotlight
 local lightPart = Workspace:FindFirstChild("OverheadLight")
@@ -320,7 +499,8 @@ ActionHandlers.TWEEN_LIGHTING = function(action, context)
 
 		local ledWall = Workspace:FindFirstChild("LEDWall")
 		if not ledWall then return end
-		local origColor = ledWall.Color
+		
+		_G.IsTweeningLighting = true
 		
 		local r, g, b = 0, 242, 254
 		if type(color) == "string" and string.sub(color, 1, 1) == "#" then
@@ -339,8 +519,8 @@ ActionHandlers.TWEEN_LIGHTING = function(action, context)
 		
 		task.delay(duration, function()
 			pcall(function()
-				ledWall.Color = origColor
 				if spotLight then spotLight.Brightness = 1.8 end
+				_G.IsTweeningLighting = false
 			end)
 		end)
 	end)
