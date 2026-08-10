@@ -107,15 +107,21 @@ async function validateRobloxUsername(username) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ usernames: [username], excludeBannedUsers: true })
         });
-        const data = await res.json();
-        if (data && data.data && data.data.length > 0) {
-            return data.data[0];
+        
+        if (res.status === 200) {
+            const data = await res.json();
+            if (data && data.data && data.data.length > 0) {
+                return data.data[0];
+            } else {
+                return null; // Successfully verified that the user DOES NOT exist
+            }
         } else {
-            return null; // Successfully verified that the user DOES NOT exist
+            console.warn(`[RobloxAPI] Validation returned status ${res.status}. Falling back to raw name.`);
+            return { name: username, networkError: true }; // API error/rate limit, fallback to raw name
         }
     } catch (err) {
         console.error('[RobloxAPI] Validation error:', err.message);
-        return { name: username, networkError: true }; // Network/API error, fallback to raw name
+        return { name: username, networkError: true }; // Network error, fallback to raw name
     }
 }
 

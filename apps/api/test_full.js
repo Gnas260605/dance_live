@@ -70,16 +70,16 @@ async function runTests() {
         assert('/status has isRobloxOnline field', 'isRobloxOnline' in (r.data?.tenantStatus || {}));
     }
 
-    console.log('\n=== 2. COMMENT FLOW (jokerick_hiep) ===');
+    console.log('\n=== 2. COMMENT FLOW (builderman) ===');
     let firstPlayerId = null;
     {
         const r = await req('POST', `${DASH}/simulate-comment`, {
             tiktokUsername: 'viewer_test',
-            comment: '!dance jokerick_hiep',
+            comment: '!dance builderman',
         });
         assert('POST simulate-comment → 200', r.status === 200, `got ${r.status} ${JSON.stringify(r.data)}`);
         assert('playerData exists', !!r.data?.playerData);
-        assert('robloxUsername = jokerick_Hiep', r.data?.playerData?.robloxUsername === 'jokerick_Hiep', r.data?.playerData?.robloxUsername);
+        assert('robloxUsername = builderman', r.data?.playerData?.robloxUsername === 'builderman', r.data?.playerData?.robloxUsername);
         assert('animationId present', !!r.data?.playerData?.animationId, r.data?.playerData?.animationId);
         assert('id present', !!r.data?.playerData?.id);
         firstPlayerId = r.data?.playerData?.id;
@@ -89,7 +89,7 @@ async function runTests() {
     {
         const r = await req('GET', `${streamerUrl}/current-player`);
         assert('GET /current-player → 200', r.status === 200, `got ${r.status}`);
-        assert('player.robloxUsername = jokerick_Hiep', r.data?.player?.robloxUsername === 'jokerick_Hiep', r.data?.player?.robloxUsername);
+        assert('player.robloxUsername = builderman', r.data?.player?.robloxUsername === 'builderman', r.data?.player?.robloxUsername);
         assert('player.id matches', r.data?.player?.id === firstPlayerId, `${r.data?.player?.id} vs ${firstPlayerId}`);
         assert('selectedDanceId exists', !!r.data?.selectedDanceId, r.data?.selectedDanceId);
         assert('danceDuration present', !!r.data?.danceDuration);
@@ -100,7 +100,7 @@ async function runTests() {
         await sleep(2100); // past cooldown
         const r = await req('POST', `${DASH}/simulate-comment`, {
             tiktokUsername: 'viewer_test',
-            comment: '!dance jokerick_hiep',
+            comment: '!dance builderman',
         });
         assert('second comment → 200', r.status === 200, `got ${r.status}`);
         // The player ID must stay SAME (bug fix: no duplicate spawn)
@@ -113,7 +113,7 @@ async function runTests() {
     {
         const r = await req('POST', `${streamerUrl}/dance-status`, {
             playerId: firstPlayerId,
-            robloxUsername: 'jokerick_Hiep',
+            robloxUsername: 'builderman',
             danceId: 'rbxassetid://86539981118136',
             danceStyle: 'bounce',
             success: true,
