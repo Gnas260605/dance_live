@@ -990,6 +990,31 @@ end
 local activeDancersList  = {}
 local nextSlotIndex      = 1
 
+local SLOT_PRIORITY = { 3, 2, 4, 1, 5, 8, 7, 9, 6, 10 }
+
+local function updateDancerPositions()
+	local stage = Workspace:FindFirstChild("KPopStage") or Workspace:FindFirstChild("DanceStage")
+	if not stage then return end
+	local stageCF = getStageCFrame(stage)
+	
+	local numDancers = #activeDancersList
+	for i = 1, numDancers do
+		local dancer = activeDancersList[i]
+		if dancer and dancer.model and dancer.model.Parent then
+			-- Newer dancers get higher priority slots (closer to 1, i.e. front-center)
+			local priorityIdx = numDancers - i + 1
+			local slotIdx = SLOT_PRIORITY[priorityIdx] or 1
+			
+			local offset = getSlotOffset(slotIdx)
+			local targetCF = stageCF * CFrame.new(offset) * CFrame.Angles(0, math.rad(180), 0)
+			
+			pcall(function()
+				dancer.model:PivotTo(targetCF)
+			end)
+		end
+	end
+end
+
 local function spawnDancer(playerId, robloxUsername, tiktokUsername, animationId, isVIP, giftDetails, customTitle, customColor, danceStyle)
 	print(string.format("[TikTokDanceManager] 🕺 Spawning: TikTok @%s → Roblox: %s", tostring(tiktokUsername), tostring(robloxUsername)))
 
@@ -1017,9 +1042,6 @@ local function spawnDancer(playerId, robloxUsername, tiktokUsername, animationId
 		end
 
 		-- Load avatar character model
-		-- Strategy: try GetHumanoidDescriptionFromUserIdAsync → CreateHumanoidModelFromDescription
-		--           fallback: CreateHumanoidModelFromUserIdAsync (old API, slower but works)
-		--           fallback: fallback box rig
 		local characterModel = nil
 
 		-- Attempt 1: Description-based (better fidelity)
@@ -1047,32 +1069,42 @@ local function spawnDancer(playerId, robloxUsername, tiktokUsername, animationId
 
 		-- Attempt 3: Minimal fallback rig (never fails)
 		if not characterModel then
-			warn(string.format("[TikTokDanceManager] ⚠️ Avatar load failed for userId=%s, using fallback rig.", tostring(userId)))
-			characterModel = Instance.new("Model")
+			warn(string.format("[TikTokDanceManager] ⚠️ Avatar load failed for userId=%s, cloning R15/Rig template.", tostring(userId)))
+			local template = Workspace:FindFirstChild("R15") or Workspace:FindFirstChild("Rig")
+			if template then
+				characterModel = template:Clone()
+				for _, part in ipairs(characterModel:GetDescendants()) do
+					if part:IsA("BasePart") then
+						part.Anchored = false
+					end
+				end
+			else
+				characterModel = Instance.new("Model")
 
-			local hum = Instance.new("Humanoid")
-			hum.Parent = characterModel
+				local hum = Instance.new("Humanoid")
+				hum.Parent = characterModel
 
-			local hrp       = Instance.new("Part")
-			hrp.Name        = "HumanoidRootPart"
-			hrp.Size        = Vector3.new(2, 2, 1)
-			hrp.Transparency = 1
-			hrp.CanCollide  = false
-			hrp.Parent      = characterModel
-			characterModel.PrimaryPart = hrp
+				local hrp       = Instance.new("Part")
+				hrp.Name        = "HumanoidRootPart"
+				hrp.Size        = Vector3.new(2, 2, 1)
+				hrp.Transparency = 1
+				hrp.CanCollide  = false
+				hrp.Parent      = characterModel
+				characterModel.PrimaryPart = hrp
 
-			local head      = Instance.new("Part")
-			head.Name       = "Head"
-			head.Shape      = Enum.PartType.Ball
-			head.Size       = Vector3.new(1.2, 1.2, 1.2)
-			head.Color      = isVIP and Color3.fromRGB(255, 215, 0) or Color3.fromRGB(255, 200, 100)
-			head.Parent     = characterModel
+				local head      = Instance.new("Part")
+				head.Name       = "Head"
+				head.Shape      = Enum.PartType.Ball
+				head.Size       = Vector3.new(1.2, 1.2, 1.2)
+				head.Color      = isVIP and Color3.fromRGB(255, 215, 0) or Color3.fromRGB(255, 200, 100)
+				head.Parent     = characterModel
 
-			local torso     = Instance.new("Part")
-			torso.Name      = "UpperTorso"
-			torso.Size      = Vector3.new(2, 2, 1)
-			torso.Color     = isVIP and Color3.fromRGB(255, 215, 0) or Color3.fromRGB(0, 242, 254)
-			torso.Parent    = characterModel
+				local torso     = Instance.new("Part")
+				torso.Name      = "UpperTorso"
+				torso.Size      = Vector3.new(2, 2, 1)
+				torso.Color     = isVIP and Color3.fromRGB(255, 215, 0) or Color3.fromRGB(0, 242, 254)
+				torso.Parent    = characterModel
+			end
 		end
 
 		-- Limit max dancers on stage
@@ -1083,26 +1115,20 @@ local function spawnDancer(playerId, robloxUsername, tiktokUsername, animationId
 			end
 		end
 
-		characterModel.Name   = robloxUsername
-		characterModel.Parent = Workspace
-
-		-- Position on stage BEFORE disabling Animate script to avoid T-pose flash
-		local slotIdx   = ((nextSlotIndex - 1) % MAX_STAGE_DANCERS) + 1
-		nextSlotIndex   = nextSlotIndex + 1
-
+		-- Position on stage BEFORE parenting to Workspace so it spawns EXACTLY on the stage floor (no falling)
 		local stageCF     = getStageCFrame(stage)
-		local offset      = getSlotOffset(slotIdx)
+		local offset      = getSlotOffset(3) -- spawn at center first, updateDancerPositions will shift
 		local targetCFrame = stageCF * CFrame.new(offset) * CFrame.Angles(0, math.rad(180), 0)
 		characterModel:PivotTo(targetCFrame)
+
+		characterModel.Name   = robloxUsername
+		characterModel.Parent = Workspace
 
 		-- Disable default Roblox Animate script
 		pcall(function()
 			local animScript = characterModel:FindFirstChild("Animate")
 			if animScript then animScript.Disabled = true end
 		end)
-
-		-- DO NOT anchor HRP here — let playDanceAnimation handle it
-		-- (Anchoring HRP before animation causes animation to not play)
 
 		table.insert(activeDancersList, {
 			model          = characterModel,
@@ -1111,6 +1137,9 @@ local function spawnDancer(playerId, robloxUsername, tiktokUsername, animationId
 			isVIP          = isVIP,
 			spawnTime      = tick(),
 		})
+
+		-- Dynamically rearrange everyone's slot positions (newest gets front center)
+		pcall(updateDancerPositions)
 
 		-- Nametag
 		createNametag(characterModel, tiktokUsername, robloxUsername, isVIP)
@@ -1142,6 +1171,7 @@ task.spawn(function()
 		task.wait(1)
 		local currentTick = tick()
 		local i = 1
+		local changed = false
 		while i <= #activeDancersList do
 			local dancer = activeDancersList[i]
 			if dancer and (currentTick - dancer.spawnTime >= danceDurationSeconds) then
@@ -1149,9 +1179,13 @@ task.spawn(function()
 					pcall(function() dancer.model:Destroy() end)
 				end
 				table.remove(activeDancersList, i)
+				changed = true
 			else
 				i = i + 1
 			end
+		end
+		if changed then
+			pcall(updateDancerPositions)
 		end
 	end
 end)
@@ -1200,7 +1234,6 @@ task.spawn(function()
 		local ok1, err1 = pcall(function()
 			local response = HttpService:GetAsync(playerUrl, false, getRequestHeaders())
 			local data     = HttpService:JSONDecode(response)
-
 			if data and data.success then
 				if data.danceDuration then
 					danceDurationSeconds = tonumber(data.danceDuration) or 60

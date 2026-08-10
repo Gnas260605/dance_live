@@ -219,9 +219,18 @@ if focusEvent then
 		pcall(function()
 			if targetModel then
 				local now = tick()
-				if targetModel == lastFocusTarget and (now - lastFocusAt) < 1.2 then
+				-- Cooldown: Prevent frantic panning by locking camera to the current dancer for at least 5 seconds
+				-- VIP dancers bypass this lock to get spotlight focus instantly
+				local currentActive = currentTargetModel and currentTargetModel.Parent and currentTargetModel:FindFirstChild("HumanoidRootPart")
+				if currentActive and (now - lastFocusAt) < 5.0 and not isVIP then
+					-- Update the text labels in real-time even if camera lock is active
+					if infoLabel and tiktokUsername and robloxUsername then
+						local prefix = isVIP and "👑 VIP GIFT DANCER: @" or "💃 Đang nhảy: @"
+						infoLabel.Text = prefix .. tostring(tiktokUsername) .. " (" .. tostring(robloxUsername) .. ")"
+					end
 					return
 				end
+
 				lastFocusTarget = targetModel
 				lastFocusAt = now
 				currentTargetModel = targetModel
