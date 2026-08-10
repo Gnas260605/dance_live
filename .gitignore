@@ -29,3 +29,7 @@ rojo.exe
 # Temporary files
 .tmp*
 
+# Reference repositories and temporary agents
+prime-agent/
+references/
+
